@@ -1,0 +1,357 @@
+/* ============================================
+   How It Works — Premium Journey Timeline
+   ============================================ */
+
+.section {
+  position: relative;
+  padding: 6rem 1rem;
+  background: linear-gradient(160deg, #064e3b 0%, #065f46 35%, #047857 70%, #059669 100%);
+  overflow: hidden;
+}
+
+/* ---- Organic leaf pattern overlay ---- */
+.patternOverlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5c-8 0-15 10-15 25s7 25 15 25 15-10 15-25S38 5 30 5z' fill='%23fff' fill-opacity='1'/%3E%3C/svg%3E");
+  background-size: 80px 80px;
+}
+
+/* ---- Top & bottom soft fade ---- */
+.section::before,
+.section::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 120px;
+  pointer-events: none;
+  z-index: 1;
+}
+.section::before {
+  top: 0;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.06), transparent);
+}
+.section::after {
+  bottom: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.15), transparent);
+}
+
+/* ---- Header ---- */
+.header {
+  text-align: center;
+  margin-bottom: 4rem;
+  position: relative;
+  z-index: 2;
+}
+
+.subtitle {
+  display: inline-block;
+  padding: 0.35rem 1.4rem;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 9999px;
+  color: #a7f3d0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 1.25rem;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.15;
+  margin-bottom: 1rem;
+}
+
+.titleHighlight {
+  display: block;
+  background: linear-gradient(90deg, #6ee7b7, #a7f3d0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.headerDesc {
+  color: rgba(167, 243, 208, 0.6);
+  font-size: 1rem;
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* ---- Timeline Container ---- */
+.timeline {
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ---- Horizontal Path Line (desktop) ---- */
+.pathLine {
+  display: none;
+}
+
+/* ---- Step Card ---- */
+.step {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  margin-bottom: 2.5rem;
+  position: relative;
+}
+
+.step:last-child {
+  margin-bottom: 0;
+}
+
+/* ---- Number Column (mobile timeline) ---- */
+.numberCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.numberCircle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #065f46;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(110, 231, 183, 0.25), 0 8px 24px rgba(0,0,0,0.2);
+  position: relative;
+  z-index: 3;
+  transition: transform 0.3s ease;
+}
+
+.step:hover .numberCircle {
+  transform: scale(1.1);
+}
+
+/* Pulse ring */
+.numberCircle::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(110, 231, 183, 0.3);
+  animation: ringPulse 3s ease-in-out infinite;
+}
+
+@keyframes ringPulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.15); opacity: 0; }
+}
+
+/* Vertical connector line (mobile) */
+.verticalLine {
+  width: 2px;
+  flex-grow: 1;
+  min-height: 40px;
+  background: linear-gradient(to bottom, rgba(110, 231, 183, 0.5), rgba(110, 231, 183, 0.1));
+  margin-top: 0.75rem;
+}
+
+/* ---- Content Card ---- */
+.card {
+  flex: 1;
+  padding: 2rem;
+  border-radius: 1.25rem;
+  background: rgba(255,255,255, 0.07);
+  border: 1px solid rgba(255,255,255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover {
+  background: rgba(255,255,255, 0.12);
+  border-color: rgba(110, 231, 183, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+
+/* Gradient shimmer on hover */
+.card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+  transition: left 0.7s ease;
+  pointer-events: none;
+}
+
+.card:hover::after {
+  left: 120%;
+}
+
+/* ---- Icon ---- */
+.iconWrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+  transition: transform 0.3s ease;
+}
+
+.card:hover .iconWrap {
+  transform: scale(1.08) rotate(3deg);
+}
+
+.iconGreen {
+  background: rgba(110, 231, 183, 0.15);
+  color: #6ee7b7;
+}
+.iconAmber {
+  background: rgba(252, 211, 77, 0.15);
+  color: #fcd34d;
+}
+.iconBlue {
+  background: rgba(125, 211, 252, 0.15);
+  color: #7dd3fc;
+}
+
+/* ---- Card text ---- */
+.cardTitle {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f0fdf4;
+  margin-bottom: 0.5rem;
+  transition: color 0.3s ease;
+}
+
+.card:hover .cardTitle {
+  color: #6ee7b7;
+}
+
+.cardDesc {
+  font-size: 0.9rem;
+  color: rgba(209, 250, 229, 0.55);
+  line-height: 1.7;
+}
+
+/* ---- Large watermark number ---- */
+.watermarkNum {
+  position: absolute;
+  bottom: -8px;
+  right: 12px;
+  font-family: var(--font-heading);
+  font-size: 5rem;
+  font-weight: 900;
+  color: rgba(255,255,255, 0.03);
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ============================================
+   DESKTOP — Horizontal Layout
+   ============================================ */
+@media (min-width: 768px) {
+  .section {
+    padding: 7rem 2rem;
+  }
+
+  .title {
+    font-size: 3rem;
+  }
+
+  .titleHighlight {
+    display: inline;
+  }
+
+  .timeline {
+    display: flex;
+    gap: 0;
+    align-items: stretch;
+    position: relative;
+  }
+
+  /* Horizontal dotted path */
+  .pathLine {
+    display: block;
+    position: absolute;
+    top: 40px;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    z-index: 1;
+  }
+
+  .pathLineSvg {
+    width: 100%;
+    height: 8px;
+    overflow: visible;
+  }
+
+  .pathDash {
+    stroke-dasharray: 8 10;
+    animation: pathFlow 2s linear infinite;
+  }
+
+  @keyframes pathFlow {
+    to { stroke-dashoffset: -18; }
+  }
+
+  /* Steps become columns */
+  .step {
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 0;
+    gap: 2rem;
+    padding: 0 1rem;
+  }
+
+  .numberCol {
+    flex-direction: row;
+    position: relative;
+    z-index: 3;
+  }
+
+  .verticalLine {
+    display: none;
+  }
+
+  .card {
+    text-align: center;
+    padding: 2.5rem 2rem;
+  }
+
+  .iconWrap {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .watermarkNum {
+    font-size: 6.5rem;
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: -12px;
+  }
+}

@@ -1,0 +1,123 @@
+.filtersBar {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.searchWrapper {
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--admin-text-muted);
+  pointer-events: none;
+}
+
+.searchInput {
+  padding-left: 40px !important;
+}
+
+.filterGroup {
+  display: flex;
+  gap: 8px;
+}
+
+.filterSelect {
+  width: 160px;
+}
+
+/* Product Cell */
+.productCell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.productThumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: var(--admin-content-bg);
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.productName {
+  font-weight: 600;
+  color: var(--admin-text);
+  text-decoration: none;
+  font-size: 14px;
+  display: block;
+}
+
+.productName:hover {
+  color: var(--admin-primary);
+}
+
+.productSlug {
+  font-size: 12px;
+  color: var(--admin-text-muted);
+}
+
+.strikePrice {
+  color: var(--admin-text-muted);
+  text-decoration: line-through;
+  margin-left: 6px;
+  font-size: 12px;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 6px;
+}
+
+.actionBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-card-bg);
+  color: var(--admin-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.actionBtn:hover {
+  background: var(--admin-content-bg);
+  color: var(--admin-text);
+}
+
+.actionBtnDanger:hover {
+  background: var(--admin-danger-bg);
+  color: var(--admin-danger);
+  border-color: transparent;
+}
+
+@media (max-width: 768px) {
+  .filtersBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filterGroup {
+    flex-wrap: wrap;
+  }
+  .filterSelect {
+    flex: 1;
+    min-width: 120px;
+    width: auto;
+  }
+}
