@@ -22,33 +22,48 @@ export default function Home() {
       try {
         const products = await getActiveProducts();
         if (products.length > 0) {
-          // Categorize products by featured tags or category
-          const best = products.filter(p => p.featured?.includes('bestseller') || p.category === 'plant-care' || p.category === 'plants');
-          const bundles = products.filter(p => p.category === 'bundles' || p.featured?.includes('bundle'));
-          const pots = products.filter(p => p.category === 'pots' || p.category === 'planters');
-          
-          // Everything else (or explicitly tagged new-arrival) goes here
-          const arrivals = products.filter(p => p.featured?.includes('new-arrival') || (!best.includes(p) && !bundles.includes(p) && !pots.includes(p)));
+          // Sort into carousels by featured tags first, then category
+          const best = products.filter(p =>
+            (p.featured?.includes('bestseller') ||
+            p.category === 'plant-care' ||
+            p.category === 'plants') &&
+            !p.featured?.includes('bundle')  // Don't put bundles in bestsellers
+          );
+          const bundles = products.filter(p =>
+            p.category === 'bundles' || p.featured?.includes('bundle')
+          );
+          const pots = products.filter(p =>
+            p.category === 'pots' || p.category === 'planters'
+          );
+          const arrivals = products.filter(p =>
+            p.featured?.includes('new-arrival') &&
+            !p.featured?.includes('bundle')  // Don't put bundles in new arrivals
+          );
 
           // Merge Firestore products with static data so carousels always look full
           const mergeWithStatic = (firestoreList, staticList) => {
             const slugs = new Set(firestoreList.map(p => p.slug));
-            const unique = staticList.filter(p => !slugs.has(p.slug));
-            return [...firestoreList, ...unique];
+            return [...firestoreList, ...staticList.filter(p => !slugs.has(p.slug))];
           };
 
-          if (best.length > 0) setBestsellers(mergeWithStatic(best, staticBestsellers));
+          // Always populate bestsellers with ALL products as fallback
+          // so no product from Firestore ever gets lost
+          const categorised = new Set([...best, ...bundles, ...pots, ...arrivals].map(p => p.id));
+          const uncategorised = products.filter(p =>
+            !categorised.has(p.id) && !p.featured?.includes('bundle')
+          );
+
+          // Merge uncategorised into bestsellers so they always show somewhere
+          const effectiveBest = best.length > 0
+            ? mergeWithStatic([...best, ...uncategorised], staticBestsellers)
+            : mergeWithStatic(products.filter(p => !p.featured?.includes('bundle')), staticBestsellers);
+
+          setBestsellers(effectiveBest);
           if (bundles.length > 0) setPlantBundles(mergeWithStatic(bundles, staticBundles));
           if (arrivals.length > 0) setNewArrivals(mergeWithStatic(arrivals, staticArrivals));
           if (pots.length > 0) setCeramics(mergeWithStatic(pots, staticCeramics));
-
-          // If no products matched any named category, put them all in Bestsellers
-          if (best.length === 0 && bundles.length === 0 && arrivals.length === 0 && pots.length === 0) {
-            setBestsellers(mergeWithStatic(products, staticBestsellers));
-          }
         }
       } catch (err) {
-        // Silently fall back to static data
         console.log('Using static product data (Firestore unavailable)');
       }
     };

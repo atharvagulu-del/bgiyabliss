@@ -1,7 +1,7 @@
 'use client';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, Leaf, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, Leaf, ChevronRight, Plus, ExternalLink } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import styles from './AdminSidebar.module.css';
@@ -31,17 +31,17 @@ export default function AdminSidebar() {
       {/* Brand */}
       <div className={styles.brand}>
         <div className={styles.brandIcon}>
-          <Leaf size={22} />
+          <Leaf size={18} />
         </div>
         <div className={styles.brandText}>
           <span className={styles.brandName}>Bgiya Bliss</span>
-          <span className={styles.brandLabel}>Admin Panel</span>
+          <span className={styles.brandLabel}>Admin</span>
         </div>
       </div>
 
       {/* Navigation */}
       <nav className={styles.nav}>
-        <span className={styles.navLabel}>Main Menu</span>
+        <span className={styles.navLabel}>Menu</span>
         {menuItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.href);
@@ -51,9 +51,9 @@ export default function AdminSidebar() {
               href={item.href}
               className={`${styles.navItem} ${active ? styles.navItemActive : ''}`}
             >
-              <Icon size={20} />
+              <Icon size={17} />
               <span>{item.label}</span>
-              {active && <ChevronRight size={16} className={styles.chevron} />}
+              {active && <ChevronRight size={14} className={styles.chevron} />}
             </Link>
           );
         })}
@@ -62,17 +62,17 @@ export default function AdminSidebar() {
       {/* Quick Actions */}
       <div className={styles.quickActions}>
         <Link href="/admin/products/new" className={styles.addProductBtn}>
-          + Add New Product
+          <Plus size={14} /> New Product
         </Link>
       </div>
 
       {/* Footer */}
       <div className={styles.sidebarFooter}>
         <Link href="/" className={styles.footerLink} target="_blank">
-          View Store →
+          <ExternalLink size={15} /> View Store
         </Link>
         <button onClick={handleLogout} className={styles.logoutBtn}>
-          <LogOut size={18} />
+          <LogOut size={15} />
           <span>Logout</span>
         </button>
       </div>

@@ -34,14 +34,22 @@ function StarRating({ rating, size = 16 }) {
 }
 
 const sampleReviews = [
-  { id: 1, name: 'Priya S.', rating: 5, date: '2 weeks ago', title: 'Excellent quality product!',
-    body: 'Very happy with the purchase. The quality is outstanding and exactly as described. My plants are thriving! Highly recommended for all gardening enthusiasts.', verified: true },
-  { id: 2, name: 'Rahul M.', rating: 5, date: '1 month ago', title: 'Great value for money',
-    body: 'Amazing product at this price point. Durable, well-made, and perfect for my terrace garden. Will definitely buy again.', verified: true },
-  { id: 3, name: 'Anita K.', rating: 4, date: '1 month ago', title: 'Good product, fast delivery',
-    body: 'Product is good quality. Delivery was quick. Using it for my kitchen garden and it works great.', verified: true },
-  { id: 4, name: 'Vikram J.', rating: 5, date: '2 months ago', title: 'Perfect for home gardening',
-    body: 'Exactly what I needed for my balcony garden. Sturdy, well-built, and looks great too!', verified: true },
+  {
+    id: 1, name: 'Priya S.', rating: 5, date: '2 weeks ago', title: 'Excellent quality product!',
+    body: 'Very happy with the purchase. The quality is outstanding and exactly as described. My plants are thriving! Highly recommended for all gardening enthusiasts.', verified: true
+  },
+  {
+    id: 2, name: 'Rahul M.', rating: 5, date: '1 month ago', title: 'Great value for money',
+    body: 'Amazing product at this price point. Durable, well-made, and perfect for my terrace garden. Will definitely buy again.', verified: true
+  },
+  {
+    id: 3, name: 'Anita K.', rating: 4, date: '1 month ago', title: 'Good product, fast delivery',
+    body: 'Product is good quality. Delivery was quick. Using it for my kitchen garden and it works great.', verified: true
+  },
+  {
+    id: 4, name: 'Vikram J.', rating: 5, date: '2 months ago', title: 'Perfect for home gardening',
+    body: 'Exactly what I needed for my balcony garden. Sturdy, well-built, and looks great too!', verified: true
+  },
 ];
 
 export default function ProductDetailPage({ product, relatedProducts }) {
@@ -162,16 +170,94 @@ export default function ProductDetailPage({ product, relatedProducts }) {
             {product.status !== 'inactive' ? 'In stock' : 'Out of stock'}
           </div>
 
-          {variants.length > 0 && (
-            <div className={styles.variantSection}>
-              <div className={styles.variantLabel}>{variants[0]?.type || 'Size'}: <strong>{selectedVariant?.name}</strong></div>
-              <div className={styles.variantOptions}>
-                {variants.map((v, i) => (
-                  <button key={i} className={`${styles.variantBtn} ${selectedVariant?.name === v.name ? styles.variantBtnActive : ''}`} onClick={() => setSelectedVariant(v)}>{v.name}</button>
-                ))}
+          {/* Amazon-style Linked Variant Switcher */}
+          {Array.isArray(product.variantSummary) && product.variantSummary.length > 0 && (() => {
+            // Extract a short weight label from any string (e.g. "Bgiya Bliss 5kg Pack" → "5kg")
+            const extractWeight = (str) => {
+              if (!str) return null;
+              const m = str.match(/\b(\d+(?:\.\d+)?)\s*(g|kg|ml|L|ltr|litre|Kg|KG)\b/i);
+              if (!m) return null;
+              const unit = m[2].toLowerCase()
+                .replace('ltr', 'L').replace('litre', 'L');
+              return `${m[1]}${unit}`;
+            };
+
+            const getShortLabel = (labelStr) => {
+              if (!labelStr) return null;
+              if (labelStr.length <= 30 && !labelStr.toLowerCase().includes('bgiya')) return labelStr;
+              return extractWeight(labelStr) || labelStr.split(' ')[0];
+            };
+
+            // Convert weight string to grams for sorting (1kg=1000g, 1L=1000ml)
+            const toGrams = (str) => {
+              if (!str) return 999999;
+              const m = str.match(/(\d+(?:\.\d+)?)\s*(g|kg|ml|L|ltr|litre|Kg|KG)/i);
+              if (!m) return 999999;
+              const val = parseFloat(m[1]);
+              const unit = m[2].toLowerCase();
+              if (unit === 'kg') return val * 1000;
+              if (unit === 'l' || unit === 'ltr' || unit === 'litre') return val * 1000;
+              return val; // g or ml — keep as is
+            };
+
+            // Sort variants lightest → heaviest, then by pack quantity (like Amazon)
+            const sortedSummary = [...product.variantSummary].sort((a, b) => {
+              const la = getShortLabel(a.label) || extractWeight(a.name) || '';
+              const lb = getShortLabel(b.label) || extractWeight(b.name) || '';
+              const wa = toGrams(la);
+              const wb = toGrams(lb);
+              if (wa !== wb) return wa - wb;
+              // Same weight — sort by pack quantity
+              const packA = la.match(/pack of (\d+)/i);
+              const packB = lb.match(/pack of (\d+)/i);
+              return (parseInt(packA?.[1] || 1)) - (parseInt(packB?.[1] || 1));
+            });
+
+            const rawLabel = product.variantLabel || '';
+            const currentLabel =
+              getShortLabel(rawLabel) ||
+              getShortLabel(product.variantSummary.find(v => v.slug === product.slug)?.label) ||
+              extractWeight(product.name) ||
+              'Default';
+
+            return (
+              <div className={styles.variantSection}>
+                <div className={styles.variantLabel}>
+                  Weight:&nbsp;<strong>{currentLabel}</strong>
+                </div>
+                <div className={styles.variantOptions}>
+                  {sortedSummary.map((v, i) => {
+                    const isActive = product.slug === v.slug;
+                    const pillLabel = (() => {
+                      if (isActive) return currentLabel;
+                      const fromLabel = getShortLabel(v.label);
+                      // If label has no pack info, check name for "Pack of X" and append it (only if X > 1)
+                      if (fromLabel && !fromLabel.includes('Pack')) {
+                        const packMatch = (v.name || v.label || '').match(/pack of\s*(\d+)/i);
+                        if (packMatch && parseInt(packMatch[1]) > 1) {
+                          return `${fromLabel} (Pack of ${packMatch[1]})`;
+                        }
+                      }
+                      return fromLabel || extractWeight(v.name) || `Variant ${i + 1}`;
+                    })();
+                    return (
+                      <a
+                        key={i}
+                        href={`/products/${v.slug}`}
+                        className={`${styles.variantBtn} ${product.slug === v.slug ? styles.variantBtnActive : ''}`}
+                        style={{ textDecoration: 'none', display: 'inline-flex', flexDirection: 'column', alignItems: 'center', minWidth: 56 }}
+                      >
+                        <span style={{ fontSize: 13, fontWeight: 600 }}>{pillLabel}</span>
+                        {v.salePrice > 0 && (
+                          <span style={{ fontSize: 10, opacity: 0.7, marginTop: 1 }}>₹{v.salePrice}</span>
+                        )}
+                      </a>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Quantity + Add to Cart — NO Buy Now */}
           <div className={styles.actionsRow} ref={addToCartRef}>
@@ -318,13 +404,13 @@ export default function ProductDetailPage({ product, relatedProducts }) {
           <div className={styles.reviewModalContent} onClick={e => e.stopPropagation()}>
             <h3 className={styles.reviewModalTitle}>Write a Review</h3>
             <div className={styles.reviewFormGroup}><label>Rating</label>
-              <div className={styles.starPicker}>{[1,2,3,4,5].map(s => (
-                <button key={s} className={`${styles.starPickerBtn} ${s <= reviewForm.rating ? styles.starPickerBtnActive : ''}`} onClick={() => setReviewForm({...reviewForm, rating: s})}>
+              <div className={styles.starPicker}>{[1, 2, 3, 4, 5].map(s => (
+                <button key={s} className={`${styles.starPickerBtn} ${s <= reviewForm.rating ? styles.starPickerBtnActive : ''}`} onClick={() => setReviewForm({ ...reviewForm, rating: s })}>
                   <Star size={28} fill={s <= reviewForm.rating ? '#f59e0b' : 'none'} /></button>
               ))}</div></div>
-            <div className={styles.reviewFormGroup}><label>Name</label><input type="text" placeholder="Your name" value={reviewForm.name} onChange={e => setReviewForm({...reviewForm, name: e.target.value})} /></div>
-            <div className={styles.reviewFormGroup}><label>Review Title</label><input type="text" placeholder="Sum up your experience" value={reviewForm.title} onChange={e => setReviewForm({...reviewForm, title: e.target.value})} /></div>
-            <div className={styles.reviewFormGroup}><label>Review</label><textarea placeholder="Tell us what you liked..." value={reviewForm.body} onChange={e => setReviewForm({...reviewForm, body: e.target.value})} /></div>
+            <div className={styles.reviewFormGroup}><label>Name</label><input type="text" placeholder="Your name" value={reviewForm.name} onChange={e => setReviewForm({ ...reviewForm, name: e.target.value })} /></div>
+            <div className={styles.reviewFormGroup}><label>Review Title</label><input type="text" placeholder="Sum up your experience" value={reviewForm.title} onChange={e => setReviewForm({ ...reviewForm, title: e.target.value })} /></div>
+            <div className={styles.reviewFormGroup}><label>Review</label><textarea placeholder="Tell us what you liked..." value={reviewForm.body} onChange={e => setReviewForm({ ...reviewForm, body: e.target.value })} /></div>
             <div className={styles.reviewModalActions}>
               <button className={styles.reviewCancelBtn} onClick={() => setShowReviewModal(false)}>Cancel</button>
               <button className={styles.reviewSubmitBtn} onClick={() => { setShowReviewModal(false); setReviewForm({ name: '', rating: 5, title: '', body: '' }); }}>Submit Review</button>

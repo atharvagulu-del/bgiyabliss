@@ -46,9 +46,9 @@ export default function ProductCarousel({ title, products, viewAllLink, bgClass 
 
         {/* Carousel Container */}
         <div className="relative group -mx-4 px-4 md:mx-0 md:px-0">
-          
+
           {/* Scroll Track */}
-          <div 
+          <div
             className="flex gap-6 overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-8 pt-2"
             ref={scrollRef}
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
@@ -62,16 +62,16 @@ export default function ProductCarousel({ title, products, viewAllLink, bgClass 
           </div>
 
           {/* Controls */}
-          <button 
+          <button
             className="hidden md:flex absolute -left-5 top-[40%] -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg items-center justify-center text-gray-600 hover:text-emerald-600 hover:scale-110 transition-all opacity-0 group-hover:opacity-100 z-10 border border-gray-100"
-            onClick={() => scroll(-1)} 
+            onClick={() => scroll(-1)}
             aria-label="Previous"
           >
             <ChevronLeft size={20} />
           </button>
-          <button 
+          <button
             className="hidden md:flex absolute -right-5 top-[40%] -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg items-center justify-center text-gray-600 hover:text-emerald-600 hover:scale-110 transition-all opacity-0 group-hover:opacity-100 z-10 border border-gray-100"
-            onClick={() => scroll(1)} 
+            onClick={() => scroll(1)}
             aria-label="Next"
           >
             <ChevronRight size={20} />

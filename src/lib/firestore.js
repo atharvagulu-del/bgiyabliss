@@ -14,7 +14,7 @@ import {
 import { db } from './firebase';
 
 const PRODUCTS_COLLECTION = 'products';
-const FIRESTORE_TIMEOUT = 5000; // 5 second timeout for all operations
+const FIRESTORE_TIMEOUT = 15000; // 15 second timeout — allows for multi-variant batch saves
 
 // Helper: wrap any promise with a timeout so it never hangs forever
 function withTimeout(promise, ms = FIRESTORE_TIMEOUT) {
@@ -147,8 +147,6 @@ export async function deleteProduct(id) {
   await withTimeout(deleteDoc(docRef));
 }
 
-// ─── SEED ────────────────────────────────────────────
-
 export async function seedProducts(productsArray) {
   const results = [];
   for (const product of productsArray) {
@@ -156,4 +154,21 @@ export async function seedProducts(productsArray) {
     results.push({ id, name: product.name });
   }
   return results;
+}
+
+// ─── VARIANT GROUP ───────────────────────────────────
+// Fetch all products that share the same variantGroupId
+export async function getVariantGroup(variantGroupId) {
+  if (!variantGroupId) return [];
+  try {
+    const q = query(
+      collection(db, PRODUCTS_COLLECTION),
+      where('variantGroupId', '==', variantGroupId)
+    );
+    const snapshot = await withTimeout(getDocs(q));
+    return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    console.log('getVariantGroup failed:', err.message);
+    return [];
+  }
 }

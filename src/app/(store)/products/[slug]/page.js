@@ -19,10 +19,10 @@ export default function Page() {
       const slug = params.slug;
 
       try {
-        // Try Firestore first, with a 2-second timeout
+        // Try Firestore first, with an 8-second timeout
         const firestoreProduct = await Promise.race([
           getProductBySlug(slug),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000))
+          new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000))
         ]);
 
         if (firestoreProduct) {
@@ -31,7 +31,7 @@ export default function Page() {
           // Get related products from Firestore (also with timeout)
           const allProducts = await Promise.race([
             getActiveProducts(),
-            new Promise(resolve => setTimeout(() => resolve([]), 2000))
+            new Promise(resolve => setTimeout(() => resolve([]), 8000))
           ]);
           
           const related = allProducts

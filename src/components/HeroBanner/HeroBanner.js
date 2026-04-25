@@ -1,4 +1,5 @@
 'use client';
+import { useRef, useEffect } from 'react';
 import { ArrowRight, Leaf, ShieldCheck, Truck } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -16,14 +17,25 @@ const itemVariants = {
 };
 
 export default function HeroBanner() {
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (vid) {
+      vid.play().catch(() => {});
+    }
+  }, []);
+
   return (
     <section className="relative min-h-screen -mt-[140px] flex items-center justify-center overflow-hidden pt-[180px] pb-24">
       {/* Background Video & Overlays */}
       <div className="absolute inset-0 z-0 overflow-hidden bg-[#0a1f12]">
         <video
+          ref={videoRef}
           className="w-full h-full object-cover scale-[1.05] md:scale-[1.1]"
-          src="/videos/background2.mp4"
+          src="/videos/hero-compressed.mp4"
           poster="/background.jpg"
+          preload="auto"
           autoPlay
           loop
           muted
@@ -75,46 +87,7 @@ export default function HeroBanner() {
           </motion.div>
         </motion.div>
 
-        {/* Floating Features Bar */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-20 lg:mt-28 grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl"
-        >
-          {/* Feature 1 */}
-          <div className="flex items-center justify-center gap-4 p-6 rounded-2xl bg-white/5 backdrop-blur-lg border border-white/10 hover:bg-white/10 transition-colors">
-            <div className="p-3 bg-emerald-500/20 rounded-full">
-              <Leaf className="w-6 h-6 text-emerald-400" />
-            </div>
-            <div className="text-left">
-              <h4 className="text-white font-bold text-lg leading-tight mb-1">100% Organic</h4>
-              <p className="text-emerald-100/70 text-sm">Chemical-free products</p>
-            </div>
-          </div>
 
-          {/* Feature 2 */}
-          <div className="flex items-center justify-center gap-4 p-6 rounded-2xl bg-white/5 backdrop-blur-lg border border-white/10 hover:bg-white/10 transition-colors">
-            <div className="p-3 bg-emerald-500/20 rounded-full">
-              <ShieldCheck className="w-6 h-6 text-emerald-400" />
-            </div>
-            <div className="text-left">
-              <h4 className="text-white font-bold text-lg leading-tight mb-1">Guaranteed Growth</h4>
-              <p className="text-emerald-100/70 text-sm">95% Germination Rate</p>
-            </div>
-          </div>
-
-          {/* Feature 3 */}
-          <div className="flex items-center justify-center gap-4 p-6 rounded-2xl bg-white/5 backdrop-blur-lg border border-white/10 hover:bg-white/10 transition-colors">
-            <div className="p-3 bg-emerald-500/20 rounded-full">
-              <Truck className="w-6 h-6 text-emerald-400" />
-            </div>
-            <div className="text-left">
-              <h4 className="text-white font-bold text-lg leading-tight mb-1">Free Delivery</h4>
-              <p className="text-emerald-100/70 text-sm">On orders above ₹499</p>
-            </div>
-          </div>
-        </motion.div>
       </div>
     </section>
   );
