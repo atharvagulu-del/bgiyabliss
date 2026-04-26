@@ -49,6 +49,11 @@ export function CartProvider({ children }) {
     setCartItems((prev) => prev.filter((item) => item.id !== id));
   };
 
+  const clearCart = () => {
+    setCartItems([]);
+    setAppliedPromo(null);
+  };
+
   const [appliedPromo, setAppliedPromo] = useState(null);
 
   const cartSubtotal = cartItems.reduce((total, item) => total + (item.salePrice * item.quantity), 0);
@@ -77,7 +82,8 @@ export function CartProvider({ children }) {
         discountAmount,
         appliedPromo,
         setAppliedPromo,
-        cartCount
+        cartCount,
+        clearCart
       }}
     >
       {children}

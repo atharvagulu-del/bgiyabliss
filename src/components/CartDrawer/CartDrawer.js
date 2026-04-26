@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Minus, Plus, ShoppingBag, ArrowRight } from 'lucide-react';
@@ -8,6 +9,7 @@ import styles from './CartDrawer.module.css';
 
 export default function CartDrawer() {
   const { cartItems, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, cartSubtotal, cartTotal, cartCount, discountAmount, appliedPromo, setAppliedPromo } = useCart();
+  const router = useRouter();
   const [promoInput, setPromoInput] = useState('');
   const [promoMessage, setPromoMessage] = useState('');
 
@@ -139,7 +141,7 @@ export default function CartDrawer() {
                   <span>Total</span>
                   <span>₹{cartTotal.toLocaleString()}</span>
                 </div>
-                <button className={styles.checkoutBtn}>
+                <button className={styles.checkoutBtn} onClick={() => { setIsCartOpen(false); router.push('/checkout'); }}>
                   Checkout <ArrowRight size={18} />
                 </button>
               </div>

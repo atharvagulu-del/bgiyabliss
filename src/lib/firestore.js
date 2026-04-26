@@ -172,3 +172,56 @@ export async function getVariantGroup(variantGroupId) {
     return [];
   }
 }
+
+// ─── ORDERS ──────────────────────────────────────────
+
+const ORDERS_COLLECTION = 'orders';
+
+export async function createOrder(orderData) {
+  const data = {
+    ...orderData,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  };
+  const docRef = await withTimeout(addDoc(collection(db, ORDERS_COLLECTION), data));
+  return docRef.id;
+}
+
+export async function getAllOrders() {
+  try {
+    const q = query(
+      collection(db, ORDERS_COLLECTION),
+      orderBy('createdAt', 'desc')
+    );
+    const snapshot = await withTimeout(getDocs(q));
+    return snapshot.docs.map((d) => ({
+      id: d.id,
+      ...d.data(),
+    }));
+  } catch (err) {
+    console.log('getAllOrders failed, trying without orderBy:', err.message);
+    const snapshot = await withTimeout(getDocs(collection(db, ORDERS_COLLECTION)));
+    const orders = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return orders.sort((a, b) => {
+      const da = a.createdAt?.toDate?.() || new Date(0);
+      const db2 = b.createdAt?.toDate?.() || new Date(0);
+      return db2 - da;
+    });
+  }
+}
+
+export async function getOrderById(id) {
+  const docRef = doc(db, ORDERS_COLLECTION, id);
+  const docSnap = await withTimeout(getDoc(docRef));
+  if (!docSnap.exists()) return null;
+  return { id: docSnap.id, ...docSnap.data() };
+}
+
+export async function updateOrderStatus(id, status) {
+  const docRef = doc(db, ORDERS_COLLECTION, id);
+  await withTimeout(updateDoc(docRef, {
+    status,
+    updatedAt: serverTimestamp(),
+  }));
+}
+
