@@ -2,11 +2,12 @@
 import styles from './AnnouncementBar.module.css';
 
 const messages = [
-  '🚚 Free Delivery Above ₹499 | Shop Now',
+  '🎉 Flat 20% Off on Orders Above ₹1099 | Use: BLISS20',
+  '⚡ Flat 10% Off on Your First Order | Use: BLISS10',
   '🌿 Premium Organic Potting Mix starting ₹249!',
-  '⚡ Next Day Delivery Available',
-  '🎉 Flat 30% Off on First Order | Use: BLISS30',
   '🌱 100% Organic | Made in India',
+  '🎉 Flat 20% Off on Orders Above ₹1099 | Use: BLISS20',
+  '⚡ Flat 10% Off on Your First Order | Use: BLISS10',
 ];
 
 export default function AnnouncementBar() {

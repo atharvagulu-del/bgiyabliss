@@ -3,7 +3,7 @@ import { CartProvider } from '@/context/CartContext';
 
 export const metadata = {
   title: 'Bgiya Bliss | India\'s Premium Online Plant Store',
-  description: 'Shop the best plants, seeds, pots & gardening products online at Bgiya Bliss. Free delivery on orders above ₹499.',
+  description: 'Shop the best plants, seeds, pots & gardening products online at Bgiya Bliss. Flat 20% off on orders above ₹1099!',
   keywords: 'plants, indoor plants, seeds, pots, planters, gardening, plant care, buy plants online, Bgiya Bliss',
 };
 

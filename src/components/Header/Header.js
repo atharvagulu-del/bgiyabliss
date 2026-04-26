@@ -7,8 +7,9 @@ import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 import { bestsellers, newArrivals, plantBundles, ceramics } from '@/data/products';
 import { navLinks } from '@/data/categories';
+import { getActiveProducts } from '@/lib/firestore';
 
-const allProducts = [...bestsellers, ...newArrivals, ...plantBundles, ...ceramics];
+const staticProducts = [...bestsellers, ...newArrivals, ...plantBundles, ...ceramics];
 
 // ─── Mobile Menu Drawer (accordion-style, collapsed by default) ───
 function MobileMenuDrawer({ navLinks, onClose }) {
@@ -128,6 +129,21 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [allProductsList, setAllProductsList] = useState(staticProducts);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const products = await getActiveProducts();
+        if (products && products.length > 0) {
+          setAllProductsList(products);
+        }
+      } catch (err) {
+        console.error('Error fetching products for search:', err);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -149,13 +165,13 @@ export default function Header() {
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
     const query = searchQuery.toLowerCase();
-    const uniqueProducts = Array.from(new Set(allProducts.map(a => a.id)))
-      .map(id => allProducts.find(a => a.id === id));
+    const uniqueProducts = Array.from(new Set(allProductsList.map(a => a.id)))
+      .map(id => allProductsList.find(a => a.id === id));
     return uniqueProducts.filter(product =>
       product.name.toLowerCase().includes(query) ||
       product.tags?.some(t => t.toLowerCase().includes(query))
     ).slice(0, 5);
-  }, [searchQuery]);
+  }, [searchQuery, allProductsList]);
 
   // Transparent glass mode: homepage + not scrolled
   const glass = isHome && !scrolled;

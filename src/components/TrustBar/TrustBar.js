@@ -1,7 +1,7 @@
 import { Truck, Shield, Leaf, Headphones } from 'lucide-react';
 
 const features = [
-  { icon: Truck, title: 'Free Delivery', desc: 'On orders above ₹499', color: 'bg-sky-50 text-sky-600' },
+  { icon: Truck, title: 'Fast Delivery', desc: 'All over India', color: 'bg-sky-50 text-sky-600' },
   { icon: Shield, title: 'Safe Packaging', desc: '100% secure delivery', color: 'bg-amber-50 text-amber-600' },
   { icon: Leaf, title: 'Healthy Plants', desc: 'Grown with love & care', color: 'bg-emerald-50 text-emerald-600' },
   { icon: Headphones, title: '24/7 Support', desc: 'Expert plant advice', color: 'bg-purple-50 text-purple-600' },

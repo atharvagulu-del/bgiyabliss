@@ -182,10 +182,35 @@ export default function ProductDetailPage({ product, relatedProducts }) {
               return `${m[1]}${unit}`;
             };
 
-            const getShortLabel = (labelStr) => {
-              if (!labelStr) return null;
-              if (labelStr.length <= 30 && !labelStr.toLowerCase().includes('bgiya')) return labelStr;
-              return extractWeight(labelStr) || labelStr.split(' ')[0];
+            // Extract "Pack of X" from any string, returns null if not found or pack=1
+            const extractPack = (str) => {
+              if (!str) return null;
+              const m = str.match(/pack\s*(?:of\s*)?(\d+)/i);
+              if (m && parseInt(m[1]) > 1) return m[1];
+              return null;
+            };
+
+            // Build a full label: weight + pack info from all available sources
+            const buildFullLabel = (label, name, ...extraSources) => {
+              // Start with the label if it's clean and short
+              let base = null;
+              if (label && label.length <= 30 && !label.toLowerCase().includes('bgiya')) {
+                base = label;
+              } else {
+                base = extractWeight(label) || extractWeight(name);
+              }
+              if (!base) return label || name || null;
+
+              // Already has pack info? Return as-is
+              if (/pack/i.test(base)) return base;
+
+              // Check all sources for pack info
+              const allSources = [label, name, ...extraSources].filter(Boolean);
+              for (const src of allSources) {
+                const packNum = extractPack(src);
+                if (packNum) return `${base} (Pack of ${packNum})`;
+              }
+              return base;
             };
 
             // Convert weight string to grams for sorting (1kg=1000g, 1L=1000ml)
@@ -202,8 +227,8 @@ export default function ProductDetailPage({ product, relatedProducts }) {
 
             // Sort variants lightest → heaviest, then by pack quantity (like Amazon)
             const sortedSummary = [...product.variantSummary].sort((a, b) => {
-              const la = getShortLabel(a.label) || extractWeight(a.name) || '';
-              const lb = getShortLabel(b.label) || extractWeight(b.name) || '';
+              const la = buildFullLabel(a.label, a.name) || '';
+              const lb = buildFullLabel(b.label, b.name) || '';
               const wa = toGrams(la);
               const wb = toGrams(lb);
               if (wa !== wb) return wa - wb;
@@ -213,12 +238,15 @@ export default function ProductDetailPage({ product, relatedProducts }) {
               return (parseInt(packA?.[1] || 1)) - (parseInt(packB?.[1] || 1));
             });
 
-            const rawLabel = product.variantLabel || '';
+            // For the current product, check variantLabel, summary label, AND the product name
+            const summaryEntry = product.variantSummary.find(v => v.slug === product.slug);
             const currentLabel =
-              getShortLabel(rawLabel) ||
-              getShortLabel(product.variantSummary.find(v => v.slug === product.slug)?.label) ||
-              extractWeight(product.name) ||
-              'Default';
+              buildFullLabel(
+                product.variantLabel,
+                product.name,
+                summaryEntry?.label,
+                summaryEntry?.name
+              ) || extractWeight(product.name) || 'Default';
 
             return (
               <div className={styles.variantSection}>
@@ -230,15 +258,7 @@ export default function ProductDetailPage({ product, relatedProducts }) {
                     const isActive = product.slug === v.slug;
                     const pillLabel = (() => {
                       if (isActive) return currentLabel;
-                      const fromLabel = getShortLabel(v.label);
-                      // If label has no pack info, check name for "Pack of X" and append it (only if X > 1)
-                      if (fromLabel && !fromLabel.includes('Pack')) {
-                        const packMatch = (v.name || v.label || '').match(/pack of\s*(\d+)/i);
-                        if (packMatch && parseInt(packMatch[1]) > 1) {
-                          return `${fromLabel} (Pack of ${packMatch[1]})`;
-                        }
-                      }
-                      return fromLabel || extractWeight(v.name) || `Variant ${i + 1}`;
+                      return buildFullLabel(v.label, v.name) || `Variant ${i + 1}`;
                     })();
                     return (
                       <a
@@ -330,7 +350,14 @@ export default function ProductDetailPage({ product, relatedProducts }) {
             <div className={styles.deliveryGrid}>
               <div className={styles.deliveryCard}>
                 <h4><Truck size={18} /> Shipping</h4>
-                <ul><li>Free Delivery on orders above ₹499</li><li>Prepaid orders below ₹499: ₹54 shipping</li><li>Cash on Delivery below ₹499: ₹84 shipping</li></ul>
+                <ul><li>Shipping charges calculated at checkout</li><li>Prepaid orders: ₹54 shipping</li><li>Cash on Delivery: ₹84 shipping</li></ul>
+                <div style={{ marginTop: 12, padding: '10px 14px', background: '#ecfdf5', borderRadius: 8, fontSize: 13 }}>
+                  <p style={{ fontWeight: 600, marginBottom: 4 }}>🎉 Available Offers:</p>
+                  <ul style={{ margin: 0, paddingLeft: 18 }}>
+                    <li>Flat 20% Off on orders above ₹1099 — Use code: <strong>BLISS20</strong></li>
+                    <li>Flat 10% Off on your first order — Use code: <strong>BLISS10</strong></li>
+                  </ul>
+                </div>
               </div>
               <div className={styles.deliveryCard}>
                 <h4><RotateCcw size={18} /> Returns</h4>

@@ -6,15 +6,10 @@ import { X, Minus, Plus, ShoppingBag, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import styles from './CartDrawer.module.css';
 
-const FREE_SHIPPING_THRESHOLD = 499;
-
 export default function CartDrawer() {
   const { cartItems, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, cartSubtotal, cartTotal, cartCount, discountAmount, appliedPromo, setAppliedPromo } = useCart();
   const [promoInput, setPromoInput] = useState('');
   const [promoMessage, setPromoMessage] = useState('');
-
-  const progress = Math.min((cartTotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
-  const remaining = FREE_SHIPPING_THRESHOLD - cartTotal;
 
   return (
     <AnimatePresence>
@@ -41,18 +36,10 @@ export default function CartDrawer() {
               </button>
             </div>
 
-            <div className={styles.shippingTracker}>
-              <p className={styles.shippingText}>
-                {remaining > 0 
-                  ? `Add ₹${remaining.toLocaleString()} more to unlock FREE Shipping!`
-                  : `🎉 You've unlocked FREE Shipping!`}
+            <div className={styles.shippingTracker} style={{ background: '#ecfdf5', borderBottom: '1px solid #d1fae5' }}>
+              <p className={styles.shippingText} style={{ color: '#065f46', fontSize: 12, fontWeight: 600 }}>
+                🎉 Use <strong>BLISS20</strong> for 20% off above ₹1099 &nbsp;|&nbsp; <strong>BLISS10</strong> for 10% off first order
               </p>
-              <div className={styles.progressBarContainer}>
-                <div 
-                  className={`${styles.progressBar} ${remaining <= 0 ? styles.unlocked : ''}`} 
-                  style={{ width: `${progress}%` }} 
-                />
-              </div>
             </div>
 
             <div className={styles.items}>
