@@ -1,0 +1,77 @@
+/* ── Hero Banner Carousel ── */
+.bannerSection {
+  width: 100%;
+  overflow: hidden;
+}
+
+.carousel {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  overflow: hidden;
+}
+
+/* ── Slide Track ── */
+.slidesTrack {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide {
+  position: relative;
+  flex-shrink: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Dot Indicators ── */
+.dots {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  z-index: 10;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.dot:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.dotActive {
+  background: #fff;
+  border-color: #fff;
+  transform: scale(1.2);
+}
+
+/* ── Tablet ── */
+@media (min-width: 640px) {
+  .carousel {
+    aspect-ratio: 2 / 1;
+  }
+  .dots { bottom: 16px; gap: 8px; }
+  .dot { width: 10px; height: 10px; }
+}
+
+/* ── Desktop — match banner's natural ratio ── */
+@media (min-width: 1024px) {
+  .carousel {
+    aspect-ratio: 2 / 1;
+  }
+  .dots { bottom: 20px; gap: 10px; }
+  .dot { width: 11px; height: 11px; }
+}

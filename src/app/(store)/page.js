@@ -1,8 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
 import HeroBanner from '@/components/HeroBanner/HeroBanner';
+import CategoryCircles from '@/components/CategoryCircles/CategoryCircles';
 import ProductCarousel from '@/components/ProductCarousel/ProductCarousel';
-
 import HowItWorks from '@/components/HowItWorks/HowItWorks';
 import TestimonialMarquee from '@/components/TestimonialMarquee/TestimonialMarquee';
 import CommunityFeed from '@/components/CommunityFeed/CommunityFeed';
@@ -22,12 +22,11 @@ export default function Home() {
       try {
         const products = await getActiveProducts();
         if (products.length > 0) {
-          // Sort into carousels by featured tags first, then category
           const best = products.filter(p =>
             (p.featured?.includes('bestseller') ||
             p.category === 'plant-care' ||
             p.category === 'plants') &&
-            !p.featured?.includes('bundle')  // Don't put bundles in bestsellers
+            !p.featured?.includes('bundle')
           );
           const bundles = products.filter(p =>
             p.category === 'bundles' || p.featured?.includes('bundle')
@@ -37,23 +36,19 @@ export default function Home() {
           );
           const arrivals = products.filter(p =>
             p.featured?.includes('new-arrival') &&
-            !p.featured?.includes('bundle')  // Don't put bundles in new arrivals
+            !p.featured?.includes('bundle')
           );
 
-          // Merge Firestore products with static data so carousels always look full
           const mergeWithStatic = (firestoreList, staticList) => {
             const slugs = new Set(firestoreList.map(p => p.slug));
             return [...firestoreList, ...staticList.filter(p => !slugs.has(p.slug))];
           };
 
-          // Always populate bestsellers with ALL products as fallback
-          // so no product from Firestore ever gets lost
           const categorised = new Set([...best, ...bundles, ...pots, ...arrivals].map(p => p.id));
           const uncategorised = products.filter(p =>
             !categorised.has(p.id) && !p.featured?.includes('bundle')
           );
 
-          // Merge uncategorised into bestsellers so they always show somewhere
           const effectiveBest = best.length > 0
             ? mergeWithStatic([...best, ...uncategorised], staticBestsellers)
             : mergeWithStatic(products.filter(p => !p.featured?.includes('bundle')), staticBestsellers);
@@ -73,38 +68,37 @@ export default function Home() {
   return (
     <>
       <HeroBanner />
-      
-      {/* Curved overlap over the Hero Video */}
-      <div className="relative z-20 -mt-10 md:-mt-20 pt-10 md:pt-20 bg-white rounded-t-[2.5rem] md:rounded-t-[4rem] shadow-[0_-20px_40px_rgba(0,0,0,0.1)]">
-        <ProductCarousel
-          title="Bestsellers"
-          products={bestsellers}
-          viewAllLink="/collections/bestsellers"
-        />
-        <ProductCarousel
-          title="Value Bundles"
-          products={plantBundles}
-          viewAllLink="/collections/bundles"
-          bgClass="bg-gray-50"
-        />
 
-        <ProductCarousel
-          title="New Arrivals"
-          products={newArrivals}
-          viewAllLink="/collections/new-arrivals"
-        />
-        <ProductCarousel
-          title="More from Bgiya Bliss"
-          products={ceramics}
-          viewAllLink="/collections/all"
-          bgClass="bg-gray-50"
-        />
-        <HowItWorks />
-        <TestimonialMarquee />
-        <CommunityFeed />
-        <WhyChooseUs />
-        <TrustBar />
-      </div>
+      {/* Category Circles — Blinkit/Organic Bazar style */}
+      <CategoryCircles />
+
+      <ProductCarousel
+        title="Bestsellers"
+        products={bestsellers}
+        viewAllLink="/collections/bestsellers"
+      />
+      <ProductCarousel
+        title="Value Bundles"
+        products={plantBundles}
+        viewAllLink="/collections/bundles"
+        bgClass="bg-gray-50"
+      />
+      <ProductCarousel
+        title="New Arrivals"
+        products={newArrivals}
+        viewAllLink="/collections/new-arrivals"
+      />
+      <ProductCarousel
+        title="More from Bgiya Bliss"
+        products={ceramics}
+        viewAllLink="/collections/all"
+        bgClass="bg-gray-50"
+      />
+      <HowItWorks />
+      <TestimonialMarquee />
+      <CommunityFeed />
+      <WhyChooseUs />
+      <TrustBar />
     </>
   );
 }

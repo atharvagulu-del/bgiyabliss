@@ -1,7 +1,88 @@
 'use client';
 import { useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { CheckCircle2, Package, ArrowRight, Home } from 'lucide-react';
+
+/* ── Confetti Burst from Bottom ── */
+function ConfettiBurst() {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const colors = ['#16a34a', '#059669', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#fbbf24'];
+    const particles = [];
+
+    // Single burst from bottom center
+    for (let i = 0; i < 120; i++) {
+      const angle = (Math.random() * 120 - 60) * (Math.PI / 180); // spread -60° to +60° upward
+      const speed = Math.random() * 14 + 8;
+      particles.push({
+        x: canvas.width / 2 + (Math.random() * 100 - 50),
+        y: canvas.height + 10,
+        vx: Math.sin(angle) * speed,
+        vy: -Math.cos(angle) * speed,
+        size: Math.random() * 7 + 3,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        rotation: Math.random() * 360,
+        rotSpeed: Math.random() * 8 - 4,
+        opacity: 1,
+        isRect: Math.random() > 0.5,
+      });
+    }
+
+    let animId;
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let alive = false;
+
+      for (const p of particles) {
+        p.vy += 0.25; // gravity
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.99;
+        p.rotation += p.rotSpeed;
+
+        if (p.y > canvas.height - 50) p.opacity -= 0.03;
+        if (p.opacity <= 0) continue;
+        alive = true;
+
+        ctx.save();
+        ctx.globalAlpha = p.opacity;
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rotation * Math.PI) / 180);
+        ctx.fillStyle = p.color;
+
+        if (p.isRect) {
+          ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+        } else {
+          ctx.beginPath();
+          ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      if (alive) animId = requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    const handleResize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    window.addEventListener('resize', handleResize);
+    return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', handleResize); };
+  }, []);
+
+  return (
+    <canvas ref={canvasRef} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 9999 }} />
+  );
+}
 
 function OrderConfirmationContent() {
   const searchParams = useSearchParams();
@@ -9,7 +90,10 @@ function OrderConfirmationContent() {
 
   return (
     <div style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', background: '#f9fafb' }}>
-      <div style={{ maxWidth: 540, width: '100%', textAlign: 'center' }}>
+
+      <ConfettiBurst />
+
+      <div style={{ maxWidth: 540, width: '100%', textAlign: 'center', position: 'relative', zIndex: 1 }}>
 
         {/* Success Icon */}
         <div style={{
@@ -90,7 +174,6 @@ function OrderConfirmationContent() {
           </a>
         </div>
 
-        {/* Pop-in animation */}
         <style>{`
           @keyframes popIn {
             0% { transform: scale(0.5); opacity: 0; }

@@ -1,6 +1,5 @@
 import styles from './WhyChooseUs.module.css';
 import { Leaf, FlaskConical, ShieldCheck, Sprout } from 'lucide-react';
-import Image from 'next/image';
 
 const reasons = [
   {
@@ -28,14 +27,17 @@ const reasons = [
 export default function WhyChooseUs() {
   return (
     <section className={styles.section}>
-      <div className={styles.bgImageWrapper}>
-        <Image 
-          src="/background.jpg" 
-          alt="Bgiya Bliss Background" 
-          fill 
-          style={{ objectFit: 'cover', objectPosition: 'center' }}
-          quality={90}
-        />
+      {/* Background Video — slightly zoomed to crop out watermark */}
+      <div className={styles.bgVideoWrapper}>
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className={styles.bgVideo}
+        >
+          <source src="/videos/background.mp4" type="video/mp4" />
+        </video>
         <div className={styles.bgOverlay}></div>
       </div>
 

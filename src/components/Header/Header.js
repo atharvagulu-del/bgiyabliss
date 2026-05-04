@@ -173,184 +173,185 @@ export default function Header() {
     ).slice(0, 5);
   }, [searchQuery, allProductsList]);
 
-  // Transparent glass mode: homepage + not scrolled
-  const glass = isHome && !scrolled;
+  // Glass mode disabled — no dark hero anymore
+  const glass = false;
 
   return (
     <>
     <header
-      className="sticky top-0 z-50 transition-all duration-500 ease-in-out"
-      style={{
-        backgroundColor: glass ? 'transparent' : 'rgba(255,255,255,0.98)',
-        backdropFilter: glass ? 'none' : 'blur(16px)',
-        WebkitBackdropFilter: glass ? 'none' : 'blur(16px)',
-        boxShadow: glass ? 'none' : '0 1px 3px rgba(0,0,0,0.06)',
-      }}
+      className="sticky top-0 z-50"
+      style={{ boxShadow: '0 1px 12px rgba(0,0,0,0.06)' }}
       onMouseLeave={() => setActiveMenu(null)}
     >
 
-      {/* ═══════ SINGLE-LINE DESKTOP HEADER ═══════ */}
+      {/* ═══════ DESKTOP HEADER ═══════ */}
       <div className="hidden md:block">
-        <div className="max-w-[1440px] mx-auto px-6 flex items-center h-[90px] gap-6">
 
-          {/* Logo */}
-          <a href="/" className="flex-shrink-0 relative h-[80px] w-[240px]">
-            <Image
-              src="/logo.png"
-              alt="Bgiya Bliss"
-              fill
-              style={{ objectFit: 'contain', objectPosition: 'left center' }}
-              className={`transition-all duration-500 ${glass ? 'brightness-0 invert' : ''}`}
-              priority
-            />
-          </a>
+        {/* TOP ROW — cream bg, logo centered, search left, icons right */}
+        <div style={{ background: 'linear-gradient(180deg, #f7f5f0 0%, #ffffff 100%)' }}>
+          <div className="max-w-[1440px] mx-auto px-10 flex items-center h-[120px]">
 
-          {/* Nav Links — inline, directly in the header */}
-          <nav className="flex items-center gap-0">
-            {navLinks.map((link, idx) => (
-              <div
-                key={idx}
-                className="relative"
-                onMouseEnter={() => link.megaMenu && setActiveMenu(idx)}
-              >
-                <a
-                  href={link.link}
-                  className={`flex items-center gap-1 px-4 py-2 text-[14px] font-medium tracking-wide whitespace-nowrap transition-colors duration-500 ${
-                    link.highlight
-                      ? (glass ? 'text-emerald-300 font-semibold' : 'text-emerald-600 font-semibold')
-                      : (glass ? 'text-white/90 hover:text-white' : 'text-gray-700 hover:text-emerald-700')
-                  }`}
-                >
-                  {link.name}
-                  {link.megaMenu && <ChevronDown size={13} className={`transition-transform ${activeMenu === idx ? 'rotate-180' : ''}`} />}
-                </a>
-
-                {/* Mega Menu dropdown */}
-                {link.megaMenu && activeMenu === idx && (
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 min-w-[480px] bg-white rounded-b-2xl shadow-2xl p-7 z-[200] animate-[fadeDown_0.2s_ease]">
-                    <div className="flex gap-10">
-                      {link.megaMenu.map((col, colIdx) => (
-                        <div key={colIdx} className="min-w-[140px]">
-                          <h4 className="text-xs font-bold text-emerald-800 uppercase tracking-wider pb-2 mb-2 border-b-2 border-gray-100">{col.title}</h4>
-                          <ul className="space-y-1">
-                            {col.items.map((item, itemIdx) => (
-                              <li key={itemIdx}>
-                                <a href={item.link} className="block py-1.5 text-[13px] text-gray-600 hover:text-emerald-600 hover:pl-1 transition-all">{item.name}</a>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
+            {/* Search — left */}
+            <div className="relative w-[260px] flex-shrink-0">
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600/60" />
+              <input
+                type="text"
+                placeholder="Search plants, soil, pots..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-8 py-2.5 rounded-full text-[13px] outline-none bg-white border border-gray-200 text-gray-800 placeholder:text-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 transition-all duration-200 shadow-sm"
+              />
+              {searchQuery && (
+                <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" onClick={() => setSearchQuery('')}><X size={13} /></button>
+              )}
+              {searchQuery && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-100 z-[200] max-h-[360px] overflow-y-auto">
+                  {searchResults.length > 0 ? (
+                    <div className="p-2">
+                      <h4 className="text-xs font-semibold text-gray-400 uppercase px-3 py-1.5 tracking-wider">Products</h4>
+                      {searchResults.map(product => (
+                        <a href={`/products/${product.slug}`} key={product.id} className="flex gap-3 px-3 py-2.5 hover:bg-emerald-50 rounded-lg transition-colors" onClick={() => setSearchQuery('')}>
+                          <div className="relative w-10 h-10 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                            <Image src={product.image || product.images?.[0] || '/product-plants.png'} alt={product.name} fill style={{ objectFit: 'cover' }} />
+                          </div>
+                          <div className="flex flex-col justify-center">
+                            <p className="text-sm font-medium text-gray-800">{product.name}</p>
+                            <p className="text-sm font-bold text-emerald-600">₹{(product.salePrice || 0).toLocaleString()}</p>
+                          </div>
+                        </a>
                       ))}
                     </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </nav>
-
-          {/* Spacer */}
-          <div className="flex-1" />
-
-          {/* Search */}
-          <div className="relative w-[280px]">
-            <Search size={15} className={`absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors duration-500 ${glass ? 'text-white/40' : 'text-gray-400'}`} />
-            <input
-              type="text"
-              placeholder="Search..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className={`w-full pl-9 pr-8 py-2 rounded-full text-sm outline-none transition-all duration-500 ${glass
-                ? 'bg-white/10 border border-white/15 text-white placeholder:text-white/40 focus:bg-white/15'
-                : 'bg-gray-50 border border-gray-200 text-gray-900 focus:border-emerald-500'}`}
-            />
-            {searchQuery && (
-              <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" onClick={() => setSearchQuery('')}><X size={13} /></button>
-            )}
-            {searchQuery && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 z-[200] max-h-[360px] overflow-y-auto">
-                {searchResults.length > 0 ? (
-                  <div className="p-2">
-                    <h4 className="text-xs font-semibold text-gray-400 uppercase px-3 py-1.5">Products</h4>
-                    {searchResults.map(product => (
-                      <a href={`/products/${product.slug}`} key={product.id} className="flex gap-3 px-3 py-2 hover:bg-emerald-50 rounded-lg" onClick={() => setSearchQuery('')}>
-                        <div className="relative w-10 h-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                          <Image src={product.image || product.images?.[0] || '/product-plants.png'} alt={product.name} fill style={{ objectFit: 'cover' }} />
-                        </div>
-                        <div className="flex flex-col justify-center">
-                          <p className="text-sm font-medium text-gray-800">{product.name}</p>
-                          <p className="text-sm font-bold text-emerald-600">₹{(product.salePrice || 0).toLocaleString()}</p>
-                        </div>
-                      </a>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="p-5 text-center text-gray-500 text-sm">No results</div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Action Icons */}
-          <div className="flex items-center gap-0.5 flex-shrink-0">
-            <button className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors duration-500 ${glass ? 'text-white/80 hover:text-white hover:bg-white/10' : 'text-gray-600 hover:text-emerald-700 hover:bg-gray-100'}`} aria-label="Wishlist">
-              <Heart size={19} />
-            </button>
-            <button className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors duration-500 ${glass ? 'text-white/80 hover:text-white hover:bg-white/10' : 'text-gray-600 hover:text-emerald-700 hover:bg-gray-100'}`} aria-label="Account">
-              <User size={19} />
-            </button>
-            <button className={`relative w-9 h-9 flex items-center justify-center rounded-full transition-colors duration-500 ${glass ? 'text-white/80 hover:text-white hover:bg-white/10' : 'text-gray-600 hover:text-emerald-700 hover:bg-gray-100'}`} aria-label="Cart" onClick={() => setIsCartOpen(true)}>
-              <ShoppingBag size={19} />
-              {cartCount > 0 && (
-                <span className="absolute top-0 right-0 w-4 h-4 rounded-full bg-emerald-500 text-white text-[10px] font-bold flex items-center justify-center">{cartCount}</span>
+                  ) : (
+                    <div className="p-5 text-center text-gray-400 text-sm">No products found</div>
+                  )}
+                </div>
               )}
-            </button>
+            </div>
+
+            {/* Logo — big, centered */}
+            <div className="flex-1 flex justify-center">
+              <a href="/" className="relative h-[90px] w-[180px] hover:opacity-90 transition-opacity duration-300">
+                <Image
+                  src="/logo.png"
+                  alt="Bgiya Bliss - Where Every Leaf Tells a Story"
+                  fill
+                  style={{ objectFit: 'contain' }}
+                  priority
+                />
+              </a>
+            </div>
+
+            {/* Action Icons — right */}
+            <div className="flex items-center gap-3 flex-shrink-0 w-[260px] justify-end">
+              <button className="w-10 h-10 flex items-center justify-center rounded-full text-emerald-800/70 hover:text-emerald-800 hover:bg-emerald-50 transition-all duration-200" aria-label="Wishlist">
+                <Heart size={20} strokeWidth={1.5} />
+              </button>
+              <button className="w-10 h-10 flex items-center justify-center rounded-full text-emerald-800/70 hover:text-emerald-800 hover:bg-emerald-50 transition-all duration-200" aria-label="Account">
+                <User size={20} strokeWidth={1.5} />
+              </button>
+              <button className="relative w-10 h-10 flex items-center justify-center rounded-full text-emerald-800/70 hover:text-emerald-800 hover:bg-emerald-50 transition-all duration-200" aria-label="Cart" onClick={() => setIsCartOpen(true)}>
+                <ShoppingBag size={20} strokeWidth={1.5} />
+                {cartCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-[18px] h-[18px] rounded-full bg-emerald-600 text-white text-[10px] font-bold flex items-center justify-center shadow-sm">{cartCount}</span>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* NAV ROW — elegant underline style */}
+        <div style={{ backgroundColor: '#ffffff', borderTop: '1px solid #e8e5df', borderBottom: '2px solid #16a34a' }}>
+          <div className="max-w-[1440px] mx-auto px-8">
+            <nav className="flex items-center justify-center gap-1">
+              {navLinks.map((link, idx) => (
+                <div
+                  key={idx}
+                  className="relative"
+                  onMouseEnter={() => link.megaMenu && setActiveMenu(idx)}
+                >
+                  <a
+                    href={link.link}
+                    className={`relative flex items-center gap-1 px-5 py-3.5 text-[13px] font-semibold uppercase tracking-widest whitespace-nowrap transition-colors duration-200 group ${
+                      link.highlight
+                        ? 'text-emerald-600 hover:text-emerald-700'
+                        : 'text-gray-700 hover:text-emerald-700'
+                    }`}
+                  >
+                    {link.name}
+                    {link.megaMenu && <ChevronDown size={12} className={`transition-transform duration-200 ${activeMenu === idx ? 'rotate-180' : ''}`} />}
+                    <span className="absolute bottom-0 left-5 right-5 h-[2px] bg-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                  </a>
+
+                  {/* Mega Menu dropdown */}
+                  {link.megaMenu && activeMenu === idx && (
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 min-w-[480px] bg-white rounded-b-2xl shadow-2xl p-7 z-[200] border border-gray-100" style={{ animation: 'fadeDown 0.2s ease' }}>
+                      <div className="flex gap-10">
+                        {link.megaMenu.map((col, colIdx) => (
+                          <div key={colIdx} className="min-w-[140px]">
+                            <h4 className="text-xs font-bold text-emerald-700 uppercase tracking-wider pb-2 mb-2 border-b-2 border-emerald-100">{col.title}</h4>
+                            <ul className="space-y-1">
+                              {col.items.map((item, itemIdx) => (
+                                <li key={itemIdx}>
+                                  <a href={item.link} className="block py-1.5 text-[13px] text-gray-500 hover:text-emerald-600 hover:pl-1 transition-all duration-200">{item.name}</a>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </nav>
           </div>
         </div>
       </div>
 
-      {/* ═══════ MOBILE HEADER ═══════ */}
-      <div className="md:hidden">
-        <div className="flex items-center justify-between px-4 h-[70px]">
-          <button aria-label="Menu" onClick={() => setIsMobileMenuOpen(true)}>
-            <Menu size={24} strokeWidth={1.5} className={`transition-colors duration-500 ${glass ? 'text-white' : 'text-gray-700'}`} />
+      {/* ═══════ MOBILE HEADER — compact ═══════ */}
+      <div className="md:hidden" style={{ background: '#fff', borderBottom: '2px solid #16a34a' }}>
+        {/* Single row: menu | logo+tagline | icons */}
+        <div className="flex items-center justify-between px-3 h-[60px]">
+          <button aria-label="Menu" onClick={() => setIsMobileMenuOpen(true)} className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
+            <Menu size={20} strokeWidth={1.5} className="text-gray-700" />
           </button>
 
-          <a href="/" className="relative h-[56px] w-[180px]">
+          <a href="/" className="relative h-[52px] w-[110px] mx-auto">
             <Image
               src="/logo.png"
               alt="Bgiya Bliss"
               fill
               style={{ objectFit: 'contain' }}
-              className={`transition-all duration-500 ${glass ? 'brightness-0 invert' : ''}`}
               priority
             />
           </a>
 
-          <div className="flex items-center gap-2">
-            <button className={`relative transition-colors duration-500 ${glass ? 'text-white' : 'text-gray-700'}`} aria-label="Cart" onClick={() => setIsCartOpen(true)}>
-              <ShoppingBag size={22} strokeWidth={1.5} />
+          <div className="flex items-center gap-0.5">
+            <button className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-600" aria-label="Wishlist">
+              <Heart size={18} strokeWidth={1.5} />
+            </button>
+            <button className="relative w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-600" aria-label="Cart" onClick={() => setIsCartOpen(true)}>
+              <ShoppingBag size={18} strokeWidth={1.5} />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 text-white text-[10px] font-bold flex items-center justify-center">{cartCount}</span>
+                <span className="absolute top-0.5 right-0.5 w-[15px] h-[15px] rounded-full bg-emerald-600 text-white text-[8px] font-bold flex items-center justify-center">{cartCount}</span>
               )}
             </button>
           </div>
         </div>
 
-        {/* Mobile Search */}
-        <div className="px-4 pb-2.5">
+        {/* Compact Search */}
+        <div className="px-3 pb-2">
           <div className="relative">
-            <Search className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors duration-500 ${glass ? 'text-white/40' : 'text-gray-400'}`} size={15} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
             <input
               type="text"
-              placeholder="Search for plants, seeds, pots..."
+              placeholder="Search plants, soil, pots..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className={`w-full pl-9 pr-9 py-2 rounded-full text-sm outline-none transition-all duration-500 ${glass
-                ? 'bg-white/10 border border-white/15 text-white placeholder:text-white/40'
-                : 'bg-gray-50 border border-gray-200 text-gray-900 focus:border-emerald-500'}`}
+              className="w-full pl-9 pr-8 py-2 rounded-full text-[13px] outline-none bg-gray-50 border border-gray-200 text-gray-800 placeholder:text-gray-400 focus:border-emerald-500 focus:bg-white transition-all duration-200"
             />
             {searchQuery && (
-              <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" onClick={() => setSearchQuery('')}><X size={13} /></button>
+              <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" onClick={() => setSearchQuery('')}><X size={12} /></button>
             )}
             {searchQuery && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden">
@@ -358,7 +359,7 @@ export default function Header() {
                   <div className="p-2">
                     {searchResults.map(product => (
                       <a href={`/products/${product.slug}`} key={product.id} className="flex gap-3 px-3 py-2 hover:bg-emerald-50 rounded-lg" onClick={() => setSearchQuery('')}>
-                        <div className="relative w-10 h-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                        <div className="relative w-10 h-10 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                           <Image src={product.image || product.images?.[0] || '/product-plants.png'} alt={product.name} fill style={{ objectFit: 'cover' }} />
                         </div>
                         <div className="flex flex-col justify-center">
@@ -369,7 +370,7 @@ export default function Header() {
                     ))}
                   </div>
                 ) : (
-                  <div className="p-5 text-center text-gray-500 text-sm">No results</div>
+                  <div className="p-4 text-center text-gray-400 text-sm">No results</div>
                 )}
               </div>
             )}

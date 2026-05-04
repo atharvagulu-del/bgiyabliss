@@ -1,7 +1,6 @@
 'use client';
 import { useState } from 'react';
 import { Leaf, Mail, Phone, MapPin, ArrowRight, Instagram, Facebook, Youtube, Linkedin } from 'lucide-react';
-import AnnouncementBar from '@/components/AnnouncementBar/AnnouncementBar';
 import styles from './Footer.module.css';
 
 export default function Footer() {
@@ -9,7 +8,6 @@ export default function Footer() {
 
   return (
     <footer className={styles.footer}>
-      <AnnouncementBar />
       {/* Newsletter */}
       <div className={styles.newsletter}>
         <div className={styles.container}>
