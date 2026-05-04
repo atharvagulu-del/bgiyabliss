@@ -11,7 +11,7 @@ import { getActiveProducts } from '@/lib/firestore';
 
 const staticProducts = [...bestsellers, ...newArrivals, ...plantBundles, ...ceramics];
 
-// ─── Mobile Menu Drawer (accordion-style, collapsed by default) ───
+// ─── Mobile Menu Drawer (Bombay Greens style) ───
 function MobileMenuDrawer({ navLinks, onClose }) {
   const [openIdx, setOpenIdx] = useState(null);
 
@@ -22,45 +22,47 @@ function MobileMenuDrawer({ navLinks, onClose }) {
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex' }}>
       <div
-        style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)' }}
+        style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)' }}
         onClick={onClose}
       />
       <div style={{
-        position: 'relative', width: '80%', maxWidth: '360px', height: '100%',
-        background: '#fff', boxShadow: '4px 0 24px rgba(0,0,0,0.15)',
+        position: 'relative', width: '82%', maxWidth: '360px', height: '100%',
+        background: '#fff', boxShadow: '4px 0 24px rgba(0,0,0,0.12)',
         display: 'flex', flexDirection: 'column',
-        animation: 'mobileMenuSlideIn 0.3s ease forwards',
+        animation: 'mobileMenuSlideIn 0.25s ease forwards',
       }}>
         <style>{`@keyframes mobileMenuSlideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }`}</style>
 
-        {/* Header with close + actions */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid #f0f0f0' }}>
-          <span style={{ fontWeight: 700, fontSize: '18px', color: '#111' }}>Menu</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <a href="#" style={{ width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555', textDecoration: 'none' }} onClick={(e) => { e.preventDefault(); }}>
-              <Heart size={20} />
-            </a>
-            <a href="#" style={{ width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555', textDecoration: 'none' }} onClick={(e) => { e.preventDefault(); }}>
-              <User size={20} />
-            </a>
-            <button onClick={onClose} style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#f5f5f5', border: 'none', cursor: 'pointer', color: '#555', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <X size={20} />
-            </button>
-          </div>
+        {/* Close button row */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderBottom: '1px solid #eee' }}>
+          <button onClick={onClose} style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', color: '#333' }}>
+            <X size={22} strokeWidth={2} />
+          </button>
         </div>
 
-        {/* Nav Links — accordion */}
+        {/* Nav Links */}
         <div style={{ overflowY: 'auto', flex: 1 }}>
+          {/* Home — always first */}
+          <div style={{ borderBottom: '1px solid #f0f0f0' }}>
+            <a
+              href="/"
+              onClick={onClose}
+              style={{ display: 'block', padding: '16px 20px', fontWeight: 500, fontSize: '15px', color: '#111', textDecoration: 'none' }}
+            >
+              Home
+            </a>
+          </div>
+
+          {/* Category links */}
           {navLinks.map((link, idx) => (
-            <div key={idx} style={{ borderBottom: '1px solid #f5f5f5' }}>
-              {/* Category row */}
+            <div key={idx} style={{ borderBottom: '1px solid #f0f0f0' }}>
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <a
                   href={link.link}
                   onClick={onClose}
                   style={{
                     flex: 1, display: 'block', padding: '16px 20px',
-                    fontWeight: 600, fontSize: '15px',
+                    fontWeight: 500, fontSize: '15px',
                     color: link.highlight ? '#16a34a' : '#111',
                     textDecoration: 'none',
                   }}
@@ -71,29 +73,28 @@ function MobileMenuDrawer({ navLinks, onClose }) {
                   <button
                     onClick={() => toggle(idx)}
                     style={{
-                      width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      width: '52px', height: '52px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                       background: 'none', border: 'none', cursor: 'pointer', color: '#999',
-                      transition: 'transform 0.2s',
-                      transform: openIdx === idx ? 'rotate(180deg)' : 'rotate(0deg)',
+                      fontSize: '20px', fontWeight: 300,
                     }}
                   >
-                    <ChevronDown size={18} />
+                    {openIdx === idx ? '−' : '+'}
                   </button>
                 )}
               </div>
 
               {/* Expandable sub-menu */}
               {link.megaMenu && openIdx === idx && (
-                <div style={{ padding: '0 20px 16px 36px', borderTop: '1px solid #f5f5f5', background: '#fafafa' }}>
+                <div style={{ padding: '0 20px 14px 32px', background: '#fafafa' }}>
                   {link.megaMenu.map((col, colIdx) => (
-                    <div key={colIdx} style={{ marginTop: '12px' }}>
+                    <div key={colIdx} style={{ marginTop: '10px' }}>
                       <span style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#166534', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '6px' }}>{col.title}</span>
                       {col.items.map((item, itemIdx) => (
                         <a
                           key={itemIdx}
                           href={item.link}
                           onClick={onClose}
-                          style={{ display: 'block', padding: '6px 0', fontSize: '14px', color: '#555', textDecoration: 'none' }}
+                          style={{ display: 'block', padding: '7px 0', fontSize: '14px', color: '#555', textDecoration: 'none' }}
                         >
                           {item.name}
                         </a>
@@ -104,16 +105,18 @@ function MobileMenuDrawer({ navLinks, onClose }) {
               )}
             </div>
           ))}
-        </div>
 
-        {/* Footer links */}
-        <div style={{ padding: '16px 20px', borderTop: '1px solid #f0f0f0', background: '#fafafa' }}>
-          <a href="/collections/all" onClick={onClose} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 0', fontSize: '14px', fontWeight: 500, color: '#333', textDecoration: 'none' }}>
-            <ShoppingBag size={18} /> All Products
-          </a>
-          <a href="/pages/contact" onClick={onClose} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 0', fontSize: '14px', fontWeight: 500, color: '#333', textDecoration: 'none' }}>
-            <User size={18} /> Contact Us
-          </a>
+          {/* Footer links */}
+          <div style={{ borderBottom: '1px solid #f0f0f0' }}>
+            <a href="/collections/all" onClick={onClose} style={{ display: 'block', padding: '16px 20px', fontWeight: 500, fontSize: '15px', color: '#111', textDecoration: 'none' }}>
+              View Entire Range
+            </a>
+          </div>
+          <div style={{ borderBottom: '1px solid #f0f0f0' }}>
+            <a href="/pages/contact" onClick={onClose} style={{ display: 'block', padding: '16px 20px', fontWeight: 500, fontSize: '15px', color: '#111', textDecoration: 'none' }}>
+              Contact Us
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -310,10 +313,24 @@ export default function Header() {
 
       {/* ═══════ MOBILE HEADER — compact ═══════ */}
       <div className="md:hidden" style={{ background: '#fff', borderBottom: '2px solid #16a34a' }}>
-        {/* Single row: menu | logo+tagline | icons */}
+        {/* Single row: Menu btn | logo | cart */}
         <div className="flex items-center justify-between px-3 h-[60px]">
-          <button aria-label="Menu" onClick={() => setIsMobileMenuOpen(true)} className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
-            <Menu size={20} strokeWidth={1.5} className="text-gray-700" />
+          <button
+            aria-label="Menu"
+            onClick={() => setIsMobileMenuOpen(true)}
+            style={{
+              padding: '5px 12px',
+              border: '1.5px solid #333',
+              borderRadius: '4px',
+              background: 'transparent',
+              fontSize: '12px',
+              fontWeight: 600,
+              color: '#333',
+              letterSpacing: '0.5px',
+              cursor: 'pointer',
+            }}
+          >
+            Menu
           </button>
 
           <a href="/" className="relative h-[52px] w-[110px] mx-auto">
@@ -326,14 +343,14 @@ export default function Header() {
             />
           </a>
 
-          <div className="flex items-center gap-0.5">
+          <div className="flex items-center gap-1">
             <button className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-600" aria-label="Wishlist">
-              <Heart size={18} strokeWidth={1.5} />
+              <Heart size={20} strokeWidth={1.5} />
             </button>
             <button className="relative w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-600" aria-label="Cart" onClick={() => setIsCartOpen(true)}>
-              <ShoppingBag size={18} strokeWidth={1.5} />
+              <ShoppingBag size={20} strokeWidth={1.5} />
               {cartCount > 0 && (
-                <span className="absolute top-0.5 right-0.5 w-[15px] h-[15px] rounded-full bg-emerald-600 text-white text-[8px] font-bold flex items-center justify-center">{cartCount}</span>
+                <span className="absolute top-0 right-0 w-[16px] h-[16px] rounded-full bg-emerald-600 text-white text-[9px] font-bold flex items-center justify-center">{cartCount}</span>
               )}
             </button>
           </div>

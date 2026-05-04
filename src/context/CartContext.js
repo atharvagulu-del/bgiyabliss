@@ -6,6 +6,7 @@ const CartContext = createContext();
 export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   // Load from local storage initially
   useEffect(() => {
@@ -31,6 +32,9 @@ export function CartProvider({ children }) {
       return [...prev, { ...product, quantity: 1 }];
     });
     setIsCartOpen(true);
+    // Trigger confetti
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 2000);
   };
 
   const updateQuantity = (id, delta) => {
@@ -83,7 +87,8 @@ export function CartProvider({ children }) {
         appliedPromo,
         setAppliedPromo,
         cartCount,
-        clearCart
+        clearCart,
+        showConfetti,
       }}
     >
       {children}
