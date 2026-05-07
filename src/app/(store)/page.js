@@ -12,10 +12,10 @@ import { bestsellers as staticBestsellers, plantBundles as staticBundles, newArr
 import { getActiveProducts } from '@/lib/firestore';
 
 export default function Home() {
-  const [bestsellers, setBestsellers] = useState(staticBestsellers);
-  const [plantBundles, setPlantBundles] = useState(staticBundles);
-  const [newArrivals, setNewArrivals] = useState(staticArrivals);
-  const [ceramics, setCeramics] = useState(staticCeramics);
+  const [bestsellers, setBestsellers] = useState([]);
+  const [plantBundles, setPlantBundles] = useState([]);
+  const [newArrivals, setNewArrivals] = useState([]);
+  const [ceramics, setCeramics] = useState([]);
 
   useEffect(() => {
     const loadFirestoreProducts = async () => {
@@ -25,41 +25,39 @@ export default function Home() {
           const best = products.filter(p =>
             (p.featured?.includes('bestseller') ||
             p.category === 'plant-care' ||
-            p.category === 'plants') &&
+            p.category === 'plants' ||
+            p.category === 'potting-mix' ||
+            p.category === 'fertilizers' ||
+            p.category === 'seeds') &&
             !p.featured?.includes('bundle')
           );
+          
           const bundles = products.filter(p =>
             p.category === 'bundles' || p.featured?.includes('bundle')
           );
+          
           const pots = products.filter(p =>
-            p.category === 'pots' || p.category === 'planters'
+            p.category === 'pots' || p.category === 'planters' || p.category === 'tools' || p.category === 'accessories'
           );
+          
           const arrivals = products.filter(p =>
             p.featured?.includes('new-arrival') &&
             !p.featured?.includes('bundle')
           );
 
-          const mergeWithStatic = (firestoreList, staticList) => {
-            const slugs = new Set(firestoreList.map(p => p.slug));
-            return [...firestoreList, ...staticList.filter(p => !slugs.has(p.slug))];
-          };
-
+          // If bestsellers filter misses items, fill it with whatever is left
           const categorised = new Set([...best, ...bundles, ...pots, ...arrivals].map(p => p.id));
-          const uncategorised = products.filter(p =>
-            !categorised.has(p.id) && !p.featured?.includes('bundle')
-          );
+          const uncategorised = products.filter(p => !categorised.has(p.id) && !p.featured?.includes('bundle'));
 
-          const effectiveBest = best.length > 0
-            ? mergeWithStatic([...best, ...uncategorised], staticBestsellers)
-            : mergeWithStatic(products.filter(p => !p.featured?.includes('bundle')), staticBestsellers);
-
-          setBestsellers(effectiveBest);
-          if (bundles.length > 0) setPlantBundles(mergeWithStatic(bundles, staticBundles));
-          if (arrivals.length > 0) setNewArrivals(mergeWithStatic(arrivals, staticArrivals));
-          if (pots.length > 0) setCeramics(mergeWithStatic(pots, staticCeramics));
+          setBestsellers(best.length > 0 ? best : uncategorised.length > 0 ? uncategorised : products.slice(0, 5));
+          setPlantBundles(bundles);
+          setNewArrivals(arrivals);
+          setCeramics(pots);
+        } else {
+          // If completely empty database, arrays stay empty
         }
       } catch (err) {
-        console.log('Using static product data (Firestore unavailable)');
+        console.log('Error loading products from Firestore', err);
       }
     };
     loadFirestoreProducts();

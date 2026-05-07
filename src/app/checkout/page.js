@@ -4,7 +4,8 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { ChevronRight, ChevronDown, Truck, Tag, Loader2, ShieldCheck, Leaf, Package, Heart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
-import { createOrder } from '@/lib/firestore';
+import { useAuth } from '@/context/AuthContext';
+import { createOrder, getPromoCode } from '@/lib/firestore';
 
 const STATES = [
   'Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat',
@@ -40,7 +41,9 @@ function FloatField({ label, value, onChange, type='text', maxLength, half, erro
 export default function CheckoutPage() {
   const router = useRouter();
   const { cartItems, cartSubtotal, cartTotal, discountAmount, appliedPromo, setAppliedPromo, clearCart, cartCount } = useCart();
+  const { user } = useAuth();
   const [form, setForm] = useState({ name:'', lastName:'', phone:'', email:'', address1:'', address2:'', city:'', state:'', pincode:'', paymentMethod:'cod' });
+  const [saveInfo, setSaveInfo] = useState(true);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -48,7 +51,31 @@ export default function CheckoutPage() {
   const [promoInput, setPromoInput] = useState('');
   const [promoMsg, setPromoMsg] = useState('');
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => { 
+    setMounted(true); 
+    
+    // Load from localStorage if exists
+    const savedInfo = localStorage.getItem('bgiyaBlissCheckoutInfo');
+    if (savedInfo) {
+      try {
+        const parsed = JSON.parse(savedInfo);
+        setForm(prev => ({ ...prev, ...parsed }));
+      } catch (e) {}
+    }
+  }, []);
+
+  // Sync with auth user
+  useEffect(() => {
+    if (user) {
+      setForm(prev => ({
+        ...prev,
+        email: prev.email || user.email || '',
+        name: prev.name || (user.displayName ? user.displayName.split(' ')[0] : ''),
+        lastName: prev.lastName || (user.displayName ? user.displayName.split(' ').slice(1).join(' ') : ''),
+        phone: prev.phone || user.phoneNumber || ''
+      }));
+    }
+  }, [user]);
 
   const shippingCost = form.paymentMethod === 'cod' ? 84 : 54;
   const orderTotal = cartTotal + shippingCost;
@@ -69,38 +96,183 @@ export default function CheckoutPage() {
     return Object.keys(e).length === 0;
   };
 
+  const loadRazorpay = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
   const handlePlaceOrder = async () => {
     if (!validate()) return;
     setLoading(true);
-    try {
-      const orderId = `BB-${Date.now()}`;
-      await createOrder({
-        orderId,
-        customer: { name: `${form.name.trim()} ${form.lastName.trim()}`.trim(), phone: form.phone.trim(), email: form.email.trim() },
-        shipping: { address1: form.address1.trim(), address2: form.address2.trim(), city: form.city.trim(), state: form.state, pincode: form.pincode.trim() },
-        items: cartItems.map(item => ({ id:item.id, name:item.name, slug:item.slug, quantity:item.quantity, price:item.salePrice||0, image:item.image||item.images?.[0]||'' })),
-        subtotal: cartSubtotal, discount: discountAmount, promoCode: appliedPromo||null,
-        shippingCost, total: orderTotal, paymentMethod: form.paymentMethod, status:'pending',
-      });
-      clearCart();
-      router.push(`/order-confirmation?id=${orderId}`);
-    } catch (err) {
-      console.error('Order failed:', err);
-      alert('Something went wrong. Please try again.');
-      setLoading(false);
+
+    const sendConfirmationEmail = async (orderInfo) => {
+      if (!orderInfo.customer.email) return; // Only send if email provided
+      try {
+        await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: orderInfo.customer.email,
+            subject: `Order Confirmation - Bgiya Bliss #${orderInfo.orderId}`,
+            html: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+                <h1 style="color: #16a34a;">Thank you for your order!</h1>
+                <p>Hi ${orderInfo.customer.name.split(' ')[0]},</p>
+                <p>We've received your order <strong>#${orderInfo.orderId}</strong> and are getting it ready for you.</p>
+                
+                <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px;">Order Summary</h2>
+                ${orderInfo.items.map(item => `
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span>${item.quantity}x ${item.name}</span>
+                    <span>₹${item.price * item.quantity}</span>
+                  </div>
+                `).join('')}
+                
+                <div style="border-top: 1px solid #eee; margin-top: 20px; padding-top: 10px;">
+                  <div style="display: flex; justify-content: space-between;"><strong>Subtotal:</strong> <span>₹${orderInfo.subtotal}</span></div>
+                  ${orderInfo.discount > 0 ? `<div style="display: flex; justify-content: space-between; color: #16a34a;"><strong>Discount:</strong> <span>-₹${orderInfo.discount}</span></div>` : ''}
+                  <div style="display: flex; justify-content: space-between;"><strong>Shipping:</strong> <span>₹${orderInfo.shippingCost}</span></div>
+                  <div style="display: flex; justify-content: space-between; font-size: 18px; margin-top: 10px;"><strong>Total:</strong> <strong>₹${orderInfo.total}</strong></div>
+                </div>
+
+                <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-top: 30px;">Shipping Address</h2>
+                <p>${orderInfo.customer.name}<br/>
+                ${orderInfo.shipping.address1}<br/>
+                ${orderInfo.shipping.address2 ? orderInfo.shipping.address2 + '<br/>' : ''}
+                ${orderInfo.shipping.city}, ${orderInfo.shipping.state} ${orderInfo.shipping.pincode}</p>
+
+                <p style="margin-top: 40px; font-size: 14px; color: #666;">If you have any questions, reply to this email or contact us at bgiyabliss73@gmail.com.</p>
+              </div>
+            `
+          })
+        });
+      } catch (e) {
+        console.error('Failed to send email:', e);
+      }
+    };
+
+    const orderId = `BB-${Date.now()}`;
+    const orderData = {
+      orderId,
+      customer: { name: `${form.name.trim()} ${form.lastName.trim()}`.trim(), phone: form.phone.trim(), email: form.email.trim() },
+      shipping: { address1: form.address1.trim(), address2: form.address2.trim(), city: form.city.trim(), state: form.state, pincode: form.pincode.trim() },
+      items: cartItems.map(item => ({ id:item.id, name:item.name, slug:item.slug, quantity:item.quantity, price:item.salePrice||0, image:item.image||item.images?.[0]||'' })),
+      subtotal: cartSubtotal, discount: discountAmount, promoCode: appliedPromo?.code || null,
+      shippingCost, total: orderTotal, paymentMethod: form.paymentMethod, status: 'pending',
+    };
+
+    if (saveInfo) {
+      localStorage.setItem('bgiyaBlissCheckoutInfo', JSON.stringify({
+        name: form.name, lastName: form.lastName, phone: form.phone, email: form.email,
+        address1: form.address1, address2: form.address2, city: form.city, state: form.state, pincode: form.pincode
+      }));
+    } else {
+      localStorage.removeItem('bgiyaBlissCheckoutInfo');
+    }
+
+    if (form.paymentMethod === 'cod') {
+      try {
+        await createOrder(orderData);
+        clearCart();
+        await sendConfirmationEmail(orderData);
+        router.push(`/order-confirmation?id=${orderId}`);
+      } catch (err) {
+        console.error('Order failed:', err);
+        alert('Something went wrong. Please try again.');
+        setLoading(false);
+      }
+    } else {
+      // Prepaid - Razorpay Flow
+      const isLoaded = await loadRazorpay();
+      if (!isLoaded) {
+        alert('Razorpay SDK failed to load. Are you online?');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Create order on our backend
+        const res = await fetch('/api/razorpay', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: orderTotal })
+        });
+        const rzpayOrder = await res.json();
+        
+        if (!res.ok) throw new Error(rzpayOrder.error || 'Failed to create Razorpay order');
+
+        const options = {
+          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'YOUR_RAZORPAY_KEY_ID',
+          amount: rzpayOrder.amount,
+          currency: rzpayOrder.currency,
+          name: 'Bgiya Bliss',
+          description: 'Premium Plant Store Purchase',
+          image: '/logo.png',
+          order_id: rzpayOrder.id,
+          handler: async function (response) {
+            // Success handler
+            try {
+              orderData.paymentStatus = 'paid';
+              orderData.razorpayPaymentId = response.razorpay_payment_id;
+              await createOrder(orderData);
+              clearCart();
+              await sendConfirmationEmail(orderData);
+              router.push(`/order-confirmation?id=${orderId}`);
+            } catch (err) {
+              console.error('Failed to save order to Firestore:', err);
+              alert('Payment was successful but order saving failed. Please contact support.');
+            }
+          },
+          prefill: {
+            name: orderData.customer.name,
+            email: orderData.customer.email,
+            contact: orderData.customer.phone
+          },
+          theme: {
+            color: '#16a34a'
+          },
+          modal: {
+            ondismiss: function() {
+              setLoading(false);
+            }
+          }
+        };
+
+        const paymentObject = new window.Razorpay(options);
+        paymentObject.on('payment.failed', function (response) {
+          alert(`Payment failed: ${response.error.description}`);
+          setLoading(false);
+        });
+        paymentObject.open();
+      } catch (err) {
+        console.error('Razorpay Error:', err);
+        alert('Could not initialize payment. Please check your console.');
+        setLoading(false);
+      }
     }
   };
 
-  const handleApplyPromo = () => {
+  const handleApplyPromo = async () => {
+    if (!promoInput.trim()) return;
+    setPromoMsg('');
     const code = promoInput.trim().toUpperCase();
-    if (code === 'BLISS20' && cartSubtotal >= 1099) {
-      setAppliedPromo('BLISS20'); setPromoMsg(''); setPromoInput('');
-    } else if (code === 'BLISS20') {
-      setPromoMsg('Min. cart value ₹1099 required for BLISS20');
-    } else if (code === 'BLISS10') {
-      setAppliedPromo('BLISS10'); setPromoMsg(''); setPromoInput('');
+    const promo = await getPromoCode(code);
+    
+    if (promo && promo.active !== false) {
+      if (cartSubtotal >= (promo.minOrderValue || 0)) {
+        setAppliedPromo(promo);
+        setPromoMsg('');
+        setPromoInput('');
+      } else {
+        setPromoMsg(`Min. cart value ₹${promo.minOrderValue} required for ${code}`);
+      }
     } else {
-      setPromoMsg('Invalid discount code');
+      setPromoMsg('Invalid or expired discount code');
     }
   };
 
@@ -194,6 +366,19 @@ export default function CheckoutPage() {
               </div>
               <FloatField label="PIN code *" value={form.pincode} onChange={v=>u('pincode',v)} maxLength={6} half error={errors.pincode} />
             </div>
+            
+            <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <input 
+                type="checkbox" 
+                id="saveInfo" 
+                checked={saveInfo}
+                onChange={(e) => setSaveInfo(e.target.checked)}
+                style={{ width: 16, height: 16, accentColor: '#16a34a', cursor: 'pointer' }}
+              />
+              <label htmlFor="saveInfo" style={{ fontSize: 14, color: '#4b5563', cursor: 'pointer' }}>
+                Save this information for next time
+              </label>
+            </div>
           </div>
 
           {/* Shipping Method */}
@@ -268,7 +453,7 @@ export default function CheckoutPage() {
             <div style={{ background:'#fff7ed', border:'1px solid #fed7aa', borderRadius:6, padding:'12px 16px', marginBottom:16 }}>
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
                 <span style={{ fontSize:14, fontWeight:600, display:'flex', alignItems:'center', gap:6 }}>
-                  🏷️ {appliedPromo} — Get {appliedPromo==='BLISS20'?'20':'10'}% OFF
+                  🏷️ {appliedPromo.code} — Get {appliedPromo.discountType === 'percent' ? `${appliedPromo.discountValue}%` : `₹${appliedPromo.discountValue}`} OFF
                 </span>
                 <button onClick={()=>{setAppliedPromo(null);setPromoInput('');}} style={{ fontSize:12, color:'#16a34a', fontWeight:600, border:'1px solid #16a34a', borderRadius:4, padding:'3px 10px', background:'#fff', cursor:'pointer' }}>Remove</button>
               </div>

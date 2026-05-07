@@ -2,14 +2,16 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import styles from './HeroBanner.module.css';
+import { getStoreSettings } from '@/lib/firestore';
 
-const banners = [
+const defaultBanners = [
   { id: 1, image: '/banners/banner1.jpeg', alt: 'Bgiya Bliss - Strong Soil, Healthy Plants' },
   { id: 2, image: '/banners/banner2.jpeg', alt: 'Bgiya Bliss - Premium Plant Care' },
   { id: 3, image: '/banners/banner3.jpeg', alt: 'Bgiya Bliss - Organic Products' },
 ];
 
 export default function HeroBanner() {
+  const [banners, setBanners] = useState(defaultBanners);
   const [current, setCurrent] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const timerRef = useRef(null);
@@ -30,6 +32,22 @@ export default function HeroBanner() {
   const prev = useCallback(() => {
     goTo((current - 1 + banners.length) % banners.length);
   }, [current, goTo]);
+
+  // Fetch dynamic banners
+  useEffect(() => {
+    async function fetchBanners() {
+      const settings = await getStoreSettings();
+      if (settings?.heroBanners?.length > 0) {
+        const dynamicBanners = settings.heroBanners.map((url, i) => ({
+          id: i + 1,
+          image: url,
+          alt: `Bgiya Bliss Hero ${i + 1}`
+        }));
+        setBanners(dynamicBanners);
+      }
+    }
+    fetchBanners();
+  }, []);
 
   // Auto-scroll
   useEffect(() => {

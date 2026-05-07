@@ -1,8 +1,41 @@
 'use client';
+import { useState, useEffect } from 'react';
 import { Gift, Crown, ArrowRight, Sparkles, Leaf, Star, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getStoreSettings } from '@/lib/firestore';
 
 export default function PromoBanners() {
+  const [banners, setBanners] = useState({
+    left: {
+      title: 'Plant Subscriptions',
+      description: 'Fresh plants delivered monthly. Starting at just',
+      price: '₹499',
+      buttonText: 'Subscribe Now',
+      link: '/pages/subscriptions',
+      badge: 'Monthly Subscription'
+    },
+    right: {
+      title: 'Plant Parent Rewards',
+      description: 'Earn points, unlock VIP discounts & claim free plants!',
+      buttonText: 'Join Now',
+      link: '/pages/rewards',
+      badge: 'VIP Program'
+    }
+  });
+
+  useEffect(() => {
+    async function loadSettings() {
+      const settings = await getStoreSettings();
+      if (settings?.promoBanners) {
+        setBanners({
+          left: settings.promoBanners.left || banners.left,
+          right: settings.promoBanners.right || banners.right
+        });
+      }
+    }
+    loadSettings();
+  }, []);
+
   return (
     <section className="py-10 md:py-16 overflow-hidden" style={{ background: 'var(--color-off-white)' }}>
       <div className="container mx-auto px-4 md:px-8 max-w-[1400px]">
@@ -10,7 +43,7 @@ export default function PromoBanners() {
 
           {/* Subscription Banner */}
           <motion.a
-            href="/pages/subscriptions"
+            href={banners.left.link}
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-50px' }}
@@ -18,14 +51,20 @@ export default function PromoBanners() {
             className="group relative block rounded-3xl overflow-hidden"
             style={{ minHeight: '320px' }}
           >
-            {/* Animated gradient background */}
-            <div
-              className="absolute inset-0 transition-all duration-700 ease-out"
-              style={{
-                background: 'linear-gradient(135deg, #0d4f3c 0%, #145c46 25%, #1a7a5a 50%, #0f6b4d 75%, #0a3d2e 100%)',
-                backgroundSize: '200% 200%',
-              }}
-            />
+            {banners.left.imageUrl ? (
+              <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                style={{ backgroundImage: `url(${banners.left.imageUrl})` }}
+              />
+            ) : (
+              <div
+                className="absolute inset-0 transition-all duration-700 ease-out"
+                style={{
+                  background: 'linear-gradient(135deg, #0d4f3c 0%, #145c46 25%, #1a7a5a 50%, #0f6b4d 75%, #0a3d2e 100%)',
+                  backgroundSize: '200% 200%',
+                }}
+              />
+            )}
 
             {/* Decorative pattern overlay */}
             <div className="absolute inset-0 opacity-[0.06]" style={{
@@ -41,59 +80,62 @@ export default function PromoBanners() {
               style={{ background: 'radial-gradient(circle, #a7f3d0 0%, transparent 60%)' }} />
 
             {/* Content */}
-            <div className="relative z-10 p-8 md:p-10 flex flex-col justify-between h-full" style={{ minHeight: '320px' }}>
-              {/* Top section */}
-              <div>
-                {/* Badge */}
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 text-xs font-semibold tracking-wider uppercase"
-                  style={{
-                    background: 'rgba(255,255,255,0.12)',
-                    backdropFilter: 'blur(12px)',
-                    border: '1px solid rgba(255,255,255,0.15)',
-                    color: '#a7f3d0',
-                  }}>
-                  <Sparkles size={13} />
-                  Monthly Subscription
+            {!banners.left.imageUrl && (
+              <div className="relative z-10 p-8 md:p-10 flex flex-col justify-between h-full" style={{ minHeight: '320px' }}>
+                {/* Top section */}
+                <div>
+                  {/* Badge */}
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 text-xs font-semibold tracking-wider uppercase"
+                    style={{
+                      background: 'rgba(255,255,255,0.12)',
+                      backdropFilter: 'blur(12px)',
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      color: '#a7f3d0',
+                    }}>
+                    <Sparkles size={13} />
+                    {banners.left.badge}
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="text-3xl md:text-4xl font-bold text-white mb-3 leading-[1.15] tracking-tight whitespace-pre-line"
+                    style={{ fontFamily: 'var(--font-heading)' }}>
+                    {banners.left.title.replace(' ', '\n')}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-base md:text-lg mb-2 leading-relaxed max-w-xs"
+                    style={{ color: 'rgba(167, 243, 208, 0.8)' }}>
+                    {banners.left.description}
+                  </p>
+
+                  {/* Price tag */}
+                  {banners.left.price && (
+                    <div className="flex items-baseline gap-1 mb-6">
+                      <span className="text-3xl md:text-4xl font-extrabold text-white">{banners.left.price}</span>
+                    </div>
+                  )}
                 </div>
 
-                {/* Title */}
-                <h3 className="text-3xl md:text-4xl font-bold text-white mb-3 leading-[1.15] tracking-tight"
-                  style={{ fontFamily: 'var(--font-heading)' }}>
-                  Plant<br />Subscriptions
-                </h3>
+                {/* Bottom section */}
+                <div className="flex items-center justify-between">
+                  {/* CTA Button */}
+                  <span className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all duration-300 group-hover:gap-3 group-hover:shadow-lg"
+                    style={{
+                      background: 'linear-gradient(135deg, #4ade80, #22c55e)',
+                      color: '#052e16',
+                      boxShadow: '0 4px 15px rgba(34,197,94,0.25)',
+                    }}>
+                    {banners.left.buttonText} <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
+                  </span>
 
-                {/* Description */}
-                <p className="text-base md:text-lg mb-2 leading-relaxed max-w-xs"
-                  style={{ color: 'rgba(167, 243, 208, 0.8)' }}>
-                  Fresh plants delivered monthly. Starting at just
-                </p>
-
-                {/* Price tag */}
-                <div className="flex items-baseline gap-1 mb-6">
-                  <span className="text-3xl md:text-4xl font-extrabold text-white">₹499</span>
-                  <span className="text-sm font-medium" style={{ color: 'rgba(167,243,208,0.7)' }}>/month</span>
+                  {/* Floating icons */}
+                  <div className="hidden md:flex items-center gap-3 opacity-40 group-hover:opacity-60 transition-opacity duration-500">
+                    <Leaf size={20} className="text-emerald-300" />
+                    <Gift size={18} className="text-emerald-200" />
+                  </div>
                 </div>
               </div>
-
-              {/* Bottom section */}
-              <div className="flex items-center justify-between">
-                {/* CTA Button */}
-                <span className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all duration-300 group-hover:gap-3 group-hover:shadow-lg"
-                  style={{
-                    background: 'linear-gradient(135deg, #4ade80, #22c55e)',
-                    color: '#052e16',
-                    boxShadow: '0 4px 15px rgba(34,197,94,0.25)',
-                  }}>
-                  Subscribe Now <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
-                </span>
-
-                {/* Floating icons */}
-                <div className="hidden md:flex items-center gap-3 opacity-40 group-hover:opacity-60 transition-opacity duration-500">
-                  <Leaf size={20} className="text-emerald-300" />
-                  <Gift size={18} className="text-emerald-200" />
-                </div>
-              </div>
-            </div>
+            )}
 
             {/* Hover border glow */}
             <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
@@ -102,7 +144,7 @@ export default function PromoBanners() {
 
           {/* Rewards Banner */}
           <motion.a
-            href="/pages/rewards"
+            href={banners.right.link}
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-50px' }}
@@ -110,14 +152,20 @@ export default function PromoBanners() {
             className="group relative block rounded-3xl overflow-hidden"
             style={{ minHeight: '320px' }}
           >
-            {/* Animated gradient background */}
-            <div
-              className="absolute inset-0 transition-all duration-700 ease-out"
-              style={{
-                background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 25%, #4338ca 50%, #3730a3 75%, #1e1b4b 100%)',
-                backgroundSize: '200% 200%',
-              }}
-            />
+            {banners.right.imageUrl ? (
+              <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                style={{ backgroundImage: `url(${banners.right.imageUrl})` }}
+              />
+            ) : (
+              <div
+                className="absolute inset-0 transition-all duration-700 ease-out"
+                style={{
+                  background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 25%, #4338ca 50%, #3730a3 75%, #1e1b4b 100%)',
+                  backgroundSize: '200% 200%',
+                }}
+              />
+            )}
 
             {/* Decorative pattern overlay */}
             <div className="absolute inset-0 opacity-[0.05]" style={{
@@ -136,70 +184,72 @@ export default function PromoBanners() {
             </div>
 
             {/* Content */}
-            <div className="relative z-10 p-8 md:p-10 flex flex-col justify-between h-full" style={{ minHeight: '320px' }}>
-              {/* Top section */}
-              <div>
-                {/* Badge */}
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 text-xs font-semibold tracking-wider uppercase"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(251,191,36,0.2), rgba(245,158,11,0.15))',
-                    backdropFilter: 'blur(12px)',
-                    border: '1px solid rgba(251,191,36,0.25)',
-                    color: '#fcd34d',
-                  }}>
-                  <Crown size={13} />
-                  VIP Program
+            {!banners.right.imageUrl && (
+              <div className="relative z-10 p-8 md:p-10 flex flex-col justify-between h-full" style={{ minHeight: '320px' }}>
+                {/* Top section */}
+                <div>
+                  {/* Badge */}
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 text-xs font-semibold tracking-wider uppercase"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(251,191,36,0.2), rgba(245,158,11,0.15))',
+                      backdropFilter: 'blur(12px)',
+                      border: '1px solid rgba(251,191,36,0.25)',
+                      color: '#fcd34d',
+                    }}>
+                    <Crown size={13} />
+                    {banners.right.badge}
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="text-3xl md:text-4xl font-bold text-white mb-3 leading-[1.15] tracking-tight whitespace-pre-line"
+                    style={{ fontFamily: 'var(--font-heading)' }}>
+                    {banners.right.title.replace(' ', '\n')}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-base md:text-lg mb-4 leading-relaxed max-w-xs"
+                    style={{ color: 'rgba(196, 181, 253, 0.85)' }}>
+                    {banners.right.description}
+                  </p>
+
+                  {/* Reward tiers */}
+                  <div className="flex items-center gap-3 mb-6">
+                    {['Bronze', 'Silver', 'Gold'].map((tier, i) => (
+                      <div key={tier} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium"
+                        style={{
+                          background: i === 2
+                            ? 'linear-gradient(135deg, rgba(251,191,36,0.25), rgba(245,158,11,0.2))'
+                            : 'rgba(255,255,255,0.08)',
+                          color: i === 2 ? '#fcd34d' : 'rgba(196,181,253,0.7)',
+                          border: i === 2 ? '1px solid rgba(251,191,36,0.3)' : '1px solid rgba(255,255,255,0.08)',
+                        }}>
+                        {i === 2 && <Zap size={10} />}
+                        {tier}
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
-                {/* Title */}
-                <h3 className="text-3xl md:text-4xl font-bold text-white mb-3 leading-[1.15] tracking-tight"
-                  style={{ fontFamily: 'var(--font-heading)' }}>
-                  Plant Parent<br />Rewards
-                </h3>
+                {/* Bottom section */}
+                <div className="flex items-center justify-between">
+                  {/* CTA Button */}
+                  <span className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all duration-300 group-hover:gap-3 group-hover:shadow-lg"
+                    style={{
+                      background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+                      color: '#451a03',
+                      boxShadow: '0 4px 15px rgba(245,158,11,0.25)',
+                    }}>
+                    {banners.right.buttonText} <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
+                  </span>
 
-                {/* Description */}
-                <p className="text-base md:text-lg mb-4 leading-relaxed max-w-xs"
-                  style={{ color: 'rgba(196, 181, 253, 0.85)' }}>
-                  Earn points, unlock VIP discounts & claim free plants!
-                </p>
-
-                {/* Reward tiers */}
-                <div className="flex items-center gap-3 mb-6">
-                  {['Bronze', 'Silver', 'Gold'].map((tier, i) => (
-                    <div key={tier} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium"
-                      style={{
-                        background: i === 2
-                          ? 'linear-gradient(135deg, rgba(251,191,36,0.25), rgba(245,158,11,0.2))'
-                          : 'rgba(255,255,255,0.08)',
-                        color: i === 2 ? '#fcd34d' : 'rgba(196,181,253,0.7)',
-                        border: i === 2 ? '1px solid rgba(251,191,36,0.3)' : '1px solid rgba(255,255,255,0.08)',
-                      }}>
-                      {i === 2 && <Zap size={10} />}
-                      {tier}
-                    </div>
-                  ))}
+                  {/* Points hint */}
+                  <div className="hidden md:flex items-center gap-2 text-xs font-medium" style={{ color: 'rgba(196,181,253,0.5)' }}>
+                    <Star size={14} fill="currentColor" />
+                    Earn 2x points this week
+                  </div>
                 </div>
               </div>
-
-              {/* Bottom section */}
-              <div className="flex items-center justify-between">
-                {/* CTA Button */}
-                <span className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all duration-300 group-hover:gap-3 group-hover:shadow-lg"
-                  style={{
-                    background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
-                    color: '#451a03',
-                    boxShadow: '0 4px 15px rgba(245,158,11,0.25)',
-                  }}>
-                  Join Now <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
-                </span>
-
-                {/* Points hint */}
-                <div className="hidden md:flex items-center gap-2 text-xs font-medium" style={{ color: 'rgba(196,181,253,0.5)' }}>
-                  <Star size={14} fill="currentColor" />
-                  Earn 2x points this week
-                </div>
-              </div>
-            </div>
+            )}
 
             {/* Hover border glow */}
             <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"

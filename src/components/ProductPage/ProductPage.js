@@ -7,6 +7,8 @@ import styles from './ProductPage.module.css';
 import ProductCarousel from '@/components/ProductCarousel/ProductCarousel';
 import TrustBar from '@/components/TrustBar/TrustBar';
 import { useCart } from '@/context/CartContext';
+import { useWishlist } from '@/context/WishlistContext';
+import { getReviews, addReview } from '@/lib/firestore';
 
 // Emoji icons for spec keys — matching OrganicBazar exactly
 const specEmojis = {
@@ -58,12 +60,16 @@ export default function ProductDetailPage({ product, relatedProducts }) {
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [activeTab, setActiveTab] = useState('description');
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [wishlist, setWishlist] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewForm, setReviewForm] = useState({ name: '', rating: 5, title: '', body: '' });
   const [stickyVisible, setStickyVisible] = useState(false);
+  const [fetchedReviews, setFetchedReviews] = useState([]);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const { addToCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
   const addToCartRef = useRef(null);
+
+  const isWished = isInWishlist(product.id);
 
   const gallery = (product.gallery || product.images || [product.image]).filter(img => img && img.trim() !== '');
   if (gallery.length === 0) gallery.push('/product-plants.png');
@@ -91,8 +97,38 @@ export default function ProductDetailPage({ product, relatedProducts }) {
     return () => obs.disconnect();
   }, []);
 
-  const reviews = product.reviews_data || sampleReviews;
-  const totalReviews = product.reviews || reviews.length;
+  useEffect(() => {
+    const loadReviews = async () => {
+      const data = await getReviews(product.id);
+      if (data && data.length > 0) {
+        setFetchedReviews(data);
+      }
+    };
+    if (product.id) loadReviews();
+  }, [product.id]);
+
+  const handleSubmitReview = async () => {
+    if (!reviewForm.name || !reviewForm.body) {
+      alert("Please enter your name and review.");
+      return;
+    }
+    setIsSubmittingReview(true);
+    try {
+      const newReview = { ...reviewForm, verified: true, date: 'Just now' };
+      const id = await addReview(product.id, newReview);
+      setFetchedReviews([{ id, ...newReview }, ...fetchedReviews]);
+      setShowReviewModal(false);
+      setReviewForm({ name: '', rating: 5, title: '', body: '' });
+    } catch (err) {
+      console.error(err);
+      alert("Failed to submit review.");
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
+  const reviews = fetchedReviews.length > 0 ? fetchedReviews : (product.reviews_data || sampleReviews);
+  const totalReviews = fetchedReviews.length > 0 ? fetchedReviews.length : (product.reviews || reviews.length);
   const avgRating = product.rating || (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length);
   const ratingDist = [5, 4, 3, 2, 1].map(star => ({
     star, count: reviews.filter(r => r.rating === star).length,
@@ -293,8 +329,8 @@ export default function ProductDetailPage({ product, relatedProducts }) {
               <button className={styles.btnAddCart} onClick={handleAddToCart}>
                 <ShoppingCart size={18} /> ADD TO CART
               </button>
-              <button className={`${styles.wishlistBtn} ${wishlist ? styles.wishlistActive : ''}`} onClick={() => setWishlist(!wishlist)}>
-                <Heart size={20} fill={wishlist ? '#ef4444' : 'none'} />
+              <button className={`${styles.wishlistBtn} ${isWished ? styles.wishlistActive : ''}`} onClick={() => toggleWishlist(product)}>
+                <Heart size={20} fill={isWished ? '#ef4444' : 'none'} />
               </button>
             </div>
           </div>
@@ -440,7 +476,9 @@ export default function ProductDetailPage({ product, relatedProducts }) {
             <div className={styles.reviewFormGroup}><label>Review</label><textarea placeholder="Tell us what you liked..." value={reviewForm.body} onChange={e => setReviewForm({ ...reviewForm, body: e.target.value })} /></div>
             <div className={styles.reviewModalActions}>
               <button className={styles.reviewCancelBtn} onClick={() => setShowReviewModal(false)}>Cancel</button>
-              <button className={styles.reviewSubmitBtn} onClick={() => { setShowReviewModal(false); setReviewForm({ name: '', rating: 5, title: '', body: '' }); }}>Submit Review</button>
+              <button className={styles.reviewSubmitBtn} onClick={handleSubmitReview} disabled={isSubmittingReview}>
+                {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
+              </button>
             </div>
           </div>
         </div>

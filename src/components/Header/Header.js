@@ -5,6 +5,8 @@ import { Search, User, ShoppingBag, Heart, X, Menu, ChevronDown } from 'lucide-r
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
+import { useWishlist } from '@/context/WishlistContext';
+import { useAuth } from '@/context/AuthContext';
 import { bestsellers, newArrivals, plantBundles, ceramics } from '@/data/products';
 import { navLinks } from '@/data/categories';
 import { getActiveProducts } from '@/lib/firestore';
@@ -129,6 +131,8 @@ export default function Header() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const { cartCount, setIsCartOpen } = useCart();
+  const { wishlistCount } = useWishlist();
+  const { user } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -246,12 +250,15 @@ export default function Header() {
 
             {/* Action Icons — right */}
             <div className="flex items-center gap-3 flex-shrink-0 w-[260px] justify-end">
-              <button className="w-10 h-10 flex items-center justify-center rounded-full text-emerald-800/70 hover:text-emerald-800 hover:bg-emerald-50 transition-all duration-200" aria-label="Wishlist">
+              <a href="/wishlist" className="relative w-10 h-10 flex items-center justify-center rounded-full text-emerald-800/70 hover:text-emerald-800 hover:bg-emerald-50 transition-all duration-200" aria-label="Wishlist">
                 <Heart size={20} strokeWidth={1.5} />
-              </button>
-              <button className="w-10 h-10 flex items-center justify-center rounded-full text-emerald-800/70 hover:text-emerald-800 hover:bg-emerald-50 transition-all duration-200" aria-label="Account">
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-[18px] h-[18px] rounded-full bg-emerald-600 text-white text-[10px] font-bold flex items-center justify-center shadow-sm">{wishlistCount}</span>
+                )}
+              </a>
+              <a href="/account" className="w-10 h-10 flex items-center justify-center rounded-full text-emerald-800/70 hover:text-emerald-800 hover:bg-emerald-50 transition-all duration-200" aria-label="Account">
                 <User size={20} strokeWidth={1.5} />
-              </button>
+              </a>
               <button className="relative w-10 h-10 flex items-center justify-center rounded-full text-emerald-800/70 hover:text-emerald-800 hover:bg-emerald-50 transition-all duration-200" aria-label="Cart" onClick={() => setIsCartOpen(true)}>
                 <ShoppingBag size={20} strokeWidth={1.5} />
                 {cartCount > 0 && (
@@ -344,9 +351,12 @@ export default function Header() {
           </a>
 
           <div className="flex items-center gap-1">
-            <button className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-600" aria-label="Wishlist">
+            <a href="/wishlist" className="relative w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-600" aria-label="Wishlist">
               <Heart size={20} strokeWidth={1.5} />
-            </button>
+              {wishlistCount > 0 && (
+                <span className="absolute top-0 right-0 w-[16px] h-[16px] rounded-full bg-emerald-600 text-white text-[9px] font-bold flex items-center justify-center">{wishlistCount}</span>
+              )}
+            </a>
             <button className="relative w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-600" aria-label="Cart" onClick={() => setIsCartOpen(true)}>
               <ShoppingBag size={20} strokeWidth={1.5} />
               {cartCount > 0 && (

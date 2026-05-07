@@ -1,6 +1,7 @@
 import './globals.css';
 import { CartProvider } from '@/context/CartContext';
-
+import { AuthProvider } from '@/context/AuthContext';
+import { WishlistProvider } from '@/context/WishlistContext';
 export const metadata = {
   title: 'Bgiya Bliss | India\'s Premium Online Plant Store',
   description: 'Shop the best plants, seeds, pots & gardening products online at Bgiya Bliss. Flat 20% off on orders above ₹1099!',
@@ -14,9 +15,13 @@ export default function RootLayout({ children }) {
         <link rel="preload" href="/videos/hero-compressed.mp4" as="video" type="video/mp4" />
       </head>
       <body>
-        <CartProvider>
-          {children}
-        </CartProvider>
+        <AuthProvider>
+          <WishlistProvider>
+            <CartProvider>
+              {children}
+            </CartProvider>
+          </WishlistProvider>
+        </AuthProvider>
       </body>
     </html>
   );

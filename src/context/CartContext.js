@@ -64,10 +64,12 @@ export function CartProvider({ children }) {
   const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
 
   let discountAmount = 0;
-  if (appliedPromo === 'BLISS20' && cartSubtotal >= 1099) {
-    discountAmount = cartSubtotal * 0.20;
-  } else if (appliedPromo === 'BLISS10') {
-    discountAmount = cartSubtotal * 0.10;
+  if (appliedPromo && cartSubtotal >= (appliedPromo.minOrderValue || 0)) {
+    if (appliedPromo.discountType === 'percent') {
+      discountAmount = cartSubtotal * (appliedPromo.discountValue / 100);
+    } else {
+      discountAmount = appliedPromo.discountValue;
+    }
   }
   
   const cartTotal = cartSubtotal - discountAmount;

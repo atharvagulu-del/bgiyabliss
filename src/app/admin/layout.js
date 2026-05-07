@@ -14,6 +14,8 @@ export default function AdminLayout({ children }) {
 
   const isLoginPage = pathname === '/admin/login';
 
+  const ADMIN_EMAIL = 'bgiyabliss73@gmail.com';
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -21,6 +23,9 @@ export default function AdminLayout({ children }) {
 
       if (!currentUser && !isLoginPage) {
         router.push('/admin/login');
+      } else if (currentUser && currentUser.email !== ADMIN_EMAIL && !isLoginPage) {
+        alert("Access Denied: You do not have admin privileges.");
+        router.push('/');
       }
     });
 
@@ -41,8 +46,8 @@ export default function AdminLayout({ children }) {
     return <div className="adminBody">{children}</div>;
   }
 
-  // Not logged in — will redirect via useEffect
-  if (!user) {
+  // Not logged in or not admin — will redirect via useEffect
+  if (!user || (user && user.email !== ADMIN_EMAIL)) {
     return (
       <div className="adminBody" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div className="adminSpinner"></div>

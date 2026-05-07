@@ -92,7 +92,7 @@ export default function Footer() {
               <ul className={styles.contactList}>
                 <li>
                   <Phone size={16} />
-                  <span>+91 98765 43210</span>
+                  <span>+91 77379 76414</span>
                 </li>
                 <li>
                   <Mail size={16} />

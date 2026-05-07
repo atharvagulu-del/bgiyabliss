@@ -1,8 +1,9 @@
 'use client';
 import { useState } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { Leaf, Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react';
+import GoogleAuthButton from '@/components/GoogleAuthButton/GoogleAuthButton';
 import styles from './page.module.css';
 
 export default function AdminLogin() {
@@ -10,6 +11,10 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const handleGoogleSuccess = () => {
+    window.location.href = '/admin';
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -51,6 +56,16 @@ export default function AdminLogin() {
             <span>{error}</span>
           </div>
         )}
+
+        <div style={{ marginBottom: '20px' }}>
+          <GoogleAuthButton onSuccess={handleGoogleSuccess} text="Sign in with Google" />
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', margin: '20px 0', color: '#9ca3af', fontSize: '14px' }}>
+          <div style={{ flex: 1, height: '1px', backgroundColor: '#e5e7eb' }}></div>
+          <span style={{ margin: '0 10px' }}>or use email</span>
+          <div style={{ flex: 1, height: '1px', backgroundColor: '#e5e7eb' }}></div>
+        </div>
 
         <form onSubmit={handleLogin} className={styles.form}>
           <div className={styles.field}>

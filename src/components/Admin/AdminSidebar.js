@@ -1,7 +1,7 @@
 'use client';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, Leaf, ChevronRight, Plus, ExternalLink } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, Leaf, ChevronRight, Plus, ExternalLink, Tag } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import styles from './AdminSidebar.module.css';
@@ -10,6 +10,7 @@ const menuItems = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { label: 'Products', href: '/admin/products', icon: Package },
   { label: 'Orders', href: '/admin/orders', icon: ShoppingCart },
+  { label: 'Promo Codes', href: '/admin/promos', icon: Tag },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 

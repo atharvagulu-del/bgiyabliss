@@ -1,20 +1,34 @@
 'use client';
+import { useEffect, useState } from 'react';
 import styles from './AnnouncementBar.module.css';
+import { getStoreSettings } from '@/lib/firestore';
 
-const messages = [
+const defaultMessages = [
   '🎉 Flat 20% Off on Orders Above ₹1099 | Use: BLISS20',
   '⚡ Flat 10% Off on Your First Order | Use: BLISS10',
   '🌿 Premium Organic Potting Mix starting ₹249!',
   '🌱 100% Organic | Made in India',
-  '🎉 Flat 20% Off on Orders Above ₹1099 | Use: BLISS20',
-  '⚡ Flat 10% Off on Your First Order | Use: BLISS10',
 ];
 
 export default function AnnouncementBar() {
+  const [messages, setMessages] = useState(defaultMessages);
+
+  useEffect(() => {
+    async function loadSettings() {
+      const settings = await getStoreSettings();
+      if (settings?.announcementMessages?.length > 0) {
+        setMessages(settings.announcementMessages);
+      }
+    }
+    loadSettings();
+  }, []);
+
+  const displayMessages = [...messages, ...messages];
+
   return (
     <div className={styles.bar}>
       <div className={styles.track}>
-        {[...messages, ...messages].map((msg, i) => (
+        {displayMessages.map((msg, i) => (
           <a key={i} href="/collections/offers" className={styles.message}>
             {msg}
           </a>

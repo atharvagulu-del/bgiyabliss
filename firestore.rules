@@ -2,16 +2,45 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Products — anyone can read, only authenticated admin can write
-    match /products/{productId} {
-      allow read: if true;
-      allow write: if true;
+    
+    // Admin check function
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'bgiyabliss73@gmail.com';
     }
 
-    // Orders — anyone can create (checkout), only admin can read/update
+    // Products & Collections: Anyone can read, only admin can write
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /collections/{collectionId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Promo Codes: Anyone can read, only admin can write
+    match /promos/{promoId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Orders: Users can create, but only read their own. Admins can read/write all.
     match /orders/{orderId} {
-      allow create: if true;
-      allow read, update, delete: if true;
+      allow create: if true; // Allow guest checkouts to create an order
+      allow read: if isAdmin() || (request.auth != null && request.auth.uid == resource.data.userId);
+      allow update, delete: if isAdmin();
+    }
+
+    // Settings (Banners, etc.): Anyone can read, only admin can write
+    match /settings/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Fallback block to ensure no other paths are open
+    match /{document=**} {
+      allow read, write: if isAdmin();
     }
   }
 }
