@@ -8,7 +8,9 @@ import { Loader2 } from 'lucide-react';
 import GoogleAuthButton from '@/components/GoogleAuthButton/GoogleAuthButton';
 import styles from './page.module.css';
 
-export default function LoginPage() {
+import { Suspense } from 'react';
+
+function LoginContent() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -121,5 +123,17 @@ export default function LoginPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ height: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Loader2 className="animate-spin" color="#16a34a" size={32} />
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }
