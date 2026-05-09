@@ -79,10 +79,18 @@ export default function Page() {
 
   if (notFound || !product) {
     return (
-      <div className="container section" style={{ textAlign: 'center' }}>
-        <h1 className="section-title">Product Not Found</h1>
-        <p style={{ color: 'var(--color-gray-600)' }}>This product does not exist.</p>
-        <a href="/" className="btn btn--primary" style={{ marginTop: 24, display: 'inline-flex' }}>Go Home</a>
+      <div className="container section" style={{ textAlign: 'center', padding: '100px 20px', minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ background: '#f0fdf4', width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
+          <span style={{ fontSize: '36px' }}>🌱</span>
+        </div>
+        <h1 className="section-title" style={{ fontSize: '2.5rem', color: '#166534', marginBottom: '16px' }}>Coming Soon</h1>
+        <p style={{ color: '#475569', fontSize: '1.1rem', maxWidth: '500px', marginBottom: '32px', lineHeight: 1.6 }}>
+          We are currently preparing this product for our online store. It will be available very soon! In the meantime, please check out our other exciting products.
+        </p>
+        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <a href="/collections/all" className="btn btn--primary" style={{ padding: '12px 28px', borderRadius: '8px', background: '#16a34a', color: '#fff', textDecoration: 'none', fontWeight: 600, border: 'none', cursor: 'pointer' }}>Explore All Products</a>
+          <a href="/" className="btn" style={{ padding: '12px 28px', borderRadius: '8px', background: '#f1f5f9', color: '#334155', textDecoration: 'none', fontWeight: 600, border: '1px solid #e2e8f0' }}>Go to Homepage</a>
+        </div>
       </div>
     );
   }

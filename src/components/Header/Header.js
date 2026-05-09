@@ -86,23 +86,31 @@ function MobileMenuDrawer({ navLinks, onClose }) {
               </div>
 
               {/* Expandable sub-menu */}
-              {link.megaMenu && openIdx === idx && (
-                <div style={{ padding: '0 20px 14px 32px', background: '#fafafa' }}>
-                  {link.megaMenu.map((col, colIdx) => (
-                    <div key={colIdx} style={{ marginTop: '10px' }}>
-                      <span style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#166534', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '6px' }}>{col.title}</span>
-                      {col.items.map((item, itemIdx) => (
-                        <a
-                          key={itemIdx}
-                          href={item.link}
-                          onClick={onClose}
-                          style={{ display: 'block', padding: '7px 0', fontSize: '14px', color: '#555', textDecoration: 'none' }}
-                        >
-                          {item.name}
-                        </a>
-                      ))}
-                    </div>
-                  ))}
+              {link.megaMenu && (
+                <div style={{ 
+                  maxHeight: openIdx === idx ? '800px' : '0',
+                  opacity: openIdx === idx ? 1 : 0,
+                  overflow: 'hidden',
+                  transition: 'all 0.35s ease-in-out',
+                  background: '#fafafa'
+                }}>
+                  <div style={{ padding: '4px 20px 14px 32px' }}>
+                    {link.megaMenu.map((col, colIdx) => (
+                      <div key={colIdx} style={{ marginTop: '10px' }}>
+                        <span style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#166534', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '6px' }}>{col.title}</span>
+                        {col.items.map((item, itemIdx) => (
+                          <a
+                            key={itemIdx}
+                            href={item.link}
+                            onClick={onClose}
+                            style={{ display: 'block', padding: '7px 0', fontSize: '14px', color: '#555', textDecoration: 'none' }}
+                          >
+                            {item.name}
+                          </a>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -321,16 +329,16 @@ export default function Header() {
       {/* ═══════ MOBILE HEADER — compact ═══════ */}
       <div className="md:hidden" style={{ background: '#fff', borderBottom: '2px solid #16a34a' }}>
         {/* Single row: Menu btn | logo | cart */}
-        <div className="flex items-center justify-between px-3 h-[60px]">
+        <div className="flex items-center justify-between px-3 h-[80px]">
           <button
             aria-label="Menu"
             onClick={() => setIsMobileMenuOpen(true)}
             style={{
-              padding: '5px 12px',
+              padding: '6px 14px',
               border: '1.5px solid #333',
               borderRadius: '4px',
               background: 'transparent',
-              fontSize: '12px',
+              fontSize: '13px',
               fontWeight: 600,
               color: '#333',
               letterSpacing: '0.5px',
@@ -340,7 +348,7 @@ export default function Header() {
             Menu
           </button>
 
-          <a href="/" className="relative h-[52px] w-[110px] mx-auto">
+          <a href="/" className="relative h-[72px] w-[190px] mx-auto">
             <Image
               src="/logo.png"
               alt="Bgiya Bliss"
