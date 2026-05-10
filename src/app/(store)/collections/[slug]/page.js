@@ -117,7 +117,10 @@ export default function CollectionPage() {
         } else if (slug === 'offers') {
           filtered = all.filter(p => (p.discount || 0) > 0 || (p.originalPrice > (p.salePrice || 0)));
         } else if (slug !== 'all') {
-          filtered = all.filter(p => p.category === slug);
+          filtered = all.filter(p => 
+            p.category === slug || 
+            (slug === 'potting-mix' && p.category === 'plants' && p.name.toLowerCase().includes('potting'))
+          );
         }
 
         // If no matches in that category, show all
