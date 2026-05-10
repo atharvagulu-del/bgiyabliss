@@ -12,16 +12,25 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import { db } from './firebase';
+import { bestsellers, newArrivals, plantBundles, ceramics } from '@/data/products';
 
 const PRODUCTS_COLLECTION = 'products';
-const FIRESTORE_TIMEOUT = 15000; // 15 second timeout — allows for multi-variant batch saves
+const FIRESTORE_TIMEOUT = 15000; // 15 second timeout
+
+const staticProducts = [...bestsellers, ...newArrivals, ...plantBundles, ...ceramics];
+
+function mergeWithStatic(firebaseProducts) {
+  const firebaseSlugs = new Set(firebaseProducts.map(p => p.slug));
+  const missingStatic = staticProducts.filter(p => !firebaseSlugs.has(p.slug));
+  return [...firebaseProducts, ...missingStatic];
+}
 
 // Helper: wrap any promise with a timeout so it never hangs forever
 function withTimeout(promise, ms = FIRESTORE_TIMEOUT) {
   return Promise.race([
     promise,
     new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Firestore operation timed out. Have you created the Firestore database in the Firebase Console?')), ms)
+      setTimeout(() => reject(new Error('Firestore operation timed out.')), ms)
     ),
   ]);
 }
@@ -42,22 +51,22 @@ export async function getAllProducts() {
 
 export async function getActiveProducts() {
   try {
-    // Try the compound query first (requires a composite index)
     const q = query(
       collection(db, PRODUCTS_COLLECTION),
       where('status', '==', 'active'),
       orderBy('createdAt', 'desc')
     );
     const snapshot = await withTimeout(getDocs(q));
-    return snapshot.docs.map((d) => ({
+    const products = snapshot.docs.map((d) => ({
       id: d.id,
       ...d.data(),
     }));
+    return mergeWithStatic(products);
   } catch (err) {
-    // If compound query fails (missing index), fall back to fetching all and filtering
     console.log('Compound query failed, falling back to client-side filter:', err.message);
     const allProducts = await getAllProducts();
-    return allProducts.filter(p => p.status === 'active');
+    const activeProducts = allProducts.filter(p => p.status === 'active');
+    return mergeWithStatic(activeProducts);
   }
 }
 
@@ -67,7 +76,11 @@ export async function getProductBySlug(slug) {
     where('slug', '==', slug)
   );
   const snapshot = await withTimeout(getDocs(q));
-  if (snapshot.empty) return null;
+  if (snapshot.empty) {
+    // Fallback to static
+    const staticFallback = staticProducts.find(p => p.slug === slug);
+    return staticFallback || null;
+  }
   const productDoc = snapshot.docs[0];
   return { id: productDoc.id, ...productDoc.data() };
 }
@@ -75,7 +88,11 @@ export async function getProductBySlug(slug) {
 export async function getProductById(id) {
   const docRef = doc(db, PRODUCTS_COLLECTION, id);
   const docSnap = await withTimeout(getDoc(docRef));
-  if (!docSnap.exists()) return null;
+  if (!docSnap.exists()) {
+    // Fallback to static
+    const staticFallback = staticProducts.find(p => p.id === id);
+    return staticFallback || null;
+  }
   return { id: docSnap.id, ...docSnap.data() };
 }
 
@@ -88,14 +105,22 @@ export async function getProductsByCategory(category) {
       orderBy('createdAt', 'desc')
     );
     const snapshot = await withTimeout(getDocs(q));
-    return snapshot.docs.map((d) => ({
+    const products = snapshot.docs.map((d) => ({
       id: d.id,
       ...d.data(),
     }));
+    const staticCategory = staticProducts.filter(p => p.category === category);
+    const firebaseSlugs = new Set(products.map(p => p.slug));
+    const missingStatic = staticCategory.filter(p => !firebaseSlugs.has(p.slug));
+    return [...products, ...missingStatic];
   } catch (err) {
     console.log('Category query failed, falling back:', err.message);
     const allProducts = await getAllProducts();
-    return allProducts.filter(p => p.category === category && p.status === 'active');
+    const activeProducts = allProducts.filter(p => p.category === category && p.status === 'active');
+    const staticCategory = staticProducts.filter(p => p.category === category);
+    const firebaseSlugs = new Set(activeProducts.map(p => p.slug));
+    const missingStatic = staticCategory.filter(p => !firebaseSlugs.has(p.slug));
+    return [...activeProducts, ...missingStatic];
   }
 }
 
@@ -107,14 +132,22 @@ export async function getProductsByFeatured(tag) {
       where('status', '==', 'active')
     );
     const snapshot = await withTimeout(getDocs(q));
-    return snapshot.docs.map((d) => ({
+    const products = snapshot.docs.map((d) => ({
       id: d.id,
       ...d.data(),
     }));
+    const staticCategory = staticProducts.filter(p => p.featured?.includes(tag));
+    const firebaseSlugs = new Set(products.map(p => p.slug));
+    const missingStatic = staticCategory.filter(p => !firebaseSlugs.has(p.slug));
+    return [...products, ...missingStatic];
   } catch (err) {
     console.log('Featured query failed, falling back:', err.message);
     const allProducts = await getAllProducts();
-    return allProducts.filter(p => p.featured?.includes(tag) && p.status === 'active');
+    const activeProducts = allProducts.filter(p => p.featured?.includes(tag) && p.status === 'active');
+    const staticCategory = staticProducts.filter(p => p.featured?.includes(tag));
+    const firebaseSlugs = new Set(activeProducts.map(p => p.slug));
+    const missingStatic = staticCategory.filter(p => !firebaseSlugs.has(p.slug));
+    return [...activeProducts, ...missingStatic];
   }
 }
 

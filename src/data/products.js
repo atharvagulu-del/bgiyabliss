@@ -3,6 +3,20 @@
 
 export const bestsellers = [
   {
+    id: 'static-bs-0',
+    name: '5-in-1 Soilless Potting Mix (10kg)',
+    slug: 'bgiya-bliss-5-in-1-potting-soil-mixture-ingredients-cocopeat-vermiculite-vermicompost-perlite-neem-powder-makes-10-kg-of-fluffy-soil-potting-soil-mix-for-plantssa',
+    category: 'potting-mix',
+    image: '/bgiya_product_potting_sack_1773167438775.png',
+    originalPrice: 899,
+    salePrice: 649,
+    rating: 4.9,
+    reviews: 342,
+    featured: ['bestseller'],
+    tags: ['organic', 'soil', 'potting mix', '5-in-1'],
+    status: 'active'
+  },
+  {
     id: 'static-bs-1',
     name: 'Premium Organic Potting Mix (5kg)',
     slug: 'premium-organic-potting-mix-5kg',
