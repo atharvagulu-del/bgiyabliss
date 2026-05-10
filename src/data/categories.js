@@ -6,20 +6,20 @@ export const navLinks = [
     link: '/collections/potting-mix',
     megaMenu: [
       {
-        title: 'By Type',
+        title: 'Potting Mixes',
         items: [
-          { name: '5-in-1 Potting Soil Mixture', link: '/products/bgiya-bliss-5-in-1-potting-soil-mixture-ingredients-cocopeat-vermiculite-vermicompost-perlite-neem-powder-makes-10-kg-of-fluffy-soil-potting-soil-mix-for-plantssa' },
-          { name: 'Premium Organic Potting Mix', link: '/products/bgiya-bliss-premium-organic-potting-mix-5kg-natural-soil-blend-with-cocopeat-perlite-mustard-cake-vermiculite-neem-cake-vermicompost-5kg-pack-of-1' },
-          { name: 'Rose Organic Potting Mix', link: '/products/rose-organic-potting-mix' },
+          { name: '5-in-1 Soilless Potting Mix', link: '/products/bgiya-bliss-5-in-1-potting-soil-mixture-ingredients-cocopeat-vermiculite-vermicompost-perlite-neem-powder-makes-10-kg-of-fluffy-soil-potting-soil-mix-for-plantssa' },
+          { name: 'Adenium Organic Potting Mix (1kg, 2kg)', link: '/products/coming-soon' },
+          { name: 'Cactus & Succulents Organic Mix (1kg, 2kg)', link: '/products/coming-soon' },
         ],
       },
       {
-        title: 'By Size',
+        title: 'Soil Amendments',
         items: [
-          { name: '1 Kg', link: '/products/bgiya-bliss-premium-organic-potting-mix-5kg-natural-soil-blend-with-cocopeat-perlite-mustard-cake-vermiculite-neem-cake-vermicompost-5kg-pack-of-1-1kg' },
-          { name: '2 Kg', link: '/products/bgiya-bliss-premium-organic-potting-mix-5kg-natural-soil-blend-with-cocopeat-perlite-mustard-cake-vermiculite-neem-cake-vermicompost-5kg-pack-of-1-2kg' },
-          { name: '5 Kg', link: '/products/bgiya-bliss-premium-organic-potting-mix-5kg-natural-soil-blend-with-cocopeat-perlite-mustard-cake-vermiculite-neem-cake-vermicompost-5kg-pack-of-1' },
-          { name: '10 Kg (Pack of 2)', link: '/products/bgiya-bliss-premium-organic-potting-mix-5kg-natural-soil-blend-with-cocopeat-perlite-mustard-cake-vermiculite-neem-cake-vermicompost-5kg-pack-of-1-5kg-pack-of-2' },
+          { name: 'Perlite (250gm)', link: '/products/coming-soon' },
+          { name: 'Vermiculite (500gm, 1kg)', link: '/products/coming-soon' },
+          { name: 'Cocopeat Blocks (1kg, 5kg)', link: '/products/premium-cocopeat-block-5kg' },
+          { name: 'Loose Cocopeat Powder (1kg)', link: '/products/coming-soon' },
         ],
       },
     ],
@@ -29,23 +29,17 @@ export const navLinks = [
     link: '/collections/fertilizers',
     megaMenu: [
       {
-        title: 'Neem Cake',
+        title: 'Organic Cakes',
         items: [
-          { name: 'Neem Cake Powder 1kg', link: '/products/bgiya-bliss-organic-neem-cake-powder-100-pure-natural-fertilizer-soil-conditioner-with-pest-control-5kg' },
-          { name: 'Neem Cake Powder 5kg', link: '/products/bgiya-bliss-organic-neem-cake-powder-100-pure-natural-fertilizer-soil-conditioner-with-pest-control-5kg-5kg' },
+          { name: 'Neem Cake Powder (1kg, 5kg)', link: '/products/bgiya-bliss-organic-neem-cake-powder-100-pure-natural-fertilizer-soil-conditioner-with-pest-control-5kg' },
+          { name: 'Mustard Cake Powder (1kg, 2kg)', link: '/products/mustard-cake-powder-1kg' },
         ],
       },
       {
-        title: 'Mustard Cake',
+        title: 'Manure & Compost',
         items: [
-          { name: 'Mustard Cake Powder 1kg', link: '/products/mustard-cake-powder-1kg' },
-        ],
-      },
-      {
-        title: 'Organic Manure',
-        items: [
-          { name: 'Organic Cow Manure', link: '/products/organic-cow-manure' },
-          { name: 'Vermicompost', link: '/products/vermicompost' },
+          { name: 'Vermicompost (1kg, 2kg, 5kg)', link: '/products/organic-vermicompost-5kg' },
+          { name: 'Cow Dung Manure (1kg, 2kg, 5kg)', link: '/products/coming-soon' },
         ],
       },
     ],
@@ -55,33 +49,20 @@ export const navLinks = [
     link: '/collections/boosters',
     megaMenu: [
       {
-        title: 'Plant Boosters',
+        title: 'Growth Promoters',
         items: [
-          { name: 'Epsom Salt', link: '/products/epsom-salt' },
-          { name: 'Organic Bio Potash Fertilizer', link: '/products/organic-bio-potash-fertilizer' },
-          { name: 'Bone Meal', link: '/products/bone-meal' },
-          { name: 'Humic Acid for Plants', link: '/products/humic-acid-for-plants' },
-          { name: 'NPK Fertilizer', link: '/products/npk-fertilizer' },
-        ],
-      },
-    ],
-  },
-  {
-    name: 'Seeds',
-    link: '/collections/seeds',
-    megaMenu: [
-      {
-        title: 'Vegetable Seeds',
-        items: [
-          { name: 'Winter Seeds', link: '/collections/seeds' },
-          { name: 'Summer Seeds', link: '/collections/seeds' },
+          { name: 'Humic Acid (450gm, 900gm)', link: '/products/coming-soon' },
+          { name: 'Epsom Salt (450gm, 900gm)', link: '/products/coming-soon' },
+          { name: 'Organic Bio Potash (450gm, 900gm)', link: '/products/coming-soon' },
+          { name: 'Seaweed Extract Granules (450gm, 900gm)', link: '/products/coming-soon' },
+          { name: 'Bone Meal Powder (450gm, 900gm)', link: '/products/coming-soon' },
         ],
       },
       {
-        title: 'Flowering',
+        title: 'NPK Fertilizers',
         items: [
-          { name: 'Flower Seeds', link: '/collections/seeds' },
-          { name: 'Flower Bulbs', link: '/collections/seeds' },
+          { name: 'NPK 19:19:19 (250gm, 400gm)', link: '/products/coming-soon' },
+          { name: 'NPK 00:52:34 (250gm, 400gm)', link: '/products/coming-soon' },
         ],
       },
     ],
@@ -93,11 +74,8 @@ export const navLinks = [
       {
         title: 'Gardening Tools',
         items: [
-          { name: 'Gardening Gloves', link: '/products/gardening-gloves' },
-          { name: 'Seedling Trays', link: '/products/seedling-trays' },
-          { name: 'Gardening Pruner', link: '/products/gardening-pruner' },
-          { name: 'Tools Kit', link: '/products/tools-kit' },
-          { name: 'Watering Can', link: '/products/watering-can' },
+          { name: 'Gardening Pruner', link: '/products/gardening-pruner-tool' },
+          { name: 'More Tools Coming Soon', link: '/products/coming-soon' },
         ],
       },
     ],
