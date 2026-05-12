@@ -450,16 +450,16 @@ export default function CheckoutPage() {
             <label onClick={() => u('paymentMethod', 'prepaid')} className="co-radio-row" style={{ borderBottom: '1px solid #e5e5e5', background: form.paymentMethod === 'prepaid' ? '#f0fdf4' : '#fafafa' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span className="co-radio">{form.paymentMethod === 'prepaid' && <span className="co-radio-dot" />}</span>
-                <span>Prepaid (UPI / Card) — <span style={{ color: '#16a34a', fontSize: 12 }}>Lower shipping</span></span>
+                <span>Prepaid (UPI / Card) — <span style={{ color: '#16a34a', fontSize: 12, fontWeight: 600 }}>Save ₹30</span></span>
               </div>
-              <span style={{ fontWeight: 600 }}>₹{shippingCost}</span>
+              <span style={{ fontWeight: 600 }}>₹54</span>
             </label>
             <label onClick={() => u('paymentMethod', 'cod')} className="co-radio-row" style={{ background: form.paymentMethod === 'cod' ? '#f0fdf4' : '#fafafa' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span className="co-radio">{form.paymentMethod === 'cod' && <span className="co-radio-dot" />}</span>
                 <span>Cash on Delivery</span>
               </div>
-              <span style={{ fontWeight: 600 }}>₹{shippingCost}</span>
+              <span style={{ fontWeight: 600 }}>₹84</span>
             </label>
           </div>
 

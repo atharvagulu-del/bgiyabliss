@@ -57,10 +57,10 @@ export default function ShippingPolicy() {
           <div className={styles.sectionBody}>
             <p>Shipping charges are calculated at checkout based on your delivery location, order weight, and chosen payment method:</p>
             <ul>
-              <li><strong>Prepaid Orders (UPI / Card / Net Banking):</strong> Lower shipping rates — Delivery within 3–5 business days</li>
-              <li><strong>Cash on Delivery (COD):</strong> Shipping includes a small COD handling fee — Delivery within 4–7 business days</li>
+              <li><strong>Prepaid Orders (UPI / Card / Net Banking):</strong> Starting at ₹54 — Delivery within 3–5 business days</li>
+              <li><strong>Cash on Delivery (COD):</strong> Starting at ₹84 (includes COD handling fee) — Delivery within 4–7 business days</li>
             </ul>
-            <p>Exact shipping charges will be displayed on the checkout page before you confirm your order. Delivery timelines may vary depending on your location. Deliveries to remote or rural areas may take an additional 2–3 business days.</p>
+            <p>Final shipping charges will be displayed on the checkout page before you confirm your order. Rates may vary for heavy items or remote locations. Deliveries to remote or rural areas may take an additional 2–3 business days.</p>
           </div>
         </div>
 
