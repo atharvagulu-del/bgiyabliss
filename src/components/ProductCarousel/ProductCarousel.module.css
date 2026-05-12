@@ -76,15 +76,31 @@
   box-shadow: var(--shadow-lg);
 }
 
-.arrowLeft { left: -6px; }
-.arrowRight { right: -6px; }
+.arrowLeft {
+  left: -6px;
+}
+
+.arrowRight {
+  right: -6px;
+}
 
 @media (max-width: 768px) {
-  .slide { width: 240px; }
-  .arrow { display: none; }
-  .header { flex-direction: column; align-items: center; }
+  .slide {
+    width: 240px;
+  }
+
+  .arrow {
+    display: none;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: center;
+  }
 }
 
 @media (max-width: 480px) {
-  .slide { width: 200px; }
+  .slide {
+    width: 200px;
+  }
 }

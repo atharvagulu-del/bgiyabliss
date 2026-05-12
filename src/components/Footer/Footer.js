@@ -68,10 +68,11 @@ export default function Footer() {
             <div className={styles.col}>
               <h4 className={styles.colTitle}>Customer Care</h4>
               <ul className={styles.colList}>
-                <li><a href="/pages/track-order">Track Order</a></li>
-                <li><a href="/pages/shipping">Shipping Policy</a></li>
-                <li><a href="/pages/returns">Return Policy</a></li>
-                <li><a href="/pages/faq">FAQs</a></li>
+                <li><a href="/track">Track Order</a></li>
+                <li><a href="/pages/shipping-policy">Shipping Policy</a></li>
+                <li><a href="/pages/refund-policy">Refund Policy</a></li>
+                <li><a href="/pages/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/pages/terms-and-conditions">Terms & Conditions</a></li>
               </ul>
             </div>
 
@@ -92,15 +93,15 @@ export default function Footer() {
               <ul className={styles.contactList}>
                 <li>
                   <Phone size={16} />
-                  <span>+91 77379 76414</span>
+                  <span>+91 95713 89234</span>
                 </li>
                 <li>
                   <Mail size={16} />
-                  <span>Bgiyabliss73@gmail.com</span>
+                  <span>bgiyabliss73@gmail.com</span>
                 </li>
                 <li>
                   <MapPin size={16} />
-                  <span>Mumbai, Maharashtra, India</span>
+                  <span>Kot Baori, Kota, Rajasthan 325001</span>
                 </li>
               </ul>
             </div>

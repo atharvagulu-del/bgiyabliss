@@ -53,7 +53,7 @@ export default function DiscountPopup() {
           </div>
 
           <p className={styles.terms}>
-            By logging in, you're agreeing to our <a href="#">Privacy Policy</a> and <a href="#">Terms of Service</a>
+            By logging in, you&apos;re agreeing to our <a href="/pages/privacy-policy">Privacy Policy</a> and <a href="/pages/terms-and-conditions">Terms of Service</a>
           </p>
         </div>
       </div>

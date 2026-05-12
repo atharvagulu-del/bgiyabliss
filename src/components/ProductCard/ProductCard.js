@@ -14,7 +14,7 @@ export default function ProductCard({ product }) {
 
   return (
     <div className="group flex flex-col h-full bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-emerald-200 transition-all duration-300 shadow-sm hover:shadow-xl w-[260px] md:w-[280px] shrink-0">
-      
+
       {/* Image Area */}
       <a href={`/products/${product.slug}`} className="relative h-64 md:h-72 w-full overflow-hidden block bg-gray-50 flex-shrink-0">
         <Image
@@ -25,7 +25,7 @@ export default function ProductCard({ product }) {
           style={{ objectFit: 'cover' }}
           className="transition-transform duration-700 group-hover:scale-105"
         />
-        
+
         {/* Floating Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2 pointer-events-none">
           {product.discount > 0 && (
@@ -50,7 +50,7 @@ export default function ProductCard({ product }) {
         </div>
 
         {/* Wishlist Button (Hover Reveal) */}
-        <button 
+        <button
           className={`absolute top-3 right-3 md:top-12 ${isWished ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'} group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-sm flex items-center justify-center z-10 ${isWished ? 'text-red-500' : 'text-gray-400 hover:text-red-500 hover:bg-white'}`}
           aria-label="Add to wishlist"
           onClick={(e) => {
@@ -63,7 +63,7 @@ export default function ProductCard({ product }) {
         </button>
 
         {/* Quick Add overlay button */}
-        <button 
+        <button
           className="absolute bottom-4 left-4 right-4 bg-emerald-600/90 backdrop-blur text-white py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium text-sm translate-y-[150%] group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-emerald-700 shadow-lg z-10"
           onClick={(e) => {
             e.preventDefault();
@@ -77,10 +77,10 @@ export default function ProductCard({ product }) {
 
       {/* Info Area */}
       <div className="p-4 flex flex-col flex-grow">
-        
+
         {/* Tags */}
         <div className="flex flex-wrap gap-1 mb-2">
-           {product.tags?.slice(0, 2)?.map((tag, idx) => (
+          {product.tags?.slice(0, 2)?.map((tag, idx) => (
             <span key={idx} className="text-[10px] font-semibold tracking-wider uppercase text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
               {tag}
             </span>
@@ -105,7 +105,7 @@ export default function ProductCard({ product }) {
                 </span>
               )}
             </div>
-            
+
             {/* Care Icons */}
             <div className="flex gap-1.5 text-gray-400" title="Care Requirements">
               <span className={`p-1 rounded-full ${!isLowLight ? 'bg-amber-50 text-amber-500' : 'bg-gray-50'}`} title={isLowLight ? "Low Light" : "Bright Light"}>

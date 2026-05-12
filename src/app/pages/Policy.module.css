@@ -1,0 +1,386 @@
+.policyPage {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f0fdf4 0%, #f9fafb 40%, #fff 100%);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* ── Back Bar ── */
+.backBar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  padding: 14px 24px;
+}
+
+.backBarInner {
+  max-width: 820px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #16a34a;
+  text-decoration: none;
+  padding: 6px 14px 6px 8px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.backLink:hover {
+  background: #f0fdf4;
+  gap: 8px;
+}
+
+.backBarBrand {
+  font-size: 12px;
+  color: #a3a3a3;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* ── Hero Header ── */
+.heroHeader {
+  padding: 56px 24px 40px;
+  text-align: center;
+}
+
+.heroIcon {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  box-shadow: 0 4px 16px rgba(22, 163, 74, 0.15);
+}
+
+.heroTitle {
+  font-size: 32px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.heroSubtitle {
+  font-size: 15px;
+  color: #64748b;
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.lastUpdated {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 16px;
+  padding: 4px 12px;
+  background: rgba(0,0,0,0.03);
+  border-radius: 20px;
+}
+
+/* ── Content ── */
+.content {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+/* ── Alert Box ── */
+.alertBox {
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 32px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  line-height: 1.6;
+}
+
+.alertDanger {
+  background: linear-gradient(135deg, #fef2f2, #fff5f5);
+  border: 1px solid #fecaca;
+}
+
+.alertDanger p {
+  color: #991b1b;
+  font-weight: 600;
+  font-size: 14px;
+  margin: 0;
+}
+
+.alertInfo {
+  background: linear-gradient(135deg, #eff6ff, #f0f7ff);
+  border: 1px solid #bfdbfe;
+}
+
+.alertInfo p {
+  color: #1e40af;
+  font-size: 14px;
+  margin: 0;
+}
+
+.alertIconDanger {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #fecaca;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.alertIconInfo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #bfdbfe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Section Cards ── */
+.section {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 16px;
+  padding: 28px 28px 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  transition: box-shadow 0.2s;
+}
+
+.section:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.sectionNumber {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #16a34a, #059669);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.sectionBody {
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.sectionBody p {
+  margin-bottom: 12px;
+}
+
+.sectionBody p:last-child {
+  margin-bottom: 0;
+}
+
+.sectionBody strong {
+  color: #1e293b;
+}
+
+.sectionBody ul {
+  padding-left: 0;
+  list-style: none;
+  margin: 12px 0;
+}
+
+.sectionBody ul li {
+  position: relative;
+  padding-left: 24px;
+  margin-bottom: 8px;
+  color: #475569;
+}
+
+.sectionBody ul li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #16a34a, #059669);
+}
+
+.sectionBody a {
+  color: #16a34a;
+  font-weight: 500;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.sectionBody a:hover {
+  border-bottom-color: #16a34a;
+}
+
+/* ── Contact Card ── */
+.contactCard {
+  background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+  border: 1px solid #bbf7d0;
+  border-radius: 16px;
+  padding: 28px;
+  margin-top: 8px;
+}
+
+.contactTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.contactGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.contactItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.7);
+  border-radius: 12px;
+  border: 1px solid rgba(22, 163, 74, 0.1);
+}
+
+.contactItemIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #dcfce7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #16a34a;
+}
+
+.contactItemLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #94a3b8;
+  margin-bottom: 2px;
+}
+
+.contactItemValue {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1e293b;
+  line-height: 1.5;
+}
+
+/* ── Footer Bar ── */
+.footerBar {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 20px 24px 40px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.footerGst {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.footerLinks {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.footerLinks a {
+  font-size: 12px;
+  color: #94a3b8;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footerLinks a:hover {
+  color: #16a34a;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .heroHeader {
+    padding: 40px 20px 28px;
+  }
+
+  .heroTitle {
+    font-size: 26px;
+  }
+
+  .content {
+    padding: 0 16px 60px;
+  }
+
+  .section {
+    padding: 20px 20px 18px;
+    border-radius: 12px;
+  }
+
+  .contactGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .footerBar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .backBarBrand {
+    display: none;
+  }
+}

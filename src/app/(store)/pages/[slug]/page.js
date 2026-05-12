@@ -14,13 +14,13 @@ function ShippingPolicy() {
       <p>All orders are processed within 1-2 business days. Orders are not shipped or delivered on weekends or public holidays.</p>
       
       <h3>Shipping Rates & Delivery Estimates</h3>
-      <p>Shipping charges for your order will be calculated and displayed at checkout.</p>
+      <p>Shipping charges are calculated at checkout based on your delivery location, order weight, and payment method.</p>
       <ul>
-        <li><strong>Prepaid Orders:</strong> ₹54 flat rate shipping.</li>
-        <li><strong>Cash on Delivery (COD) Orders:</strong> ₹84 flat rate shipping.</li>
+        <li><strong>Prepaid Orders:</strong> Lower shipping rates. Delivery within 3–5 business days.</li>
+        <li><strong>Cash on Delivery (COD) Orders:</strong> Includes a small COD handling fee. Delivery within 4–7 business days.</li>
         <li><strong>Free Shipping:</strong> Available on promotional orders or specific cart values as advertised.</li>
       </ul>
-      <p>Delivery typically takes 3-5 business days depending on your location. Deliveries to remote areas may take longer.</p>
+      <p>Exact charges will be shown on the checkout page. Delivery to remote areas may take longer.</p>
       
       <h3>Order Tracking</h3>
       <p>You will receive a shipment confirmation email or SMS once your order has shipped containing your tracking number(s). The tracking number will be active within 24 hours.</p>
@@ -34,20 +34,28 @@ function ShippingPolicy() {
 function ReturnPolicy() {
   return (
     <div className={styles.content}>
-      <h2>Return & Refund Policy</h2>
-      <p>We want you to be completely satisfied with your purchase. Due to the perishable nature of plants, our return policy is specific to ensure fairness and quality.</p>
+      <h2>Refund & Cancellation Policy</h2>
+      <p><strong>All sales on Bgiya Bliss are final.</strong> Due to the perishable and consumable nature of our products (fertilizers, potting mixes, seeds, soil additives, etc.), we do not offer refunds or returns on any products.</p>
       
-      <h3>7-Day Replacement Guarantee</h3>
-      <p>If your plant arrives dead or severely damaged, we offer a free replacement. You must report the issue within 7 days of delivery with clear photographs of the plant and its original packaging.</p>
+      <h3>Order Cancellations</h3>
+      <p>You may request cancellation within 6 hours of placing your order, provided it has not already been dispatched. Contact us at bgiyabliss73@gmail.com or call +91 95713 89234.</p>
       
-      <h3>Non-Plant Items</h3>
-      <p>For pots, tools, fertilizers, and other non-perishable items, we accept returns within 7 days of delivery. The item must be unused, in its original packaging, and in the same condition that you received it.</p>
+      <h3>Damaged or Defective Products</h3>
+      <p>If your product arrives damaged or is materially different from what was ordered, report the issue within 24 hours of delivery with clear photographs. Upon verification, we will send a free replacement — no monetary refund will be provided.</p>
       
-      <h3>Refund Process</h3>
-      <p>Once your return is received and inspected, we will notify you of the approval or rejection of your refund. If approved, your refund will be processed to your original method of payment within 5-7 business days.</p>
-      
-      <h3>Exchanges</h3>
-      <p>We only replace items if they are defective or damaged. If you need to exchange an item, please contact our customer support.</p>
+      <h3>Non-Returnable Items</h3>
+      <ul>
+        <li>Fertilizers (organic and inorganic)</li>
+        <li>Potting mixes and soil blends</li>
+        <li>Seeds and seed kits</li>
+        <li>Neem cake, vermicompost, and bio-fertilizers</li>
+        <li>Gardening tools and accessories (once opened)</li>
+      </ul>
+
+      <h3>COD Order Refusals</h3>
+      <p>Refusal to accept COD delivery without valid reason may result in being blocked from future COD purchases.</p>
+
+      <p style={{ marginTop: 24 }}>For the complete policy, visit our <a href="/pages/refund-policy" style={{ color: '#16a34a' }}>Refund & Cancellation Policy</a> page.</p>
     </div>
   );
 }
@@ -74,7 +82,7 @@ function FAQ() {
       
       <div className={styles.faqItem}>
         <div className={styles.faqQuestion}>Do you offer Cash on Delivery (COD)?</div>
-        <div className={styles.faqAnswer}>Yes, COD is available for a flat shipping fee of ₹84. We recommend prepaid orders for a lower shipping fee of ₹54 and a contactless delivery experience.</div>
+        <div className={styles.faqAnswer}>Yes, COD is available! Shipping charges (including a small COD handling fee) are calculated at checkout based on your location. We recommend prepaid orders for lower shipping and a contactless delivery experience.</div>
       </div>
       
       <div className={styles.faqItem}>
@@ -120,7 +128,7 @@ function ContactUs() {
             <Phone className={styles.contactIcon} size={20} />
             <div>
               <strong>Phone</strong>
-              <p>+91 77379 76414<br/><span style={{fontSize: '13px', color: '#6b7280'}}>Mon-Sat, 9am - 6pm</span></p>
+              <p>+91 95713 89234<br/><span style={{fontSize: '13px', color: '#6b7280'}}>Mon-Sat, 9am - 6pm</span></p>
             </div>
           </div>
           <div className={styles.contactItem}>
@@ -134,7 +142,7 @@ function ContactUs() {
             <MapPin className={styles.contactIcon} size={20} />
             <div>
               <strong>Office</strong>
-              <p>Mumbai, Maharashtra, India<br/><span style={{fontSize: '13px', color: '#6b7280'}}>Online Store Only</span></p>
+              <p>Khasra No. 754, Aamli, Kanwas,<br/>Kot Baori, Kota, Rajasthan 325001<br/><span style={{fontSize: '13px', color: '#6b7280'}}>Online Store</span></p>
             </div>
           </div>
           <div className={styles.contactItem}>

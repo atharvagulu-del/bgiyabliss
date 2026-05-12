@@ -24,22 +24,22 @@ export default function Home() {
         if (products.length > 0) {
           const best = products.filter(p =>
             (p.featured?.includes('bestseller') ||
-            p.category === 'plant-care' ||
-            p.category === 'plants' ||
-            p.category === 'potting-mix' ||
-            p.category === 'fertilizers' ||
-            p.category === 'seeds') &&
+              p.category === 'plant-care' ||
+              p.category === 'plants' ||
+              p.category === 'potting-mix' ||
+              p.category === 'fertilizers' ||
+              p.category === 'seeds') &&
             !p.featured?.includes('bundle')
           );
-          
+
           const bundles = products.filter(p =>
             p.category === 'bundles' || p.featured?.includes('bundle')
           );
-          
+
           const pots = products.filter(p =>
             p.category === 'pots' || p.category === 'planters' || p.category === 'tools' || p.category === 'accessories'
           );
-          
+
           const arrivals = products.filter(p =>
             p.featured?.includes('new-arrival') &&
             !p.featured?.includes('bundle')

@@ -81,28 +81,28 @@ export default function ProductForm({ existingProduct = null }) {
       // Each entry in variantSummary (except isMain) maps to a variant card
       const reconstructedVariants = Array.isArray(existingProduct.variantSummary)
         ? existingProduct.variantSummary
-            .filter(v => !v.isMain)
-            .map(v => {
-              // Parse weight & pack from the stored label (e.g. "5kg (Pack of 2)")
-              const lbl = v.label || '';
-              const wMatch = lbl.match(/(\d+(?:\.\d+)?)\s*(g|kg|ml|L)/i);
-              const pMatch = lbl.match(/pack of\s*(\d+)/i);
-              return {
-                name: v.name || '',
-                label: lbl,
-                weightValue: wMatch ? wMatch[1] : '',
-                weightUnit: wMatch ? wMatch[2] : 'g',
-                packQuantity: pMatch ? pMatch[1] : '',
-                salePrice: v.salePrice ? String(v.salePrice) : '',
-                originalPrice: v.originalPrice ? String(v.originalPrice) : '',
-                images: Array.isArray(v.images) ? v.images : [],
-                isUploading: false,
-                expanded: false,  // collapsed by default on edit
-                featured: Array.isArray(v.featured) ? v.featured : [],
-                status: v.status || 'active',
-                _existingSlug: v.slug,  // remember original slug for reference
-              };
-            })
+          .filter(v => !v.isMain)
+          .map(v => {
+            // Parse weight & pack from the stored label (e.g. "5kg (Pack of 2)")
+            const lbl = v.label || '';
+            const wMatch = lbl.match(/(\d+(?:\.\d+)?)\s*(g|kg|ml|L)/i);
+            const pMatch = lbl.match(/pack of\s*(\d+)/i);
+            return {
+              name: v.name || '',
+              label: lbl,
+              weightValue: wMatch ? wMatch[1] : '',
+              weightUnit: wMatch ? wMatch[2] : 'g',
+              packQuantity: pMatch ? pMatch[1] : '',
+              salePrice: v.salePrice ? String(v.salePrice) : '',
+              originalPrice: v.originalPrice ? String(v.originalPrice) : '',
+              images: Array.isArray(v.images) ? v.images : [],
+              isUploading: false,
+              expanded: false,  // collapsed by default on edit
+              featured: Array.isArray(v.featured) ? v.featured : [],
+              status: v.status || 'active',
+              _existingSlug: v.slug,  // remember original slug for reference
+            };
+          })
         : [];
 
       setForm({
@@ -342,7 +342,7 @@ export default function ProductForm({ existingProduct = null }) {
         body: formData,
       });
       const data = await res.json();
-      
+
       if (data.secure_url) {
         // Find the first empty slot or append to the end
         const emptyIndex = form.images.findIndex(img => img.trim() === '');
@@ -441,10 +441,10 @@ export default function ProductForm({ existingProduct = null }) {
       };
       const allVariantSummary = validVariants.length > 0
         ? [mainEntry, ...siblingEntries.map(v => ({
-            label: v.label, name: v.name, slug: v.slug,
-            salePrice: v.salePrice, originalPrice: v.originalPrice,
-            images: v.images, featured: v.featured, status: v.status,
-          }))]
+          label: v.label, name: v.name, slug: v.slug,
+          salePrice: v.salePrice, originalPrice: v.originalPrice,
+          images: v.images, featured: v.featured, status: v.status,
+        }))]
         : [];
 
       const baseProductData = {

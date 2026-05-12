@@ -357,7 +357,7 @@ export default function ProductDetailPage({ product, relatedProducts }) {
             </div>
             <div className={styles.trustItem}>
               <RotateCcw size={20} className={styles.trustIcon} />
-              <span className={styles.trustText}>7 Days Returnable</span>
+              <span className={styles.trustText}>Replacement Guarantee</span>
             </div>
             <div className={styles.trustItem}>
               <ShieldCheck size={20} className={styles.trustIcon} />
@@ -386,7 +386,7 @@ export default function ProductDetailPage({ product, relatedProducts }) {
             <div className={styles.deliveryGrid}>
               <div className={styles.deliveryCard}>
                 <h4><Truck size={18} /> Shipping</h4>
-                <ul><li>Shipping charges calculated at checkout</li><li>Prepaid orders: ₹54 shipping</li><li>Cash on Delivery: ₹84 shipping</li></ul>
+                <ul><li>Shipping charges calculated at checkout based on location</li><li>Prepaid orders enjoy lower shipping rates</li><li>COD available with a small handling fee</li></ul>
                 <div style={{ marginTop: 12, padding: '10px 14px', background: '#ecfdf5', borderRadius: 8, fontSize: 13 }}>
                   <p style={{ fontWeight: 600, marginBottom: 4 }}>🎉 Available Offers:</p>
                   <ul style={{ margin: 0, paddingLeft: 18 }}>
@@ -396,8 +396,8 @@ export default function ProductDetailPage({ product, relatedProducts }) {
                 </div>
               </div>
               <div className={styles.deliveryCard}>
-                <h4><RotateCcw size={18} /> Returns</h4>
-                <ul><li>Return or exchange within 7 days of delivery</li><li>Items must be in original condition</li><li>Satisfaction guaranteed</li></ul>
+                <h4><RotateCcw size={18} /> Returns & Refunds</h4>
+                <ul><li>All sales are final — no refunds</li><li>Free replacement for damaged products (report within 24 hrs)</li><li>Contact us with photos for quick resolution</li></ul>
               </div>
             </div>
           )}

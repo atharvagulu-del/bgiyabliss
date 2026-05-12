@@ -208,8 +208,19 @@
 }
 
 @media (max-width: 480px) {
-  .info { padding: 12px; }
-  .name { font-size: 14px; }
-  .tags { display: none; }
-  .salePrice { font-size: 16px; }
+  .info {
+    padding: 12px;
+  }
+
+  .name {
+    font-size: 14px;
+  }
+
+  .tags {
+    display: none;
+  }
+
+  .salePrice {
+    font-size: 16px;
+  }
 }
