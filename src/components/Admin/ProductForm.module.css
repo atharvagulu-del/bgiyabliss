@@ -212,6 +212,27 @@
   opacity: 1;
 }
 
+.imageDragHandle {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  cursor: grab;
+}
+
+.imagePreview:hover .imageDragHandle {
+  opacity: 1;
+}
+
 /* Compact Upload Button */
 .uploadBtn {
   display: inline-flex;

@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Save, Trash2, Plus, X, Image as ImageIcon, ArrowLeft, ChevronDown, ChevronUp, Link2 } from 'lucide-react';
+import { Save, Trash2, Plus, X, Image as ImageIcon, ArrowLeft, ChevronDown, ChevronUp, Link2, GripVertical } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { addProduct, updateProduct, deleteProduct, getVariantGroup } from '@/lib/firestore';
@@ -68,6 +68,8 @@ export default function ProductForm({ existingProduct = null }) {
   const [isUploading, setIsUploading] = useState(false);
   const [toast, setToast] = useState(null);
   const [tagInput, setTagInput] = useState('');
+  const [dragIndex, setDragIndex] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
 
   // Initialize form with existing product data
   useEffect(() => {
@@ -780,28 +782,57 @@ export default function ProductForm({ existingProduct = null }) {
             <div className={`adminCard ${styles.section}`}>
               <div className="adminCardHeader">
                 <h3 className="adminCardTitle">Product Images</h3>
-                <p style={{ fontSize: 12, color: 'var(--admin-text-muted)', margin: '4px 0 0' }}>Upload multiple images — first image is used as the main product photo</p>
+                <p style={{ fontSize: 12, color: 'var(--admin-text-muted)', margin: '4px 0 0' }}>Drag to reorder — first image is the main product photo</p>
               </div>
               <div className="adminCardBody">
-                {/* Image thumbnails grid */}
+                {/* Image thumbnails grid — drag to reorder */}
                 {form.images.filter(img => img.trim()).length > 0 && (
                   <div className={styles.imageGrid} style={{ marginBottom: 12 }}>
                     {form.images.map((url, i) => {
                       if (!url.trim()) return null;
                       return (
-                        <div key={i} className={styles.imageSlot}>
+                        <div
+                          key={url}
+                          className={styles.imageSlot}
+                          draggable
+                          onDragStart={(e) => { setDragIndex(i); e.dataTransfer.effectAllowed = 'move'; }}
+                          onDragOver={(e) => { e.preventDefault(); setDragOverIndex(i); }}
+                          onDragLeave={() => setDragOverIndex(null)}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            if (dragIndex === null || dragIndex === i) return;
+                            const newImages = [...form.images];
+                            const [moved] = newImages.splice(dragIndex, 1);
+                            newImages.splice(i, 0, moved);
+                            setForm(prev => ({ ...prev, images: newImages }));
+                            setDragIndex(null);
+                            setDragOverIndex(null);
+                          }}
+                          onDragEnd={() => { setDragIndex(null); setDragOverIndex(null); }}
+                          style={{
+                            opacity: dragIndex === i ? 0.4 : 1,
+                            border: dragOverIndex === i ? '2px dashed #16a34a' : undefined,
+                            borderRadius: 10,
+                            transition: 'opacity 0.15s, border 0.15s',
+                            cursor: 'grab',
+                          }}
+                        >
                           <div className={styles.imagePreview}>
                             <img src={url} alt={`Product ${i + 1}`} className={styles.previewImg} />
                             {i === 0 && (
                               <span className={styles.mainBadge}>Main</span>
                             )}
+                            <div className={styles.imageDragHandle}>
+                              <GripVertical size={14} />
+                            </div>
                             <button
                               className={styles.imageRemove}
-                              onClick={() => removeListItem('images', i)}
+                              onClick={(e) => { e.stopPropagation(); removeListItem('images', i); }}
                             >
                               <X size={14} />
                             </button>
                           </div>
+                          <span style={{ fontSize: 10, color: '#94a3b8', textAlign: 'center', display: 'block', marginTop: 4 }}>{i === 0 ? '★ Main' : `#${i + 1}`}</span>
                         </div>
                       );
                     })}

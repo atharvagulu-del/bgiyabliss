@@ -5,7 +5,6 @@ import CategoryCircles from '@/components/CategoryCircles/CategoryCircles';
 import ProductCarousel from '@/components/ProductCarousel/ProductCarousel';
 import HowItWorks from '@/components/HowItWorks/HowItWorks';
 import TestimonialMarquee from '@/components/TestimonialMarquee/TestimonialMarquee';
-import CommunityFeed from '@/components/CommunityFeed/CommunityFeed';
 import WhyChooseUs from '@/components/WhyChooseUs/WhyChooseUs';
 import TrustBar from '@/components/TrustBar/TrustBar';
 import { bestsellers as staticBestsellers, plantBundles as staticBundles, newArrivals as staticArrivals, ceramics as staticCeramics } from '@/data/products';
@@ -94,7 +93,6 @@ export default function Home() {
       />
       <HowItWorks />
       <TestimonialMarquee />
-      <CommunityFeed />
       <WhyChooseUs />
       <TrustBar />
     </>
