@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { ChevronRight, ChevronDown, Truck, Tag, Loader2, ShieldCheck, Leaf, Package, Heart, MapPin, CheckCircle2, Lock } from 'lucide-react';
+import { X, Check, Lock, Ticket, ChevronRight, ChevronDown, Truck, Tag, Loader2, ShieldCheck, Leaf, Package, Heart, MapPin, CheckCircle2 } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { createOrder, getPromoCode } from '@/lib/firestore';
@@ -50,6 +51,12 @@ export default function CheckoutPage() {
   const [showMobileSummary, setShowMobileSummary] = useState(false);
   const [promoInput, setPromoInput] = useState('');
   const [promoMsg, setPromoMsg] = useState('');
+  const [showOffers, setShowOffers] = useState(false);
+
+  const AVAILABLE_COUPONS = [
+    { code: 'BLISS10', label: 'Flat 10% Off', desc: 'On your first order', minCart: 0, discount: 10 },
+    { code: 'BLISS15', label: 'Flat 15% Off', desc: 'On orders above ₹1099', minCart: 1099, discount: 15 },
+  ];
   const [pincodeStatus, setPincodeStatus] = useState(''); // '' | 'loading' | 'success' | 'error'
   const [dynamicShippingCost, setDynamicShippingCost] = useState(null);
 
@@ -350,17 +357,38 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleApplyPromo = async () => {
-    if (!promoInput.trim()) return;
+  const handleApplyPromo = async (codeToApply) => {
+    const code = (codeToApply || promoInput).trim().toUpperCase();
+    if (!code) return;
     setPromoMsg('');
-    const code = promoInput.trim().toUpperCase();
-    const promo = await getPromoCode(code);
+    
+    // Check local hardcoded coupons first
+    if (code === 'BLISS15') {
+      if (cartSubtotal >= 1099) {
+        setAppliedPromo({ code: 'BLISS15', discountType: 'percent', discountValue: 15, minOrderValue: 1099 });
+        setPromoMsg('');
+        setPromoInput('');
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      } else {
+        setPromoMsg(`Min. cart value ₹1099 required for BLISS15`);
+      }
+      return;
+    } else if (code === 'BLISS10') {
+      setAppliedPromo({ code: 'BLISS10', discountType: 'percent', discountValue: 10, minOrderValue: 0 });
+      setPromoMsg('');
+      setPromoInput('');
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      return;
+    }
 
+    const promo = await getPromoCode(code);
+    
     if (promo && promo.active !== false) {
       if (cartSubtotal >= (promo.minOrderValue || 0)) {
         setAppliedPromo(promo);
         setPromoMsg('');
         setPromoInput('');
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
       } else {
         setPromoMsg(`Min. cart value ₹${promo.minOrderValue} required for ${code}`);
       }
@@ -454,7 +482,6 @@ export default function CheckoutPage() {
                 />
                 {pincodeStatus === 'loading' && <Loader2 size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#16a34a', animation: 'spin 1s linear infinite' }} />}
                 {pincodeStatus === 'success' && <CheckCircle2 size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#16a34a' }} />}
-                {pincodeStatus === 'error' && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#ef4444', fontSize: 11, fontWeight: 500 }}>Invalid</span>}
               </FloatField>
               {pincodeStatus === 'success' && <p style={{ color: '#16a34a', fontSize: 11, marginTop: 3, paddingLeft: 2, display: 'flex', alignItems: 'center', gap: 4 }}><MapPin size={11} /> Auto-detected: {form.city}, {form.state}</p>}
             </div>
@@ -555,29 +582,81 @@ export default function CheckoutPage() {
             </div>
           ))}
 
-          {/* Discount Code Input */}
-          <div style={{ display: 'flex', gap: 8, marginTop: 8, marginBottom: 8 }}>
-            <input value={promoInput} onChange={e => setPromoInput(e.target.value.toUpperCase())} placeholder="Discount code or gift card"
-              style={{ flex: 1, padding: '12px 14px', border: '1px solid #d1d5db', borderRadius: 5, fontSize: 14, outline: 'none', background: '#fff' }}
-              onFocus={e => e.target.style.borderColor = '#16a34a'} onBlur={e => e.target.style.borderColor = '#d1d5db'}
-            />
-            <button onClick={handleApplyPromo}
-              style={{ padding: '12px 20px', background: '#f5f5f5', border: '1px solid #d1d5db', borderRadius: 5, fontSize: 14, color: '#737373', cursor: 'pointer', fontWeight: 500 }}>
-              Apply
-            </button>
-          </div>
-          {promoMsg && <p style={{ fontSize: 12, color: '#dc2626', marginBottom: 8 }}>{promoMsg}</p>}
-
-          {/* Applied Promo */}
-          {appliedPromo && (
-            <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 6, padding: '12px 16px', marginBottom: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  🏷️ {appliedPromo.code} — Get {appliedPromo.discountType === 'percent' ? `${appliedPromo.discountValue}%` : `₹${appliedPromo.discountValue}`} OFF
-                </span>
-                <button onClick={() => { setAppliedPromo(null); setPromoInput(''); }} style={{ fontSize: 12, color: '#16a34a', fontWeight: 600, border: '1px solid #16a34a', borderRadius: 4, padding: '3px 10px', background: '#fff', cursor: 'pointer' }}>Remove</button>
+          {/* Discount/Promo */}
+          {appliedPromo ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', background: '#f0fdf4', border: '1.5px solid #bbf7d0', borderRadius: 6, marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <CheckCircle2 size={16} style={{ color: '#16a34a' }} />
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#16a34a' }}>Save ₹{Math.round(discountAmount).toLocaleString()}</div>
+                  <div style={{ fontSize: 12, color: '#6b7280' }}>with &apos;{appliedPromo.code}&apos;</div>
+                </div>
               </div>
-              <p style={{ fontSize: 12, color: '#16a34a', marginTop: 4 }}>🎉 Discount applied!</p>
+              <button onClick={() => { setAppliedPromo(null); setPromoInput(''); setPromoMsg(''); }} style={{ fontSize: 12, fontWeight: 600, color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}>Remove</button>
+            </div>
+          ) : (
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
+                <input value={promoInput} onChange={e => setPromoInput(e.target.value.toUpperCase())} placeholder="Discount code or gift card"
+                  style={{ flex: 1, padding: '12px', border: '1px solid #d1d5db', borderRadius: 5, fontSize: 14 }}
+                />
+                <button onClick={() => handleApplyPromo()}
+                  style={{ padding: '0 20px', background: promoInput.trim() ? '#111' : '#f3f4f6', color: promoInput.trim() ? '#fff' : '#9ca3af', border: 'none', borderRadius: 5, fontWeight: 600, cursor: promoInput.trim() ? 'pointer' : 'default' }}>
+                  Apply
+                </button>
+              </div>
+              {promoMsg && <p style={{ fontSize: 12, color: '#dc2626', marginBottom: 16 }}>{promoMsg}</p>}
+
+              {/* Offers toggle */}
+              <button
+                onClick={() => setShowOffers(!showOffers)}
+                style={{
+                  width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '12px 16px', marginBottom: '12px',
+                  background: '#fffbeb', border: '1.5px dashed #f59e0b', borderRadius: '8px',
+                  cursor: 'pointer', fontSize: '13px', fontWeight: 600, color: '#92400e',
+                }}
+              >
+                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Ticket size={16} /> {AVAILABLE_COUPONS.length} Offers Available
+                </span>
+                <span style={{ fontSize: '12px', color: '#16a34a', fontWeight: 700 }}>View all &gt;</span>
+              </button>
+
+              {showOffers && (
+                <div style={{ marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {AVAILABLE_COUPONS.map((coupon) => {
+                    const isEligible = cartSubtotal >= coupon.minCart;
+                    return (
+                      <div key={coupon.code} style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '12px', borderRadius: '8px',
+                        border: '1px solid #e5e7eb', background: '#fff',
+                      }}>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                            <span style={{ fontSize: '12px', fontWeight: 800, color: '#16a34a', background: '#ecfdf5', padding: '2px 8px', borderRadius: '4px', border: '1px dashed #bbf7d0' }}>{coupon.code}</span>
+                            <span style={{ fontSize: '12px', fontWeight: 700, color: '#111' }}>{coupon.label}</span>
+                          </div>
+                          <span style={{ fontSize: '11px', color: '#6b7280' }}>{coupon.desc}</span>
+                        </div>
+                        <button
+                          onClick={() => handleApplyPromo(coupon.code)}
+                          style={{
+                            padding: '6px 16px', borderRadius: '6px', fontSize: '12px', fontWeight: 700,
+                            border: isEligible ? '1.5px solid #16a34a' : '1px solid #d1d5db',
+                            background: isEligible ? '#fff' : '#f9fafb',
+                            color: isEligible ? '#16a34a' : '#9ca3af',
+                            cursor: isEligible ? 'pointer' : 'default',
+                          }}
+                        >
+                          {isEligible ? 'Apply' : `Min ₹${coupon.minCart}`}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 

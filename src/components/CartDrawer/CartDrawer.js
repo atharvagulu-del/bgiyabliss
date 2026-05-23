@@ -5,6 +5,7 @@ import { useCart } from '@/context/CartContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Minus, Plus, ShoppingBag, ArrowRight, Ticket, ChevronDown, ChevronUp, CheckCircle2, Trash2 } from 'lucide-react';
 import Image from 'next/image';
+import confetti from 'canvas-confetti';
 import styles from './CartDrawer.module.css';
 
 const MILESTONES = [
@@ -109,12 +110,14 @@ export default function CartDrawer() {
       setAppliedPromo({ code: 'BLISS15', discountType: 'percent', discountValue: 15, minOrderValue: 1099 });
       setPromoInput('BLISS15');
       setPromoMessage('🎉 15% discount applied!');
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
     } else if (code === 'BLISS15' && cartSubtotal < 1099) {
       setPromoMessage(`Add ₹${(1099 - cartSubtotal).toLocaleString()} more to use BLISS15`);
     } else if (code === 'BLISS10') {
       setAppliedPromo({ code: 'BLISS10', discountType: 'percent', discountValue: 10, minOrderValue: 0 });
       setPromoInput('BLISS10');
       setPromoMessage('🎉 10% discount applied!');
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
     } else {
       setPromoMessage('Invalid promo code');
     }
