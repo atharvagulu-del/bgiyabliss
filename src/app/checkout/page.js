@@ -130,12 +130,10 @@ export default function CheckoutPage() {
           setPincodeStatus('success');
           setTimeout(() => setPincodeStatus(''), 3000);
         } else {
-          setPincodeStatus('error');
-          setTimeout(() => setPincodeStatus(''), 3000);
+          setPincodeStatus('');
         }
       } catch {
-        setPincodeStatus('error');
-        setTimeout(() => setPincodeStatus(''), 3000);
+        setPincodeStatus('');
       }
     } else {
       setPincodeStatus('');
