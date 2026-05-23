@@ -110,9 +110,10 @@ export default function CheckoutPage() {
   }, [user]);
 
   const baseShippingCost = dynamicShippingCost !== null ? Math.round(dynamicShippingCost) : 54;
-  const shippingCost = 0;
+  const COD_FEE = 25;
+  const shippingCost = form.paymentMethod === 'cod' ? COD_FEE : 0;
   const orderTotal = cartTotal + shippingCost;
-  const savings = discountAmount + baseShippingCost;
+  const savings = discountAmount + (form.paymentMethod === 'prepaid' ? baseShippingCost : baseShippingCost - COD_FEE);
 
   // PIN code auto-fill
   const handlePincodeChange = async (val) => {
@@ -494,7 +495,7 @@ export default function CheckoutPage() {
             <label onClick={() => u('paymentMethod', 'prepaid')} className="co-radio-row" style={{ borderBottom: '1px solid #e5e5e5', background: form.paymentMethod === 'prepaid' ? '#f0fdf4' : '#fafafa' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span className="co-radio">{form.paymentMethod === 'prepaid' && <span className="co-radio-dot" />}</span>
-                <span>Prepaid (UPI / Card)</span>
+                <span>Prepaid (UPI / Card) — <span style={{ color: '#16a34a', fontSize: 12, fontWeight: 600 }}>Save ₹{baseShippingCost}</span></span>
               </div>
               <span style={{ fontWeight: 600, color: '#16a34a' }}>
                 <span style={{ textDecoration: 'line-through', color: '#a3a3a3', marginRight: 6, fontSize: 12 }}>₹{baseShippingCost}</span>
@@ -506,9 +507,9 @@ export default function CheckoutPage() {
                 <span className="co-radio">{form.paymentMethod === 'cod' && <span className="co-radio-dot" />}</span>
                 <span>Cash on Delivery</span>
               </div>
-              <span style={{ fontWeight: 600, color: '#16a34a' }}>
-                <span style={{ textDecoration: 'line-through', color: '#a3a3a3', marginRight: 6, fontSize: 12 }}>₹{baseShippingCost + 30}</span>
-                Free
+              <span style={{ fontWeight: 600 }}>
+                <span style={{ textDecoration: 'line-through', color: '#a3a3a3', marginRight: 6, fontSize: 12 }}>₹{baseShippingCost}</span>
+                <span style={{ color: '#1a1a1a' }}>₹25</span>
               </span>
             </label>
           </div>
@@ -601,7 +602,10 @@ export default function CheckoutPage() {
               <span>Shipping</span>
               <span>
                 <span style={{ textDecoration: 'line-through', color: '#a3a3a3', marginRight: 6, fontSize: 12 }}>₹{baseShippingCost}.00</span>
-                <span style={{ color: '#16a34a', fontWeight: 600 }}>Free</span>
+                {form.paymentMethod === 'prepaid'
+                  ? <span style={{ color: '#16a34a', fontWeight: 600 }}>Free</span>
+                  : <span style={{ fontWeight: 600 }}>₹25.00</span>
+                }
               </span>
             </div>
           </div>
