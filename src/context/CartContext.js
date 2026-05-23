@@ -74,6 +74,33 @@ export function CartProvider({ children }) {
   
   const cartTotal = cartSubtotal - discountAmount;
 
+  // Calculate total weight in grams
+  const cartTotalWeight = cartItems.reduce((total, item) => {
+    let itemWeightGrams = 0;
+    const weightStr = item.weight || item.details?.Weight || item.variantLabel || '';
+    if (weightStr) {
+      const match = weightStr.toString().match(/(\d+(?:\.\d+)?)\s*(kg|g|ml|l)/i);
+      if (match) {
+        const val = parseFloat(match[1]);
+        const unit = match[2].toLowerCase();
+        if (unit === 'kg' || unit === 'l') {
+          itemWeightGrams = val * 1000;
+        } else {
+          itemWeightGrams = val;
+        }
+      }
+    }
+    // Default to 1kg if not found
+    if (itemWeightGrams === 0) itemWeightGrams = 1000;
+    
+    let pack = 1;
+    const packMatch = weightStr.toString().match(/pack of\s*(\d+)/i);
+    if (packMatch) pack = parseInt(packMatch[1]);
+    
+    return total + (itemWeightGrams * pack * item.quantity);
+  }, 0);
+
+
   return (
     <CartContext.Provider
       value={{
@@ -91,6 +118,7 @@ export function CartProvider({ children }) {
         cartCount,
         clearCart,
         showConfetti,
+        cartTotalWeight,
       }}
     >
       {children}

@@ -40,7 +40,7 @@ function FloatField({ label, value, onChange, type = 'text', maxLength, half, er
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cartItems, cartSubtotal, cartTotal, discountAmount, appliedPromo, setAppliedPromo, clearCart, cartCount } = useCart();
+  const { cartItems, cartSubtotal, cartTotal, discountAmount, appliedPromo, setAppliedPromo, clearCart, cartCount, cartTotalWeight } = useCart();
   const { user } = useAuth();
   const [form, setForm] = useState({ name: '', lastName: '', phone: '', email: '', address1: '', address2: '', city: '', state: '', pincode: '', paymentMethod: 'cod' });
   const [saveInfo, setSaveInfo] = useState(true);
@@ -51,6 +51,7 @@ export default function CheckoutPage() {
   const [promoInput, setPromoInput] = useState('');
   const [promoMsg, setPromoMsg] = useState('');
   const [pincodeStatus, setPincodeStatus] = useState(''); // '' | 'loading' | 'success' | 'error'
+  const [dynamicShippingCost, setDynamicShippingCost] = useState(null);
 
   useEffect(() => {
     setMounted(true);
@@ -61,9 +62,39 @@ export default function CheckoutPage() {
       try {
         const parsed = JSON.parse(savedInfo);
         setForm(prev => ({ ...prev, ...parsed }));
+        if (parsed.pincode && parsed.pincode.length === 6) {
+           fetchShippingRate(parsed.pincode, cartTotalWeight, cartTotal);
+        }
       } catch (e) { }
     }
   }, []);
+
+  const fetchShippingRate = async (pincode, weight, amount) => {
+    if (!pincode || pincode.length !== 6) return;
+    try {
+      const rateRes = await fetch('/api/shipping/rates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ destination: pincode, weight, paymentType: 'prepaid', orderAmount: amount })
+      });
+      const rateData = await rateRes.json();
+      if (rateData.success && rateData.rate) {
+        setDynamicShippingCost(rateData.rate);
+      } else {
+        setDynamicShippingCost(null);
+      }
+    } catch(e) {
+      console.error('Failed to fetch rate', e);
+      setDynamicShippingCost(null);
+    }
+  };
+
+  useEffect(() => {
+    if (form.pincode && form.pincode.length === 6 && mounted) {
+      fetchShippingRate(form.pincode, cartTotalWeight, cartTotal);
+    }
+  }, [form.pincode, cartTotalWeight, cartTotal, mounted]);
+
 
   // Sync with auth user
   useEffect(() => {
@@ -78,9 +109,10 @@ export default function CheckoutPage() {
     }
   }, [user]);
 
-  const shippingCost = form.paymentMethod === 'cod' ? 84 : 54;
+  const baseShippingCost = dynamicShippingCost !== null ? Math.round(dynamicShippingCost) : 54;
+  const shippingCost = 0;
   const orderTotal = cartTotal + shippingCost;
-  const savings = discountAmount + (form.paymentMethod === 'prepaid' ? 30 : 0);
+  const savings = discountAmount + baseShippingCost;
 
   // PIN code auto-fill
   const handlePincodeChange = async (val) => {
@@ -185,6 +217,18 @@ export default function CheckoutPage() {
       }
     };
 
+    const autoShip = async (orderInfo) => {
+      try {
+        await fetch('/api/nimbus/create-shipment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...orderInfo, totalWeight: cartTotalWeight })
+        });
+      } catch (e) {
+        console.error('Auto ship failed:', e);
+      }
+    };
+
     const orderId = `BB-${Date.now()}`;
     const orderData = {
       orderId,
@@ -209,6 +253,7 @@ export default function CheckoutPage() {
         await createOrder(orderData);
         clearCart();
         await sendConfirmationEmail(orderData);
+        await autoShip(orderData);
         router.push(`/order-confirmation?id=${orderId}`);
       } catch (err) {
         console.error('Order failed:', err);
@@ -270,6 +315,7 @@ export default function CheckoutPage() {
               await createOrder(orderData);
               clearCart();
               await sendConfirmationEmail(orderData);
+              await autoShip(orderData);
               router.push(`/order-confirmation?id=${orderId}`);
             } catch (err) {
               console.error('Failed to verify/save order:', err);
@@ -450,16 +496,22 @@ export default function CheckoutPage() {
             <label onClick={() => u('paymentMethod', 'prepaid')} className="co-radio-row" style={{ borderBottom: '1px solid #e5e5e5', background: form.paymentMethod === 'prepaid' ? '#f0fdf4' : '#fafafa' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span className="co-radio">{form.paymentMethod === 'prepaid' && <span className="co-radio-dot" />}</span>
-                <span>Prepaid (UPI / Card) — <span style={{ color: '#16a34a', fontSize: 12, fontWeight: 600 }}>Save ₹30</span></span>
+                <span>Prepaid (UPI / Card)</span>
               </div>
-              <span style={{ fontWeight: 600 }}>₹54</span>
+              <span style={{ fontWeight: 600, color: '#16a34a' }}>
+                <span style={{ textDecoration: 'line-through', color: '#a3a3a3', marginRight: 6, fontSize: 12 }}>₹{baseShippingCost}</span>
+                Free
+              </span>
             </label>
             <label onClick={() => u('paymentMethod', 'cod')} className="co-radio-row" style={{ background: form.paymentMethod === 'cod' ? '#f0fdf4' : '#fafafa' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span className="co-radio">{form.paymentMethod === 'cod' && <span className="co-radio-dot" />}</span>
                 <span>Cash on Delivery</span>
               </div>
-              <span style={{ fontWeight: 600 }}>₹84</span>
+              <span style={{ fontWeight: 600, color: '#16a34a' }}>
+                <span style={{ textDecoration: 'line-through', color: '#a3a3a3', marginRight: 6, fontSize: 12 }}>₹{baseShippingCost + 30}</span>
+                Free
+              </span>
             </label>
           </div>
 
@@ -549,7 +601,10 @@ export default function CheckoutPage() {
             )}
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>Shipping</span>
-              <span>₹{shippingCost}.00</span>
+              <span>
+                <span style={{ textDecoration: 'line-through', color: '#a3a3a3', marginRight: 6, fontSize: 12 }}>₹{baseShippingCost}.00</span>
+                <span style={{ color: '#16a34a', fontWeight: 600 }}>Free</span>
+              </span>
             </div>
           </div>
 
