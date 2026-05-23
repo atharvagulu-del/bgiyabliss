@@ -587,13 +587,13 @@ export default function CheckoutPage() {
               <span>Subtotal · {cartCount} item{cartCount > 1 ? 's' : ''}</span>
               <span>₹{cartSubtotal.toLocaleString()}.00</span>
             </div>
-            {discountAmount > 0 && (
+            {discountAmount > 0 && appliedPromo && (
               <>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span>Order discount</span><span></span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#16a34a' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Tag size={12} /> {appliedPromo}</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Tag size={12} /> {appliedPromo.code}</span>
                   <span>− ₹{Math.round(discountAmount).toLocaleString()}.00</span>
                 </div>
               </>

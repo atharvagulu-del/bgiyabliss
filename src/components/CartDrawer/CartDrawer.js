@@ -9,12 +9,12 @@ import styles from './CartDrawer.module.css';
 
 const MILESTONES = [
   { amount: 599, label: 'FLAT 10% OFF!', code: 'BLISS10' },
-  { amount: 1099, label: 'FLAT 20% OFF!', code: 'BLISS20' },
+  { amount: 1099, label: 'FLAT 15% OFF!', code: 'BLISS15' },
 ];
 
 const AVAILABLE_COUPONS = [
-  { code: 'BLISS10', label: 'Flat 10% Off', desc: 'On your first order', minCart: 0, discount: 0.10 },
-  { code: 'BLISS20', label: 'Flat 20% Off', desc: 'On orders above ₹1099', minCart: 1099, discount: 0.20 },
+  { code: 'BLISS10', label: 'Flat 10% Off', desc: 'On your first order', minCart: 0, discount: 10 },
+  { code: 'BLISS15', label: 'Flat 15% Off', desc: 'On orders above ₹1099', minCart: 1099, discount: 15 },
 ];
 
 /* ── Milestone Progress Bar ── */
@@ -105,14 +105,14 @@ export default function CartDrawer() {
   }, 0) + discountAmount;
 
   const applyCode = (code) => {
-    if (code === 'BLISS20' && cartSubtotal >= 1099) {
-      setAppliedPromo('BLISS20');
-      setPromoInput('BLISS20');
-      setPromoMessage('🎉 20% discount applied!');
-    } else if (code === 'BLISS20' && cartSubtotal < 1099) {
-      setPromoMessage(`Add ₹${(1099 - cartSubtotal).toLocaleString()} more to use BLISS20`);
+    if (code === 'BLISS15' && cartSubtotal >= 1099) {
+      setAppliedPromo({ code: 'BLISS15', discountType: 'percent', discountValue: 15, minOrderValue: 1099 });
+      setPromoInput('BLISS15');
+      setPromoMessage('🎉 15% discount applied!');
+    } else if (code === 'BLISS15' && cartSubtotal < 1099) {
+      setPromoMessage(`Add ₹${(1099 - cartSubtotal).toLocaleString()} more to use BLISS15`);
     } else if (code === 'BLISS10') {
-      setAppliedPromo('BLISS10');
+      setAppliedPromo({ code: 'BLISS10', discountType: 'percent', discountValue: 10, minOrderValue: 0 });
       setPromoInput('BLISS10');
       setPromoMessage('🎉 10% discount applied!');
     } else {
@@ -217,7 +217,7 @@ export default function CartDrawer() {
                       <CheckCircle2 size={16} style={{ color: '#16a34a' }} />
                       <div>
                         <span style={{ fontSize: '12px', fontWeight: 700, color: '#16a34a' }}>Save ₹{Math.round(discountAmount).toLocaleString()}</span>
-                        <span style={{ fontSize: '11px', color: '#6b7280', marginLeft: '6px' }}>with &apos;{appliedPromo}&apos;</span>
+                        <span style={{ fontSize: '11px', color: '#6b7280', marginLeft: '6px' }}>with &apos;{appliedPromo.code}&apos;</span>
                       </div>
                     </div>
                     <button onClick={() => { setAppliedPromo(null); setPromoInput(''); setPromoMessage(''); }} style={{ fontSize: '11px', fontWeight: 600, color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}>Remove</button>
@@ -297,9 +297,9 @@ export default function CartDrawer() {
                   <span>Subtotal</span>
                   <span>₹{cartSubtotal.toLocaleString()}</span>
                 </div>
-                {discountAmount > 0 && (
+                {discountAmount > 0 && appliedPromo && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#16a34a', fontWeight: 700, marginBottom: '6px' }}>
-                    <span>Discount ({appliedPromo})</span>
+                    <span>Discount ({appliedPromo.code})</span>
                     <span>-₹{Math.round(discountAmount).toLocaleString()}</span>
                   </div>
                 )}
