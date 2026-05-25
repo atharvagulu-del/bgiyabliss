@@ -12,19 +12,28 @@ export async function POST(req) {
     const token = await getNimbusToken();
     const origin = process.env.NIMBUS_ORIGIN_PIN || '324010';
     
-    // Nimbus expects weight in grams. 
+    // Use the weight sent from checkout (already calculated per-product in CartContext)
     // Fallback to 1kg if 0 or undefined
     const finalWeight = weight > 0 ? weight : 1000;
+
+    // Estimate dimensions based on weight
+    // Heavier orders (>5kg) likely contain 10kg bags
+    let length = 25, breadth = 15, height = 10;
+    if (finalWeight >= 10000) {
+      length = 40; breadth = 30; height = 40;
+    } else if (finalWeight >= 3000) {
+      length = 40; breadth = 25; height = 15;
+    }
 
     const payload = {
       origin,
       destination,
-      payment_type: paymentType || 'prepaid', // 'cod' or 'prepaid'
+      payment_type: paymentType || 'prepaid',
       order_amount: orderAmount || 0,
       weight: finalWeight,
-      length: 25,
-      breadth: 15,
-      height: 10
+      length,
+      breadth,
+      height
     };
 
     const res = await fetch('https://api.nimbuspost.com/v1/courier/serviceability', {
@@ -40,8 +49,6 @@ export async function POST(req) {
     const data = await res.json();
 
     if (data.status && data.data && data.data.length > 0) {
-      // Filter out any couriers that are disabled or unsupported if needed
-      // Find the cheapest available courier
       const couriers = data.data;
       const cheapest = couriers.reduce((prev, curr) => {
         return (prev.total_charges < curr.total_charges) ? prev : curr;
@@ -54,7 +61,6 @@ export async function POST(req) {
         estimatedDelivery: cheapest.expected_delivery_date
       });
     } else {
-      // No serviceability or error
       return NextResponse.json({ success: false, error: data.message || 'No couriers available for this PIN code.' });
     }
   } catch (error) {

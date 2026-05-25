@@ -1,13 +1,67 @@
 import { NextResponse } from 'next/server';
 import { getNimbusToken } from '@/lib/nimbus';
-import { db } from '@/lib/firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+
+// ── Shipping weight & dimensions lookup ──
+// Keys are lowercase substrings matched against item names.
+// weight = actual shipping weight in grams (with packaging)
+// l/b/h = box dimensions in cm
+const PRODUCT_SHIPPING_INFO = [
+  { match: '10kg',              weight: 10500, l: 40, b: 30, h: 40 },
+  { match: '10 kg',             weight: 10500, l: 40, b: 30, h: 40 },
+  { match: '5 in 1',            weight: 3700,  l: 40, b: 25, h: 15 },
+  { match: '5 in one',          weight: 3700,  l: 40, b: 25, h: 15 },
+  { match: '5-in-1',            weight: 3700,  l: 40, b: 25, h: 15 },
+  { match: 'neem cake',         weight: 3700,  l: 40, b: 25, h: 15 },
+  { match: 'cow manure',        weight: 3700,  l: 40, b: 25, h: 15 },
+  { match: 'cow dung',          weight: 3700,  l: 40, b: 25, h: 15 },
+  { match: 'organic manure',    weight: 3700,  l: 40, b: 25, h: 15 },
+  { match: 'potting mix',       weight: 3700,  l: 40, b: 25, h: 15 },
+];
+
+// Default for anything not matched (small items like seeds, tools, etc.)
+const DEFAULT_SHIPPING = { weight: 1000, l: 25, b: 15, h: 10 };
+
+function getProductShipping(itemName) {
+  const name = (itemName || '').toLowerCase();
+  // Try matches in order — first match wins (10kg before generic potting mix)
+  for (const entry of PRODUCT_SHIPPING_INFO) {
+    if (name.includes(entry.match)) {
+      return entry;
+    }
+  }
+  return DEFAULT_SHIPPING;
+}
+
+function calculateShipmentDimensions(items) {
+  let totalWeight = 0;
+  let maxL = 0, maxB = 0, totalH = 0;
+
+  for (const item of items) {
+    const info = getProductShipping(item.name);
+    const qty = item.quantity || 1;
+    totalWeight += info.weight * qty;
+    // Use the largest L and B among all items
+    maxL = Math.max(maxL, info.l);
+    maxB = Math.max(maxB, info.b);
+    // Stack height for multiple items
+    totalH += info.h * qty;
+  }
+
+  // Cap height at a reasonable max
+  if (totalH > 100) totalH = 100;
+
+  return {
+    weight: totalWeight,
+    length: maxL || DEFAULT_SHIPPING.l,
+    breadth: maxB || DEFAULT_SHIPPING.b,
+    height: totalH || DEFAULT_SHIPPING.h,
+  };
+}
 
 export async function POST(req) {
   try {
     const orderData = await req.json();
     
-    // We need the orderId and order details
     if (!orderData || !orderData.orderId) {
       return NextResponse.json({ error: 'Order data is required' }, { status: 400 });
     }
@@ -15,7 +69,10 @@ export async function POST(req) {
     const token = await getNimbusToken();
 
     const paymentType = orderData.paymentMethod === 'cod' ? 'cod' : 'prepaid';
-    const weight = orderData.totalWeight || 1000;
+    
+    // Calculate real shipping weight & dimensions from the order items
+    const dims = calculateShipmentDimensions(orderData.items || []);
+    console.log(`Shipment dimensions for ${orderData.orderId}: ${dims.weight}g, ${dims.length}x${dims.breadth}x${dims.height}cm`);
 
     // Step 1: Fetch available couriers and pick the cheapest one
     let courierId = null;
@@ -31,16 +88,15 @@ export async function POST(req) {
           destination: orderData.shipping.pincode,
           payment_type: paymentType,
           order_amount: orderData.total,
-          weight: weight,
-          length: 25,
-          breadth: 15,
-          height: 10
+          weight: dims.weight,
+          length: dims.length,
+          breadth: dims.breadth,
+          height: dims.height
         })
       });
       const courierData = await courierRes.json();
 
       if (courierData.status && courierData.data && courierData.data.length > 0) {
-        // Sort by total_charges and pick the cheapest
         const cheapest = courierData.data.sort((a, b) => 
           parseFloat(a.total_charges) - parseFloat(b.total_charges)
         )[0];
@@ -59,10 +115,10 @@ export async function POST(req) {
       cod_charges: 0,
       payment_type: paymentType,
       order_amount: orderData.total,
-      package_weight: weight,
-      package_length: 25,
-      package_breadth: 15,
-      package_height: 10,
+      package_weight: dims.weight,
+      package_length: dims.length,
+      package_breadth: dims.breadth,
+      package_height: dims.height,
       request_auto_pickup: 'yes',
       ...(courierId && { courier_id: courierId }),
       consignee: {
@@ -105,17 +161,9 @@ export async function POST(req) {
     const data = await res.json();
 
     if (data.status && data.data) {
-      // Successfully created AWB
       const awb = data.data.awb_number;
       const courier = data.data.courier_name;
       const shipmentId = data.data.shipment_id;
-
-      // Now we should ideally update the order in Firebase to save the AWB
-      // But since this route is just a helper, we'll return it so the frontend can update, 
-      // or we can update it right here if we have the firestore doc ID.
-      // Usually orderData.orderId is the custom string we save, but the doc ID might be different,
-      // or we use the custom orderId as the doc ID. 
-      // In checkout/page.js, `createOrder` might use auto-generated ID or `orderId`. Let's assume frontend will handle updating if needed, or we just return it.
       
       return NextResponse.json({
         success: true,
