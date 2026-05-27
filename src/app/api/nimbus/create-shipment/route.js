@@ -6,10 +6,7 @@ import { getNimbusToken } from '@/lib/nimbus';
 // weight = actual shipping weight in grams (with packaging)
 // l/b/h = box dimensions in cm
 const PRODUCT_SHIPPING_INFO = [
-  { match: '10kg',              weight: 10500, l: 40, b: 30, h: 40 },
-  { match: '10 kg',             weight: 10500, l: 40, b: 30, h: 40 },
-  { match: '5kg',               weight: 5000,  l: 40, b: 25, h: 15 },
-  { match: '5 kg',              weight: 5000,  l: 40, b: 25, h: 15 },
+  // ── Specific product names FIRST (before generic weight patterns) ──
   { match: '5 in 1',            weight: 3700,  l: 30, b: 20, h: 20 },
   { match: '5 in one',          weight: 3700,  l: 30, b: 20, h: 20 },
   { match: '5-in-1',            weight: 3700,  l: 30, b: 20, h: 20 },
@@ -17,6 +14,11 @@ const PRODUCT_SHIPPING_INFO = [
   { match: 'cow manure',        weight: 5000,  l: 40, b: 25, h: 15 },
   { match: 'cow dung',          weight: 5000,  l: 40, b: 25, h: 15 },
   { match: 'organic manure',    weight: 5000,  l: 40, b: 25, h: 15 },
+  // ── Generic weight-based patterns LAST ──
+  { match: '10kg',              weight: 10500, l: 40, b: 30, h: 40 },
+  { match: '10 kg',             weight: 10500, l: 40, b: 30, h: 40 },
+  { match: '5kg',               weight: 5000,  l: 40, b: 25, h: 15 },
+  { match: '5 kg',              weight: 5000,  l: 40, b: 25, h: 15 },
   { match: 'potting mix',       weight: 3700,  l: 40, b: 25, h: 15 },
 ];
 
