@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Star, ShieldCheck, Truck, RotateCcw, ChevronLeft, ChevronRight, X, Heart, ShoppingCart, CheckCircle2 } from 'lucide-react';
+import { Star, ShieldCheck, Truck, RotateCcw, ChevronLeft, ChevronRight, X, Heart, ShoppingCart, CheckCircle2, Share2 } from 'lucide-react';
 import styles from './ProductPage.module.css';
 import ProductCarousel from '@/components/ProductCarousel/ProductCarousel';
 import TrustBar from '@/components/TrustBar/TrustBar';
@@ -65,6 +65,7 @@ export default function ProductDetailPage({ product, relatedProducts }) {
   const [stickyVisible, setStickyVisible] = useState(false);
   const [fetchedReviews, setFetchedReviews] = useState([]);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const addToCartRef = useRef(null);
@@ -332,6 +333,28 @@ export default function ProductDetailPage({ product, relatedProducts }) {
               <button className={`${styles.wishlistBtn} ${isWished ? styles.wishlistActive : ''}`} onClick={() => toggleWishlist(product)}>
                 <Heart size={20} fill={isWished ? '#ef4444' : 'none'} />
               </button>
+              <button
+                className={styles.wishlistBtn}
+                title="Share this product"
+                onClick={() => {
+                  const url = window.location.href;
+                  navigator.clipboard.writeText(url).then(() => {
+                    setShareCopied(true);
+                    setTimeout(() => setShareCopied(false), 2000);
+                  });
+                }}
+                style={{ position: 'relative' }}
+              >
+                <Share2 size={20} />
+                {shareCopied && (
+                  <span style={{
+                    position: 'absolute', bottom: '110%', left: '50%', transform: 'translateX(-50%)',
+                    background: '#111', color: '#fff', fontSize: 11, fontWeight: 600,
+                    padding: '4px 10px', borderRadius: 6, whiteSpace: 'nowrap',
+                    pointerEvents: 'none', animation: 'fadeIn 0.2s ease'
+                  }}>Link copied!</span>
+                )}
+              </button>
             </div>
           </div>
 
@@ -390,7 +413,7 @@ export default function ProductDetailPage({ product, relatedProducts }) {
                 <div style={{ marginTop: 12, padding: '10px 14px', background: '#ecfdf5', borderRadius: 8, fontSize: 13 }}>
                   <p style={{ fontWeight: 600, marginBottom: 4 }}>🎉 Available Offers:</p>
                   <ul style={{ margin: 0, paddingLeft: 18 }}>
-                    <li>Flat 20% Off on orders above ₹1099 — Use code: <strong>BLISS20</strong></li>
+                    <li>Flat 15% Off on orders above ₹1099 — Use code: <strong>BLISS15</strong></li>
                     <li>Flat 10% Off on your first order — Use code: <strong>BLISS10</strong></li>
                   </ul>
                 </div>
