@@ -56,7 +56,12 @@ const emptyForm = {
   mainVariantLabel: '',
   productWeight: '',
   productWeightUnit: 'kg',
-  productPackQuantity: '',  // e.g. 2 for "Pack of 2" on the main product
+  productPackQuantity: '',
+  // Shipping fields for Nimbus
+  shippingWeight: '',      // in kg (actual shipping weight with packaging)
+  shippingLength: '',      // cm
+  shippingBreadth: '',     // cm
+  shippingHeight: '',      // cm
 };
 
 export default function ProductForm({ existingProduct = null }) {
@@ -147,6 +152,10 @@ export default function ProductForm({ existingProduct = null }) {
           const pMatch = w.match(/pack of\s*(\d+)/i);
           return pMatch ? pMatch[1] : '';
         })(),
+        shippingWeight: existingProduct.shippingWeight || '',
+        shippingLength: existingProduct.shippingLength || '',
+        shippingBreadth: existingProduct.shippingBreadth || '',
+        shippingHeight: existingProduct.shippingHeight || '',
       });
     }
   }, [existingProduct]);
@@ -468,8 +477,13 @@ export default function ProductForm({ existingProduct = null }) {
         status: status || form.status,
         featured: form.featured,
         variantGroupId: groupId,
-        variantLabel: mainLabel,          // short weight label for this product page's pill
+        variantLabel: mainLabel,
         variantSummary: allVariantSummary,
+        // Shipping info for Nimbus
+        shippingWeight: parseFloat(form.shippingWeight) || 0,
+        shippingLength: parseFloat(form.shippingLength) || 0,
+        shippingBreadth: parseFloat(form.shippingBreadth) || 0,
+        shippingHeight: parseFloat(form.shippingHeight) || 0,
       };
 
       if (isEditing) {
@@ -991,6 +1005,70 @@ export default function ProductForm({ existingProduct = null }) {
                   <div className={styles.discountDisplay}>
                     <span>Discount</span>
                     <strong>{form.discount}% OFF</strong>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* ─── Shipping Dimensions (for Nimbus) ─── */}
+            <div className={`adminCard ${styles.section}`}>
+              <div className="adminCardHeader">
+                <h3 className="adminCardTitle">📦 Shipping Info</h3>
+                <p style={{ fontSize: 12, color: 'var(--admin-text-muted)', margin: '4px 0 0' }}>Used for Nimbus Post shipment — actual weight with packaging</p>
+              </div>
+              <div className="adminCardBody">
+                <div className="adminFormGroup">
+                  <label className="adminLabel">Shipping Weight (kg)</label>
+                  <input
+                    type="number"
+                    className="adminInput"
+                    placeholder="e.g. 3.7"
+                    step="0.1"
+                    min="0"
+                    value={form.shippingWeight}
+                    onChange={(e) => setForm(prev => ({ ...prev, shippingWeight: e.target.value }))}
+                  />
+                  <p style={{ fontSize: 11, color: 'var(--admin-text-muted)', marginTop: 4 }}>Actual weight including packaging (in kg)</p>
+                </div>
+                <label className="adminLabel" style={{ marginBottom: 8 }}>Dimensions (cm)</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+                  <div className="adminFormGroup" style={{ margin: 0 }}>
+                    <input
+                      type="number"
+                      className="adminInput"
+                      placeholder="Length"
+                      min="0"
+                      value={form.shippingLength}
+                      onChange={(e) => setForm(prev => ({ ...prev, shippingLength: e.target.value }))}
+                    />
+                    <span style={{ fontSize: 10, color: 'var(--admin-text-muted)', textAlign: 'center', display: 'block', marginTop: 2 }}>Length</span>
+                  </div>
+                  <div className="adminFormGroup" style={{ margin: 0 }}>
+                    <input
+                      type="number"
+                      className="adminInput"
+                      placeholder="Breadth"
+                      min="0"
+                      value={form.shippingBreadth}
+                      onChange={(e) => setForm(prev => ({ ...prev, shippingBreadth: e.target.value }))}
+                    />
+                    <span style={{ fontSize: 10, color: 'var(--admin-text-muted)', textAlign: 'center', display: 'block', marginTop: 2 }}>Breadth</span>
+                  </div>
+                  <div className="adminFormGroup" style={{ margin: 0 }}>
+                    <input
+                      type="number"
+                      className="adminInput"
+                      placeholder="Height"
+                      min="0"
+                      value={form.shippingHeight}
+                      onChange={(e) => setForm(prev => ({ ...prev, shippingHeight: e.target.value }))}
+                    />
+                    <span style={{ fontSize: 10, color: 'var(--admin-text-muted)', textAlign: 'center', display: 'block', marginTop: 2 }}>Height</span>
+                  </div>
+                </div>
+                {form.shippingWeight && form.shippingLength && form.shippingBreadth && form.shippingHeight && (
+                  <div style={{ marginTop: 12, padding: '10px 14px', background: '#f0fdf4', borderRadius: 8, fontSize: 12, color: '#065f46' }}>
+                    ✅ Nimbus will use: <strong>{form.shippingWeight}kg</strong> — <strong>{form.shippingLength} × {form.shippingBreadth} × {form.shippingHeight} cm</strong>
                   </div>
                 )}
               </div>

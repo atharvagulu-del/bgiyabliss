@@ -240,7 +240,7 @@ export default function CheckoutPage() {
       orderId,
       customer: { name: `${form.name.trim()} ${form.lastName.trim()}`.trim(), phone: form.phone.trim(), email: form.email.trim() },
       shipping: { address1: form.address1.trim(), address2: form.address2.trim(), city: form.city.trim(), state: form.state, pincode: form.pincode.trim() },
-      items: cartItems.map(item => ({ id: item.id, name: item.name, slug: item.slug, quantity: item.quantity, price: item.salePrice || 0, image: item.image || item.images?.[0] || '' })),
+      items: cartItems.map(item => ({ id: item.id, name: item.name, slug: item.slug, quantity: item.quantity, price: item.salePrice || 0, image: item.image || item.images?.[0] || '', shippingWeight: item.shippingWeight || 0, shippingLength: item.shippingLength || 0, shippingBreadth: item.shippingBreadth || 0, shippingHeight: item.shippingHeight || 0 })),
       subtotal: cartSubtotal, discount: discountAmount, promoCode: appliedPromo?.code || null,
       shippingCost, total: orderTotal, paymentMethod: form.paymentMethod, status: 'pending',
     };

@@ -25,9 +25,19 @@ const PRODUCT_SHIPPING_INFO = [
 // Default for anything not matched (small items like seeds, tools, etc.)
 const DEFAULT_SHIPPING = { weight: 1000, l: 25, b: 15, h: 10 };
 
-function getProductShipping(itemName) {
-  const name = (itemName || '').toLowerCase();
-  // Try matches in order — first match wins (10kg before generic potting mix)
+function getProductShipping(item) {
+  // Priority 1: Use shipping data set in admin panel (stored on product in Firestore)
+  if (item.shippingWeight && item.shippingWeight > 0) {
+    return {
+      weight: item.shippingWeight * 1000, // admin stores in kg, nimbus expects grams
+      l: item.shippingLength || 25,
+      b: item.shippingBreadth || 15,
+      h: item.shippingHeight || 10,
+    };
+  }
+
+  // Priority 2: Fall back to hardcoded name-based lookup
+  const name = (item.name || '').toLowerCase();
   for (const entry of PRODUCT_SHIPPING_INFO) {
     if (name.includes(entry.match)) {
       return entry;
@@ -41,17 +51,14 @@ function calculateShipmentDimensions(items) {
   let maxL = 0, maxB = 0, totalH = 0;
 
   for (const item of items) {
-    const info = getProductShipping(item.name);
+    const info = getProductShipping(item);
     const qty = item.quantity || 1;
     totalWeight += info.weight * qty;
-    // Use the largest L and B among all items
     maxL = Math.max(maxL, info.l);
     maxB = Math.max(maxB, info.b);
-    // Stack height for multiple items
     totalH += info.h * qty;
   }
 
-  // Cap height at a reasonable max
   if (totalH > 100) totalH = 100;
 
   return {
