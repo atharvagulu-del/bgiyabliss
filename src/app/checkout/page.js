@@ -117,7 +117,7 @@ export default function CheckoutPage() {
   }, [user]);
 
   const baseShippingCost = dynamicShippingCost !== null ? Math.round(dynamicShippingCost) : 54;
-  const COD_FEE = 25;
+  const COD_FEE = 52;
   const shippingCost = form.paymentMethod === 'cod' ? COD_FEE : 0;
   const orderTotal = cartTotal + shippingCost;
   const savings = discountAmount + (form.paymentMethod === 'prepaid' ? baseShippingCost : baseShippingCost - COD_FEE);
@@ -536,7 +536,7 @@ export default function CheckoutPage() {
               </div>
               <span style={{ fontWeight: 600 }}>
                 <span style={{ textDecoration: 'line-through', color: '#a3a3a3', marginRight: 6, fontSize: 12 }}>₹{baseShippingCost}</span>
-                <span style={{ color: '#1a1a1a' }}>₹25</span>
+                <span style={{ color: '#1a1a1a' }}>₹52</span>
               </span>
             </label>
           </div>
@@ -683,7 +683,7 @@ export default function CheckoutPage() {
                 <span style={{ textDecoration: 'line-through', color: '#a3a3a3', marginRight: 6, fontSize: 12 }}>₹{baseShippingCost}.00</span>
                 {form.paymentMethod === 'prepaid'
                   ? <span style={{ color: '#16a34a', fontWeight: 600 }}>Free</span>
-                  : <span style={{ fontWeight: 600 }}>₹25.00</span>
+                  : <span style={{ fontWeight: 600 }}>₹52.00</span>
                 }
               </span>
             </div>
