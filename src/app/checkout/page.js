@@ -47,6 +47,7 @@ export default function CheckoutPage() {
   const [saveInfo, setSaveInfo] = useState(true);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [orderPlaced, setOrderPlaced] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [showMobileSummary, setShowMobileSummary] = useState(false);
   const [promoInput, setPromoInput] = useState('');
@@ -257,6 +258,7 @@ export default function CheckoutPage() {
     if (form.paymentMethod === 'cod') {
       try {
         await createOrder(orderData);
+        setOrderPlaced(true);
         clearCart();
         await sendConfirmationEmail(orderData);
         await autoShip(orderData);
@@ -319,6 +321,7 @@ export default function CheckoutPage() {
               orderData.razorpayOrderId = response.razorpay_order_id;
               orderData.razorpaySignature = response.razorpay_signature;
               await createOrder(orderData);
+              setOrderPlaced(true);
               clearCart();
               await sendConfirmationEmail(orderData);
               await autoShip(orderData);
@@ -400,6 +403,31 @@ export default function CheckoutPage() {
   const u = (f, v) => { setForm(p => ({ ...p, [f]: v })); if (errors[f]) setErrors(p => { const n = { ...p }; delete n[f]; return n; }); };
 
   if (!mounted) return null;
+
+  if (orderPlaced || (loading && cartCount === 0)) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, fontFamily: "'Inter',system-ui,sans-serif", background: '#fafafa' }}>
+        <div style={{ position: 'relative', width: 64, height: 64, marginBottom: 24 }}>
+          <div style={{ width: 64, height: 64, border: '3px solid #e5e7eb', borderTopColor: '#16a34a', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+            <Package size={24} style={{ color: '#16a34a' }} />
+          </div>
+        </div>
+        <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 8, color: '#111' }}>Processing your order...</h2>
+        <p style={{ color: '#737373', fontSize: 14, marginBottom: 8 }}>Please wait while we confirm everything</p>
+        <div style={{ display: 'flex', gap: 6, marginTop: 12 }}>
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#16a34a', animation: 'bounce 1.4s ease-in-out infinite', animationDelay: '0s' }} />
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#16a34a', animation: 'bounce 1.4s ease-in-out infinite', animationDelay: '0.2s' }} />
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#16a34a', animation: 'bounce 1.4s ease-in-out infinite', animationDelay: '0.4s' }} />
+        </div>
+        <style>{`
+          @keyframes spin { to { transform: rotate(360deg); } }
+          @keyframes bounce { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+        `}</style>
+      </div>
+    );
+  }
+
   if (cartCount === 0) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, fontFamily: "'Inter',system-ui,sans-serif" }}>
