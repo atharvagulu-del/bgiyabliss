@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Leaf, Mail, Phone, MapPin, ArrowRight, Instagram, Facebook, Youtube, Linkedin } from 'lucide-react';
+import { Leaf, Mail, Phone, MapPin, ArrowRight, Instagram } from 'lucide-react';
 import styles from './Footer.module.css';
 
 export default function Footer() {
@@ -47,10 +47,10 @@ export default function Footer() {
                 India&apos;s premium destination for plants, seeds, pots &amp; all gardening essentials. Bringing nature closer to you since 2024.
               </p>
               <div className={styles.social}>
-                <a href="#" className={styles.socialIcon} aria-label="Instagram"><Instagram size={20} /></a>
-                <a href="#" className={styles.socialIcon} aria-label="Facebook"><Facebook size={20} /></a>
-                <a href="#" className={styles.socialIcon} aria-label="YouTube"><Youtube size={20} /></a>
-                <a href="#" className={styles.socialIcon} aria-label="LinkedIn"><Linkedin size={20} /></a>
+                <a href="https://www.instagram.com/bgiyabliss/" target="_blank" rel="noopener noreferrer" className={styles.igIcon} aria-label="Instagram">
+                  <Instagram size={24} />
+                  <span className={styles.igHandle}>@bgiyabliss</span>
+                </a>
               </div>
             </div>
 
@@ -60,7 +60,6 @@ export default function Footer() {
               <ul className={styles.colList}>
                 <li><a href="/pages/our-story">Our Story</a></li>
                 <li><a href="/pages/contact">Contact Us</a></li>
-                <li><a href="/pages/careers">Careers</a></li>
               </ul>
             </div>
 

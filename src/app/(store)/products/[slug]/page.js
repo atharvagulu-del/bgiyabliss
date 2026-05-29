@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import ProductDetailPage from '@/components/ProductPage/ProductPage';
 import { getProductBySlug, getActiveProducts } from '@/lib/firestore';
 import { bestsellers, newArrivals, plantBundles, ceramics } from '@/data/products';
@@ -14,6 +14,8 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
+  const router = useRouter();
+
   useEffect(() => {
     const loadProduct = async () => {
       const slug = params.slug;
@@ -26,6 +28,11 @@ export default function Page() {
         ]);
 
         if (firestoreProduct) {
+          // Redirect tools/inactive products to coming-soon page
+          if (firestoreProduct.category === 'tools' || firestoreProduct.status === 'inactive') {
+            router.replace('/products/coming-soon');
+            return;
+          }
           setProduct(firestoreProduct);
 
           // Get related products from Firestore (also with timeout)
@@ -52,6 +59,11 @@ export default function Page() {
 
       const staticProduct = uniqueProducts.find(p => p.slug === slug);
       if (staticProduct) {
+        // Redirect tools/inactive products to coming-soon page
+        if (staticProduct.category === 'tools' || staticProduct.status === 'inactive') {
+          router.replace('/products/coming-soon');
+          return;
+        }
         setProduct(staticProduct);
         setRelatedProducts(
           uniqueProducts
@@ -66,7 +78,7 @@ export default function Page() {
     };
 
     loadProduct();
-  }, [params.slug]);
+  }, [params.slug, router]);
 
   if (loading) {
     return (
