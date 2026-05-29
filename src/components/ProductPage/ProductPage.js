@@ -202,9 +202,11 @@ export default function ProductDetailPage({ product, relatedProducts }) {
           </div>
           <p className={styles.taxLine}>Taxes included. <Link href="/pages/shipping-policy">Shipping</Link> calculated at checkout.</p>
 
-          <div className={`${styles.stockBadge} ${product.status !== 'inactive' ? styles.inStock : styles.outOfStock}`}>
-            <span className={`${styles.stockDot} ${product.status !== 'inactive' ? styles.stockDotGreen : styles.stockDotRed}`} />
-            {product.status !== 'inactive' ? 'In stock' : 'Out of stock'}
+          <div className={`${styles.stockBadge} ${product.category === 'tools' || product.status === 'inactive' ? styles.outOfStock : styles.inStock}`}
+            style={product.category === 'tools' || product.status === 'inactive' ? { color: '#b45309', background: '#fffbeb' } : {}}>
+            <span className={`${styles.stockDot} ${product.category === 'tools' || product.status === 'inactive' ? styles.stockDotRed : styles.stockDotGreen}`}
+              style={product.category === 'tools' || product.status === 'inactive' ? { background: '#f59e0b' } : {}} />
+            {product.category === 'tools' || product.status === 'inactive' ? 'Coming Soon' : 'In stock'}
           </div>
 
           {/* Amazon-style Linked Variant Switcher */}
@@ -317,6 +319,48 @@ export default function ProductDetailPage({ product, relatedProducts }) {
           })()}
 
           {/* Quantity + Add to Cart — NO Buy Now */}
+          {product.category === 'tools' || product.status === 'inactive' ? (
+            <div style={{ marginTop: 16 }}>
+              <div style={{
+                background: 'linear-gradient(135deg, #fef3c7, #fffbeb)',
+                border: '1px solid #f59e0b',
+                borderRadius: 12,
+                padding: '20px 24px',
+                textAlign: 'center',
+              }}>
+                <div style={{ fontSize: 28, marginBottom: 8 }}>🔔</div>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#92400e', marginBottom: 4 }}>Coming Soon</h3>
+                <p style={{ fontSize: 13, color: '#a16207', margin: 0 }}>This product will be available shortly. Stay tuned!</p>
+              </div>
+              <div className={styles.btnRow} style={{ marginTop: 12 }}>
+                <button className={`${styles.wishlistBtn} ${isWished ? styles.wishlistActive : ''}`} onClick={() => toggleWishlist(product)}>
+                  <Heart size={20} fill={isWished ? '#ef4444' : 'none'} />
+                </button>
+                <button
+                  className={styles.wishlistBtn}
+                  title="Share this product"
+                  onClick={() => {
+                    const url = window.location.href;
+                    navigator.clipboard.writeText(url).then(() => {
+                      setShareCopied(true);
+                      setTimeout(() => setShareCopied(false), 2000);
+                    });
+                  }}
+                  style={{ position: 'relative' }}
+                >
+                  <Share2 size={20} />
+                  {shareCopied && (
+                    <span style={{
+                      position: 'absolute', bottom: '110%', left: '50%', transform: 'translateX(-50%)',
+                      background: '#111', color: '#fff', fontSize: 11, fontWeight: 600,
+                      padding: '4px 10px', borderRadius: 6, whiteSpace: 'nowrap',
+                      pointerEvents: 'none', animation: 'fadeIn 0.2s ease'
+                    }}>Link copied!</span>
+                  )}
+                </button>
+              </div>
+            </div>
+          ) : (
           <div className={styles.actionsRow} ref={addToCartRef}>
             <div className={styles.qtyRow}>
               <span className={styles.qtyLabel}>Quantity:</span>
@@ -357,6 +401,7 @@ export default function ProductDetailPage({ product, relatedProducts }) {
               </button>
             </div>
           </div>
+          )}
 
           {/* Specs — OB style: emoji + bold label: value */}
           {Object.keys(details).length > 0 && (

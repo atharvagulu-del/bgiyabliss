@@ -101,7 +101,7 @@ export const newArrivals = [
     reviews: 42,
     featured: ['new-arrival'],
     tags: ['tools', 'pruner', 'accessories'],
-    status: 'active'
+    status: 'inactive'
   },
   {
     id: 'static-na-3',

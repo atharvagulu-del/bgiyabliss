@@ -8,6 +8,7 @@ export default function ProductCard({ product }) {
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const isWished = isInWishlist(product.id);
+  const isComingSoon = product.category === 'tools' || product.status === 'inactive';
   // Mock care data based strictly on tags for demo purposes
   const isLowLight = product.tags?.includes('Low Light');
   const isLowCare = product.tags?.includes('Low Care') || product.tags?.includes('Low Maintenance');
@@ -28,15 +29,23 @@ export default function ProductCard({ product }) {
 
         {/* Floating Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2 pointer-events-none">
-          {product.discount > 0 && (
-            <span className="bg-red-500 text-white text-[10px] font-bold tracking-wider uppercase px-2 py-1 rounded shadow-sm">
-              {product.discount}% OFF
+          {isComingSoon ? (
+            <span className="bg-amber-500 text-white text-[10px] font-bold tracking-wider uppercase px-2 py-1 rounded shadow-sm">
+              COMING SOON
             </span>
-          )}
-          {product.featured?.includes('new-arrival') && (
-            <span className="bg-emerald-500 text-white text-[10px] font-bold tracking-wider uppercase px-2 py-1 rounded shadow-sm">
-              NEW
-            </span>
+          ) : (
+            <>
+              {product.discount > 0 && (
+                <span className="bg-red-500 text-white text-[10px] font-bold tracking-wider uppercase px-2 py-1 rounded shadow-sm">
+                  {product.discount}% OFF
+                </span>
+              )}
+              {product.featured?.includes('new-arrival') && (
+                <span className="bg-emerald-500 text-white text-[10px] font-bold tracking-wider uppercase px-2 py-1 rounded shadow-sm">
+                  NEW
+                </span>
+              )}
+            </>
           )}
         </div>
 
@@ -63,16 +72,24 @@ export default function ProductCard({ product }) {
         </button>
 
         {/* Quick Add overlay button */}
-        <button
-          className="absolute bottom-4 left-4 right-4 bg-emerald-600/90 backdrop-blur text-white py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium text-sm translate-y-[150%] group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-emerald-700 shadow-lg z-10"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            addToCart(product);
-          }}
-        >
-          <ShoppingCart size={16} /> Quick Add
-        </button>
+        {isComingSoon ? (
+          <div
+            className="absolute bottom-4 left-4 right-4 bg-gray-800/80 backdrop-blur text-white py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium text-sm opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg z-10 cursor-default"
+          >
+            🔔 Coming Soon
+          </div>
+        ) : (
+          <button
+            className="absolute bottom-4 left-4 right-4 bg-emerald-600/90 backdrop-blur text-white py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium text-sm translate-y-[150%] group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-emerald-700 shadow-lg z-10"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              addToCart(product);
+            }}
+          >
+            <ShoppingCart size={16} /> Quick Add
+          </button>
+        )}
       </a>
 
       {/* Info Area */}
