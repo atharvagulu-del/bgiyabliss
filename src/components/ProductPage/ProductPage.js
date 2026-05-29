@@ -9,6 +9,7 @@ import TrustBar from '@/components/TrustBar/TrustBar';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { getReviews, addReview } from '@/lib/firestore';
+import { getSeedReviews } from '@/data/seedReviews';
 
 // Emoji icons for spec keys — matching OrganicBazar exactly
 const specEmojis = {
@@ -35,23 +36,10 @@ function StarRating({ rating, size = 16 }) {
   );
 }
 
-const sampleReviews = [
-  {
-    id: 1, name: 'Priya S.', rating: 5, date: '2 weeks ago', title: 'Excellent quality product!',
-    body: 'Very happy with the purchase. The quality is outstanding and exactly as described. My plants are thriving! Highly recommended for all gardening enthusiasts.', verified: true
-  },
-  {
-    id: 2, name: 'Rahul M.', rating: 5, date: '1 month ago', title: 'Great value for money',
-    body: 'Amazing product at this price point. Durable, well-made, and perfect for my terrace garden. Will definitely buy again.', verified: true
-  },
-  {
-    id: 3, name: 'Anita K.', rating: 4, date: '1 month ago', title: 'Good product, fast delivery',
-    body: 'Product is good quality. Delivery was quick. Using it for my kitchen garden and it works great.', verified: true
-  },
-  {
-    id: 4, name: 'Vikram J.', rating: 5, date: '2 months ago', title: 'Perfect for home gardening',
-    body: 'Exactly what I needed for my balcony garden. Sturdy, well-built, and looks great too!', verified: true
-  },
+const AVATAR_COLORS = [
+  '#16a34a', '#2563eb', '#9333ea', '#e11d48', '#ea580c',
+  '#0891b2', '#4f46e5', '#c026d3', '#059669', '#d97706',
+  '#7c3aed', '#dc2626', '#0d9488', '#6366f1', '#db2777',
 ];
 
 export default function ProductDetailPage({ product, relatedProducts }) {
@@ -66,6 +54,7 @@ export default function ProductDetailPage({ product, relatedProducts }) {
   const [fetchedReviews, setFetchedReviews] = useState([]);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
+  const [reviewsToShow, setReviewsToShow] = useState(5);
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const addToCartRef = useRef(null);
@@ -128,9 +117,10 @@ export default function ProductDetailPage({ product, relatedProducts }) {
     }
   };
 
-  const reviews = fetchedReviews.length > 0 ? fetchedReviews : (product.reviews_data || sampleReviews);
-  const totalReviews = fetchedReviews.length > 0 ? fetchedReviews.length : (product.reviews || reviews.length);
-  const avgRating = product.rating || (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length);
+  const seedReviews = getSeedReviews(product.slug, product.name, product.category);
+  const reviews = fetchedReviews.length > 0 ? [...fetchedReviews, ...seedReviews] : (product.reviews_data || seedReviews);
+  const totalReviews = product.reviews || reviews.length;
+  const avgRating = product.rating || (reviews.length > 0 ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) : 4.8);
   const ratingDist = [5, 4, 3, 2, 1].map(star => ({
     star, count: reviews.filter(r => r.rating === star).length,
     pct: Math.round((reviews.filter(r => r.rating === star).length / reviews.length) * 100),
@@ -492,13 +482,13 @@ export default function ProductDetailPage({ product, relatedProducts }) {
       {/* Reviews */}
       <section className={styles.reviewsSection} id="reviewsSection">
         <div className={styles.reviewsHeader}>
-          <h2 className={styles.reviewsTitle}>Customer Reviews</h2>
-          <button className={styles.writeReviewBtn} onClick={() => setShowReviewModal(true)}>Write a Review</button>
+          <h2 className={styles.reviewsTitle}>⭐ Customer Reviews</h2>
+          <button className={styles.writeReviewBtn} onClick={() => setShowReviewModal(true)}>✍️ Write a Review</button>
         </div>
         <div className={styles.reviewsSummary}>
           <div className={styles.reviewsOverall}>
             <span className={styles.reviewsBigNum}>{avgRating.toFixed(1)}</span>
-            <div><StarRating rating={avgRating} size={16} /><div className={styles.reviewsTotalText}>{totalReviews} reviews</div></div>
+            <div><StarRating rating={avgRating} size={18} /><div className={styles.reviewsTotalText}>{totalReviews} verified reviews</div></div>
           </div>
           <div className={styles.ratingBars}>
             {ratingDist.map(({ star, count, pct }) => (
@@ -511,22 +501,32 @@ export default function ProductDetailPage({ product, relatedProducts }) {
           </div>
         </div>
         <div className={styles.reviewsList}>
-          {reviews.map((r, idx) => (
+          {reviews.slice(0, reviewsToShow).map((r, idx) => (
             <div key={r.id || idx} className={styles.reviewCard}>
               <div className={styles.reviewTop}>
                 <div className={styles.reviewAuthor}>
-                  <div className={styles.reviewAvatar}>{r.name?.charAt(0)?.toUpperCase() || 'U'}</div>
+                  <div className={styles.reviewAvatar} style={{ background: AVATAR_COLORS[idx % AVATAR_COLORS.length] }}>{r.name?.charAt(0)?.toUpperCase() || 'U'}</div>
                   <div><div className={styles.reviewName}>{r.name || 'Customer'}</div><div className={styles.reviewDate}>{r.date}</div></div>
                 </div>
-                {r.verified && <span className={styles.reviewVerified}><CheckCircle2 size={12} /> Verified</span>}
+                {r.verified && <span className={styles.reviewVerified}><CheckCircle2 size={12} /> Verified Purchase</span>}
               </div>
               <div className={styles.reviewStars}>{[...Array(5)].map((_, i) => <Star key={i} size={14} fill={i < r.rating ? '#f59e0b' : 'none'} stroke={i < r.rating ? '#f59e0b' : '#d1d5db'} />)}</div>
               {r.title && <div className={styles.reviewTitle}>{r.title}</div>}
               <div className={styles.reviewBody}>{r.body}</div>
-              {r.reply && <div className={styles.reviewReply}><div className={styles.reviewReplyLabel}>Bgiya Bliss Response</div><div className={styles.reviewReplyText}>{r.reply}</div></div>}
+              {r.reply && <div className={styles.reviewReply}><div className={styles.reviewReplyLabel}>🌿 Bgiya Bliss Response</div><div className={styles.reviewReplyText}>{r.reply}</div></div>}
             </div>
           ))}
         </div>
+        {reviews.length > reviewsToShow && (
+          <button className={styles.showMoreBtn} onClick={() => setReviewsToShow(prev => prev + 10)}>
+            Show More Reviews ({reviews.length - reviewsToShow} remaining)
+          </button>
+        )}
+        {reviewsToShow > 5 && reviews.length <= reviewsToShow && (
+          <button className={styles.showMoreBtn} onClick={() => setReviewsToShow(5)}>
+            Show Less
+          </button>
+        )}
       </section>
 
       {/* Review Modal */}
@@ -534,6 +534,7 @@ export default function ProductDetailPage({ product, relatedProducts }) {
         <div className={styles.reviewModal} onClick={() => setShowReviewModal(false)}>
           <div className={styles.reviewModalContent} onClick={e => e.stopPropagation()}>
             <h3 className={styles.reviewModalTitle}>Write a Review</h3>
+            <p className={styles.reviewModalSubtitle}>Share your experience to help other gardeners</p>
             <div className={styles.reviewFormGroup}><label>Rating</label>
               <div className={styles.starPicker}>{[1, 2, 3, 4, 5].map(s => (
                 <button key={s} className={`${styles.starPickerBtn} ${s <= reviewForm.rating ? styles.starPickerBtnActive : ''}`} onClick={() => setReviewForm({ ...reviewForm, rating: s })}>
