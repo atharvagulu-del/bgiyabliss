@@ -449,7 +449,7 @@ export default function ProductDetailPage({ product, relatedProducts }) {
                   <p style={{ fontWeight: 600, marginBottom: 4 }}>🎉 Available Offers:</p>
                   <ul style={{ margin: 0, paddingLeft: 18 }}>
                     <li>Flat 15% Off on orders above ₹1099 — Use code: <strong>BLISS15</strong></li>
-                    <li>Flat 10% Off on your first order — Use code: <strong>BLISS10</strong></li>
+                    <li>10% Off on your first prepaid order — Use code: <strong>BLISS10</strong></li>
                   </ul>
                 </div>
               </div>

@@ -55,8 +55,8 @@ export default function CheckoutPage() {
   const [showOffers, setShowOffers] = useState(false);
 
   const AVAILABLE_COUPONS = [
-    { code: 'BLISS10', label: 'Flat 10% Off', desc: 'On your first order', minCart: 0, discount: 10 },
     { code: 'BLISS15', label: 'Flat 15% Off', desc: 'On orders above ₹1099', minCart: 1099, discount: 15 },
+    { code: 'BLISS10', label: 'Flat 10% Off', desc: 'First prepaid order only', minCart: 0, discount: 10 },
   ];
   const [pincodeStatus, setPincodeStatus] = useState(''); // '' | 'loading' | 'success' | 'error'
   const [dynamicShippingCost, setDynamicShippingCost] = useState(null);

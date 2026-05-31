@@ -37,7 +37,7 @@ export default function SubscriptionsPage() {
               </li>
               <li className="flex items-center gap-3">
                 <Check className="text-emerald-500" size={20} />
-                <span className="text-gray-600">24x7 Support</span>
+                <span className="text-gray-600">Priority Support (9AM-6PM)</span>
               </li>
               <li className="flex items-center gap-3 opacity-50">
                 <X className="text-gray-400" size={20} />
@@ -75,7 +75,7 @@ export default function SubscriptionsPage() {
               </li>
               <li className="flex items-center gap-3">
                 <Check className="text-emerald-400" size={20} />
-                <span className="text-white/90">24x7 Support</span>
+                <span className="text-white/90">Priority Support (9AM-6PM)</span>
               </li>
               <li className="flex items-center gap-3">
                 <Check className="text-emerald-400" size={20} />
@@ -118,7 +118,7 @@ export default function SubscriptionsPage() {
                 <td className="py-6 text-center"><Check className="mx-auto text-emerald-500" size={24} /></td>
               </tr>
               <tr>
-                <td className="py-6 text-gray-700 font-medium">24x7 Support</td>
+                <td className="py-6 text-gray-700 font-medium">Priority Support (9AM-6PM)</td>
                 <td className="py-6 text-center"><Check className="mx-auto text-emerald-500" size={24} /></td>
                 <td className="py-6 text-center"><Check className="mx-auto text-emerald-500" size={24} /></td>
               </tr>

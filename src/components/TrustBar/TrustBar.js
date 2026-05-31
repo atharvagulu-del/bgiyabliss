@@ -4,7 +4,7 @@ const features = [
   { icon: Truck, title: 'Fast Delivery', desc: 'All over India', color: 'bg-sky-50 text-sky-600' },
   { icon: Shield, title: 'Safe Packaging', desc: '100% secure delivery', color: 'bg-amber-50 text-amber-600' },
   { icon: Leaf, title: 'Healthy Plants', desc: 'Grown with love & care', color: 'bg-emerald-50 text-emerald-600' },
-  { icon: Headphones, title: '24/7 Support', desc: 'Expert plant advice', color: 'bg-purple-50 text-purple-600' },
+  { icon: Headphones, title: 'Support 9AM-6PM', desc: 'Expert plant advice', color: 'bg-purple-50 text-purple-600' },
 ];
 
 export default function TrustBar() {

@@ -9,13 +9,12 @@ import confetti from 'canvas-confetti';
 import styles from './CartDrawer.module.css';
 
 const MILESTONES = [
-  { amount: 599, label: 'FLAT 10% OFF!', code: 'BLISS10' },
   { amount: 1099, label: 'FLAT 15% OFF!', code: 'BLISS15' },
 ];
 
 const AVAILABLE_COUPONS = [
-  { code: 'BLISS10', label: 'Flat 10% Off', desc: 'On your first order', minCart: 0, discount: 10 },
   { code: 'BLISS15', label: 'Flat 15% Off', desc: 'On orders above ₹1099', minCart: 1099, discount: 15 },
+  { code: 'BLISS10', label: 'Flat 10% Off', desc: 'First prepaid order only', minCart: 0, discount: 10 },
 ];
 
 /* ── Milestone Progress Bar ── */
@@ -116,7 +115,7 @@ export default function CartDrawer() {
     } else if (code === 'BLISS10') {
       setAppliedPromo({ code: 'BLISS10', discountType: 'percent', discountValue: 10, minOrderValue: 0 });
       setPromoInput('BLISS10');
-      setPromoMessage('🎉 10% discount applied!');
+      setPromoMessage('🎉 10% off applied! Valid on first prepaid order only');
       confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
     } else {
       setPromoMessage('Invalid promo code');
