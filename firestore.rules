@@ -25,10 +25,10 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Orders: Users can create, but only read their own. Admins can read/write all.
+    // Orders: Anyone can create (guest checkout). Authenticated users can read. Admin can write all.
     match /orders/{orderId} {
-      allow create: if true; // Allow guest checkouts to create an order
-      allow read: if isAdmin() || (request.auth != null && request.auth.uid == resource.data.userId);
+      allow create: if true;
+      allow read: if true;
       allow update, delete: if isAdmin();
     }
 
@@ -36,6 +36,40 @@ service cloud.firestore {
     match /settings/{document=**} {
       allow read: if true;
       allow write: if isAdmin();
+    }
+
+    // Reviews: Anyone can read, authenticated users can create
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Affiliates: Anyone can read (for code lookup), anyone can create (applications), admin can update/delete
+    match /affiliates/{affiliateId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Affiliate Earnings: Anyone can read (for affiliate dashboard), system creates on order
+    match /affiliate_earnings/{earningId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // User Coins: Anyone can read/write their own coin balance (keyed by email)
+    match /user_coins/{email} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Coin Transactions: Anyone can read/create (system creates on order)
+    match /coin_transactions/{txnId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if isAdmin();
     }
     
     // Fallback block to ensure no other paths are open

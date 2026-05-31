@@ -6,15 +6,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Minus, Plus, ShoppingBag, ArrowRight, Ticket, ChevronDown, ChevronUp, CheckCircle2, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import confetti from 'canvas-confetti';
+import { getAffiliateByCode } from '@/lib/firestore';
 import styles from './CartDrawer.module.css';
 
 const MILESTONES = [
-  { amount: 1099, label: 'FLAT 15% OFF!', code: 'BLISS15' },
+  { amount: 1599, label: 'FLAT 15% OFF!', code: 'BLISS15' },
 ];
 
 const AVAILABLE_COUPONS = [
-  { code: 'BLISS15', label: 'Flat 15% Off', desc: 'On orders above ₹1099', minCart: 1099, discount: 15 },
-  { code: 'BLISS10', label: 'Flat 10% Off', desc: 'First prepaid order only', minCart: 0, discount: 10 },
+  { code: 'BLISS5', label: '5% Off (Save up to ₹30)', desc: 'On orders above ₹599', minCart: 599, percent: 5, maxDiscount: 30 },
+  { code: 'BLISS10', label: '10% Off (Save up to ₹110)', desc: 'On orders above ₹1,099', minCart: 1099, percent: 10, maxDiscount: 110 },
+  { code: 'BLISS15', label: '15% Off (Save up to ₹240)', desc: 'On orders above ₹1,599', minCart: 1599, percent: 15, maxDiscount: 240 },
 ];
 
 /* ── Milestone Progress Bar ── */
@@ -104,20 +106,31 @@ export default function CartDrawer() {
     return total + ((mrp - item.salePrice) * item.quantity);
   }, 0) + discountAmount;
 
-  const applyCode = (code) => {
-    if (code === 'BLISS15' && cartSubtotal >= 1099) {
-      setAppliedPromo({ code: 'BLISS15', discountType: 'percent', discountValue: 15, minOrderValue: 1099 });
-      setPromoInput('BLISS15');
-      setPromoMessage('🎉 15% discount applied!');
-      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-    } else if (code === 'BLISS15' && cartSubtotal < 1099) {
-      setPromoMessage(`Add ₹${(1099 - cartSubtotal).toLocaleString()} more to use BLISS15`);
-    } else if (code === 'BLISS10') {
-      setAppliedPromo({ code: 'BLISS10', discountType: 'percent', discountValue: 10, minOrderValue: 0 });
-      setPromoInput('BLISS10');
-      setPromoMessage('🎉 10% off applied! Valid on first prepaid order only');
-      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-    } else {
+  const applyCode = async (code) => {
+    const blissCoupon = AVAILABLE_COUPONS.find(c => c.code === code);
+    if (blissCoupon) {
+      if (cartSubtotal >= blissCoupon.minCart) {
+        setAppliedPromo({ code: blissCoupon.code, discountType: 'percent', discountValue: blissCoupon.percent, maxDiscount: blissCoupon.maxDiscount, minOrderValue: blissCoupon.minCart });
+        setPromoInput(blissCoupon.code);
+        setPromoMessage(`🎉 ${blissCoupon.percent}% discount applied!`);
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      } else {
+        setPromoMessage(`Add ₹${(blissCoupon.minCart - cartSubtotal).toLocaleString()} more to use ${code}`);
+      }
+      return;
+    }
+    else {
+      // Check if it's an affiliate code
+      try {
+        const affiliate = await getAffiliateByCode(code);
+        if (affiliate) {
+          setAppliedPromo({ code: affiliate.code, discountType: 'percent', discountValue: affiliate.buyerDiscount || 5, minOrderValue: 0, isAffiliate: true });
+          setPromoInput(affiliate.code);
+          setPromoMessage(`🎉 ${affiliate.buyerDiscount || 5}% off applied via affiliate!`);
+          confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+          return;
+        }
+      } catch (e) {}
       setPromoMessage('Invalid promo code');
     }
   };
@@ -242,43 +255,50 @@ export default function CartDrawer() {
                       <span style={{ fontSize: '11px', color: '#16a34a', fontWeight: 700 }}>View all &gt;</span>
                     </button>
 
-                    {showOffers && (
-                      <div style={{ marginBottom: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        {AVAILABLE_COUPONS.map((coupon) => {
-                          const isEligible = cartSubtotal >= coupon.minCart;
-                          return (
-                            <div key={coupon.code} style={{
-                              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                              padding: '10px 12px', borderRadius: '8px',
-                              border: '1px solid #e5e7eb', background: '#fff',
-                            }}>
-                              <div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-                                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#16a34a', background: '#ecfdf5', padding: '2px 8px', borderRadius: '4px', border: '1px dashed #bbf7d0' }}>{coupon.code}</span>
-                                  <span style={{ fontSize: '11px', fontWeight: 700, color: '#111' }}>{coupon.label}</span>
+                    <AnimatePresence>
+                      {showOffers && (
+                        <motion.div 
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          style={{ overflow: 'hidden', marginBottom: '10px' }}
+                        >
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            {AVAILABLE_COUPONS.map((coupon) => {
+                              const isEligible = cartSubtotal >= coupon.minCart;
+                              return (
+                                <div key={coupon.code} style={{
+                                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                  padding: '10px 12px', borderRadius: '8px',
+                                  border: '1px solid #e5e7eb', background: '#fff',
+                                }}>
+                                  <div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                                      <span style={{ fontSize: '11px', fontWeight: 800, color: '#16a34a', background: '#ecfdf5', padding: '2px 8px', borderRadius: '4px', border: '1px dashed #bbf7d0' }}>{coupon.code}</span>
+                                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#111' }}>{coupon.label}</span>
+                                    </div>
+                                    <span style={{ fontSize: '10px', color: '#6b7280' }}>{coupon.desc}</span>
+                                  </div>
+                                  <button
+                                    onClick={() => applyCode(coupon.code)}
+                                    style={{
+                                      padding: '4px 14px', borderRadius: '6px', fontSize: '11px', fontWeight: 700,
+                                      border: isEligible ? '1.5px solid #16a34a' : '1px solid #d1d5db',
+                                      background: isEligible ? '#fff' : '#f9fafb',
+                                      color: isEligible ? '#16a34a' : '#9ca3af',
+                                      cursor: isEligible ? 'pointer' : 'default',
+                                    }}
+                                  >
+                                    {isEligible ? 'Apply' : `Unlock at ₹${coupon.minCart}`}
+                                  </button>
                                 </div>
-                                <span style={{ fontSize: '10px', color: '#6b7280' }}>{coupon.desc}</span>
-                              </div>
-                              <button
-                                onClick={() => applyCode(coupon.code)}
-                                style={{
-                                  padding: '4px 14px', borderRadius: '6px', fontSize: '11px', fontWeight: 700,
-                                  border: isEligible ? '1.5px solid #16a34a' : '1px solid #d1d5db',
-                                  background: isEligible ? '#fff' : '#f9fafb',
-                                  color: isEligible ? '#16a34a' : '#9ca3af',
-                                  cursor: isEligible ? 'pointer' : 'default',
-                                }}
-                              >
-                                {isEligible ? 'Apply' : `Min ₹${coupon.minCart}`}
-                              </button>
-                            </div>
-                          );
-                        })}
+                              );
+                            })}
 
-                        {/* Manual input */}
-                        <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
-                          <input
-                            type="text"
+                            {/* Manual input */}
+                            <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
+                              <input
+                                type="text"
                             placeholder="Enter code"
                             value={promoInput}
                             onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
@@ -289,8 +309,10 @@ export default function CartDrawer() {
                         {promoMessage && (
                           <p style={{ fontSize: '11px', fontWeight: 600, color: promoMessage.includes('🎉') ? '#16a34a' : '#ef4444', margin: '2px 0 0' }}>{promoMessage}</p>
                         )}
-                      </div>
-                    )}
+                          </div>
+                        </motion.div>
+                      )}
+                      </AnimatePresence>
                   </>
                 )}
 

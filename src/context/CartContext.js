@@ -67,6 +67,9 @@ export function CartProvider({ children }) {
   if (appliedPromo && cartSubtotal >= (appliedPromo.minOrderValue || 0)) {
     if (appliedPromo.discountType === 'percent') {
       discountAmount = cartSubtotal * (appliedPromo.discountValue / 100);
+      if (appliedPromo.maxDiscount && discountAmount > appliedPromo.maxDiscount) {
+        discountAmount = appliedPromo.maxDiscount;
+      }
     } else {
       discountAmount = appliedPromo.discountValue;
     }

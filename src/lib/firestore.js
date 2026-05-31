@@ -10,6 +10,8 @@ import {
   where,
   orderBy,
   serverTimestamp,
+  setDoc,
+  limit,
 } from 'firebase/firestore';
 import { db } from './firebase';
 
@@ -208,15 +210,30 @@ export async function getAllOrders() {
   }
 }
 
-export async function getUserOrders(email) {
+export async function getUserOrders(email, userId) {
   try {
-    if (!email) return [];
-    const q = query(
-      collection(db, ORDERS_COLLECTION),
-      where('customer.email', '==', email)
-    );
-    const snapshot = await withTimeout(getDocs(q));
-    const orders = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    if (!email && !userId) return [];
+    let orders = [];
+    // Try by email first
+    if (email) {
+      try {
+        const q = query(collection(db, ORDERS_COLLECTION), where('customer.email', '==', email));
+        const snapshot = await withTimeout(getDocs(q));
+        orders = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      } catch (err) {
+        console.log('getUserOrders by email failed:', err.message);
+      }
+    }
+    // If no results and userId provided, try by userId
+    if (orders.length === 0 && userId) {
+      try {
+        const q = query(collection(db, ORDERS_COLLECTION), where('userId', '==', userId));
+        const snapshot = await withTimeout(getDocs(q));
+        orders = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      } catch (err) {
+        console.log('getUserOrders by userId failed:', err.message);
+      }
+    }
     return orders.sort((a, b) => {
       const da = a.createdAt?.toDate?.() || new Date(0);
       const db2 = b.createdAt?.toDate?.() || new Date(0);
@@ -408,3 +425,134 @@ export async function deletePromoCode(id) {
   const docRef = doc(db, PROMOS_COLLECTION, id);
   await withTimeout(deleteDoc(docRef));
 }
+
+// ═══════ AFFILIATES ═══════
+export async function createAffiliate(data) {
+  const ref = await addDoc(collection(db, 'affiliates'), { ...data, totalEarnings: 0, totalOrders: 0, status: 'pending', createdAt: serverTimestamp() });
+  return ref.id;
+}
+
+export async function getAllAffiliates() {
+  try {
+    const snap = await withTimeout(getDocs(query(collection(db, 'affiliates'), orderBy('createdAt', 'desc'))));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    console.log('getAllAffiliates fallback:', err.message);
+    const snap = await withTimeout(getDocs(collection(db, 'affiliates')));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+}
+
+export async function getAffiliateByCode(code) {
+  try {
+    const snap = await withTimeout(getDocs(query(collection(db, 'affiliates'), where('code', '==', code.toUpperCase()), where('status', '==', 'active'))));
+    return snap.empty ? null : { id: snap.docs[0].id, ...snap.docs[0].data() };
+  } catch (err) {
+    console.log('getAffiliateByCode fallback:', err.message);
+    const snap = await withTimeout(getDocs(query(collection(db, 'affiliates'), where('code', '==', code.toUpperCase()))));
+    const active = snap.docs.filter(d => d.data().status === 'active');
+    return active.length === 0 ? null : { id: active[0].id, ...active[0].data() };
+  }
+}
+
+export async function updateAffiliate(id, data) {
+  await updateDoc(doc(db, 'affiliates', id), data);
+}
+
+export async function incrementAffiliateStats(id, orderAmount, commission) {
+  const docRef = doc(db, 'affiliates', id);
+  const snap = await getDoc(docRef);
+  if (!snap.exists()) return;
+  const current = snap.data();
+  await updateDoc(docRef, {
+    totalOrders: (current.totalOrders || 0) + 1,
+    totalEarnings: (current.totalEarnings || 0) + commission,
+  });
+}
+
+export async function logAffiliateEarning(data) {
+  await addDoc(collection(db, 'affiliate_earnings'), { ...data, status: 'pending', createdAt: serverTimestamp() });
+}
+
+export async function getAffiliateEarnings(affiliateCode) {
+  try {
+    const snap = await withTimeout(getDocs(query(collection(db, 'affiliate_earnings'), where('affiliateCode', '==', affiliateCode), orderBy('createdAt', 'desc'))));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    console.log('getAffiliateEarnings fallback:', err.message);
+    const snap = await withTimeout(getDocs(query(collection(db, 'affiliate_earnings'), where('affiliateCode', '==', affiliateCode))));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+}
+
+export async function getAllAffiliateEarnings() {
+  try {
+    const snap = await withTimeout(getDocs(query(collection(db, 'affiliate_earnings'), orderBy('createdAt', 'desc'))));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    console.log('getAllAffiliateEarnings fallback:', err.message);
+    const snap = await withTimeout(getDocs(collection(db, 'affiliate_earnings')));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+}
+
+export async function markEarningPaid(id) {
+  await updateDoc(doc(db, 'affiliate_earnings', id), { status: 'paid' });
+}
+
+// ═══════ BGIYA COINS ═══════
+export async function getUserCoins(email) {
+  try {
+    const docRef = doc(db, 'user_coins', email);
+    const snap = await withTimeout(getDoc(docRef));
+    return snap.exists() ? snap.data() : { balance: 0, totalEarned: 0, totalRedeemed: 0 };
+  } catch (err) {
+    console.log('getUserCoins failed:', err.message);
+    return { balance: 0, totalEarned: 0, totalRedeemed: 0 };
+  }
+}
+
+export async function addCoins(email, amount, reason, orderId) {
+  try {
+    const docRef = doc(db, 'user_coins', email);
+    const snap = await getDoc(docRef);
+    const current = snap.exists() ? snap.data() : { balance: 0, totalEarned: 0, totalRedeemed: 0 };
+    await setDoc(docRef, {
+      balance: (current.balance || 0) + amount,
+      totalEarned: (current.totalEarned || 0) + amount,
+      totalRedeemed: current.totalRedeemed || 0,
+      updatedAt: serverTimestamp()
+    });
+    await addDoc(collection(db, 'coin_transactions'), { email, type: 'credit', amount, reason, orderId: orderId || null, createdAt: serverTimestamp() });
+  } catch (err) {
+    console.error('addCoins failed:', err.message);
+  }
+}
+
+export async function redeemCoins(email, amount, orderId) {
+  const docRef = doc(db, 'user_coins', email);
+  const snap = await getDoc(docRef);
+  if (!snap.exists()) return false;
+  const current = snap.data();
+  if ((current.balance || 0) < amount) return false;
+  await setDoc(docRef, {
+    balance: current.balance - amount,
+    totalEarned: current.totalEarned || 0,
+    totalRedeemed: (current.totalRedeemed || 0) + amount,
+    updatedAt: serverTimestamp()
+  });
+  await addDoc(collection(db, 'coin_transactions'), { email, type: 'debit', amount, reason: 'Redeemed on order', orderId, createdAt: serverTimestamp() });
+  return true;
+}
+
+export async function getCoinTransactions(email) {
+  try {
+    const snap = await withTimeout(getDocs(query(collection(db, 'coin_transactions'), where('email', '==', email), orderBy('createdAt', 'desc'))));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    console.log('getCoinTransactions fallback:', err.message);
+    const snap = await withTimeout(getDocs(query(collection(db, 'coin_transactions'), where('email', '==', email))));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+}
+
