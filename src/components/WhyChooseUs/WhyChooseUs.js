@@ -9,8 +9,8 @@ const reasons = [
   },
   {
     icon: <FlaskConical size={28} strokeWidth={1.5} />,
-    title: 'Lab Tested',
-    desc: 'Optimal NPK ratios.',
+    title: 'Premium Quality',
+    desc: 'Handpicked ingredients.',
   },
   {
     icon: <ShieldCheck size={28} strokeWidth={1.5} />,
