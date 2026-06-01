@@ -10,7 +10,9 @@ import { getAffiliateByCode } from '@/lib/firestore';
 import styles from './CartDrawer.module.css';
 
 const MILESTONES = [
-  { amount: 1599, label: 'FLAT 15% OFF!', code: 'BLISS15' },
+  { amount: 599, label: '5% OFF!', code: 'BLISS5' },
+  { amount: 1099, label: '10% OFF!', code: 'BLISS10' },
+  { amount: 1599, label: '15% OFF!', code: 'BLISS15' },
 ];
 
 const AVAILABLE_COUPONS = [
@@ -33,10 +35,11 @@ function MilestoneBar({ cartSubtotal }) {
         </p>
       ) : (
         <p style={{ textAlign: 'center', fontSize: '12px', fontWeight: 500, color: '#065f46', margin: '0 0 10px' }}>
-          {cartSubtotal < MILESTONES[0].amount
-            ? `Add ₹${(MILESTONES[0].amount - cartSubtotal).toLocaleString()} more for ${MILESTONES[0].label}`
-            : `Add ₹${(MILESTONES[1].amount - cartSubtotal).toLocaleString()} more for ${MILESTONES[1].label}`
-          }
+          {(() => {
+            const next = MILESTONES.find(m => cartSubtotal < m.amount);
+            if (!next) return '';
+            return `Add ₹${(next.amount - cartSubtotal).toLocaleString()} more for ${next.label}`;
+          })()}
         </p>
       )}
 
@@ -75,15 +78,16 @@ function MilestoneBar({ cartSubtotal }) {
       </div>
 
       {/* Labels */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', margin: '6px 0 0', padding: '0 4px' }}>
+      <div style={{ position: 'relative', height: '32px', margin: '6px 20px 0' }}>
         {MILESTONES.map((m, i) => {
           const reached = cartSubtotal >= m.amount;
+          const pos = (m.amount / maxAmount) * 100;
           return (
-            <div key={i} style={{ textAlign: i === 0 ? 'left' : 'right' }}>
+            <div key={i} style={{ position: 'absolute', left: `${pos}%`, transform: 'translateX(-50%)', textAlign: 'center', width: '60px' }}>
               <div style={{ fontSize: '11px', fontWeight: 700, color: reached ? '#16a34a' : '#6b7280' }}>
                 ₹{m.amount}
               </div>
-              <div style={{ fontSize: '9px', fontWeight: 600, color: reached ? '#16a34a' : '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+              <div style={{ fontSize: '9px', fontWeight: 600, color: reached ? '#16a34a' : '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.3px', whiteSpace: 'nowrap' }}>
                 {m.label}
               </div>
             </div>
