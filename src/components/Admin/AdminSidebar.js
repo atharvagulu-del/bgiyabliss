@@ -1,7 +1,8 @@
 'use client';
+import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, Leaf, ChevronRight, Plus, ExternalLink, Tag, Users } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, Leaf, ChevronRight, Plus, ExternalLink, Tag, Users, Menu, X } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import styles from './AdminSidebar.module.css';
@@ -17,6 +18,7 @@ const menuItems = [
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -29,30 +31,53 @@ export default function AdminSidebar() {
   };
 
   return (
-    <aside className={styles.sidebar}>
-      {/* Brand */}
-      <div className={styles.brand}>
-        <div className={styles.brandIcon}>
-          <Leaf size={18} />
-        </div>
-        <div className={styles.brandText}>
-          <span className={styles.brandName}>Bgiya Bliss</span>
-          <span className={styles.brandLabel}>Admin</span>
-        </div>
-      </div>
+    <>
+      {/* Mobile Toggle Button */}
+      <button 
+        className={styles.mobileToggleBtn}
+        onClick={() => setMobileOpen(!mobileOpen)}
+      >
+        <Menu size={24} />
+      </button>
 
-      {/* Navigation */}
-      <nav className={styles.nav}>
-        <span className={styles.navLabel}>Menu</span>
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          const active = isActive(item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`${styles.navItem} ${active ? styles.navItemActive : ''}`}
-            >
+      {/* Mobile Overlay */}
+      {mobileOpen && (
+        <div className={styles.mobileOverlay} onClick={() => setMobileOpen(false)} />
+      )}
+
+      <aside className={`${styles.sidebar} ${mobileOpen ? styles.sidebarOpen : ''}`}>
+        {/* Mobile Close Button (inside sidebar) */}
+        <button 
+          className={styles.mobileCloseBtn}
+          onClick={() => setMobileOpen(false)}
+        >
+          <X size={20} />
+        </button>
+
+        {/* Brand */}
+        <div className={styles.brand}>
+          <div className={styles.brandIcon}>
+            <Leaf size={18} />
+          </div>
+          <div className={styles.brandText}>
+            <span className={styles.brandName}>Bgiya Bliss</span>
+            <span className={styles.brandLabel}>Admin</span>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className={styles.nav}>
+          <span className={styles.navLabel}>Menu</span>
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setMobileOpen(false)}
+                className={`${styles.navItem} ${active ? styles.navItemActive : ''}`}
+              >
               <Icon size={17} />
               <span>{item.label}</span>
               {active && <ChevronRight size={14} className={styles.chevron} />}
@@ -79,5 +104,6 @@ export default function AdminSidebar() {
         </button>
       </div>
     </aside>
+    </>
   );
 }
