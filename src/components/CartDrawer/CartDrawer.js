@@ -349,9 +349,6 @@ export default function CartDrawer() {
 
                 {/* Checkout Button */}
                 <div style={{ marginTop: '12px', textAlign: 'center' }}>
-                  <div style={{ padding: '10px', background: '#fffbeb', border: '1px solid #fef3c7', borderRadius: '8px', marginBottom: '10px' }}>
-                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#d97706' }}>⚠️ We are on a short break till Tuesday! Orders are temporarily paused.</span>
-                  </div>
                   <button
                     disabled
                     style={{
@@ -361,8 +358,9 @@ export default function CartDrawer() {
                       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                     }}
                   >
-                    Checkout Unavailable
+                    Items Out of Stock
                   </button>
+                  <p style={{ fontSize: '12px', color: '#dc2626', marginTop: '8px', fontWeight: 600 }}>Some items in your cart are currently out of stock.</p>
                 </div>
               </div>
             )}

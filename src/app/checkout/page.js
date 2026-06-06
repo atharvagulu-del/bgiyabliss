@@ -753,9 +753,6 @@ export default function CheckoutPage() {
 
             {/* Place Order */}
             <div style={{ marginTop: '16px', textAlign: 'center' }}>
-              <div style={{ padding: '12px', background: '#fffbeb', border: '1px solid #fef3c7', borderRadius: '12px', marginBottom: '16px' }}>
-                <span style={{ fontSize: '13px', fontWeight: 600, color: '#d97706' }}>⚠️ We are on a short break till Tuesday! Orders are temporarily paused.</span>
-              </div>
               <motion.button 
                 disabled 
                 style={{
@@ -768,8 +765,9 @@ export default function CheckoutPage() {
                   outline: 'none'
                 }}
               >
-                Checkout Unavailable
+                Items Out of Stock
               </motion.button>
+              <p style={{ fontSize: '13px', color: '#dc2626', marginTop: '12px', fontWeight: 600 }}>Some items in your order are currently out of stock. Please check back later.</p>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 14, fontSize: 11, color: '#9ca3af' }}>
