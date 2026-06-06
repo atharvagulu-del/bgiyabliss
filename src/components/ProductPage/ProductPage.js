@@ -361,9 +361,14 @@ export default function ProductDetailPage({ product, relatedProducts }) {
               </div>
             </div>
             <div className={styles.btnRow}>
-              <button className={styles.btnAddCart} onClick={handleAddToCart}>
-                <ShoppingCart size={18} /> ADD TO CART
-              </button>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ padding: '8px 12px', background: '#fffbeb', border: '1px solid #fef3c7', borderRadius: '8px', fontSize: '12px', fontWeight: 600, color: '#d97706', textAlign: 'center' }}>
+                  ⚠️ We are on a short break till Tuesday! Orders are temporarily paused.
+                </div>
+                <button className={styles.btnAddCart} disabled style={{ background: '#9ca3af', cursor: 'not-allowed', opacity: 1, boxShadow: 'none' }}>
+                  <ShoppingCart size={18} /> ADD TO CART (UNAVAILABLE)
+                </button>
+              </div>
               <button className={`${styles.wishlistBtn} ${isWished ? styles.wishlistActive : ''}`} onClick={() => toggleWishlist(product)}>
                 <Heart size={20} fill={isWished ? '#ef4444' : 'none'} />
               </button>

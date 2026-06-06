@@ -348,18 +348,22 @@ export default function CartDrawer() {
                 </div>
 
                 {/* Checkout Button */}
-                <button
-                  onClick={() => { setIsCartOpen(false); router.push('/checkout'); }}
-                  style={{
-                    width: '100%', padding: '13px', marginTop: '12px',
-                    background: '#16a34a', color: '#fff', border: 'none', borderRadius: '10px',
-                    fontSize: '14px', fontWeight: 700, cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                    boxShadow: '0 4px 14px rgba(22,163,74,0.3)',
-                  }}
-                >
-                  Checkout <ArrowRight size={18} />
-                </button>
+                <div style={{ marginTop: '12px', textAlign: 'center' }}>
+                  <div style={{ padding: '10px', background: '#fffbeb', border: '1px solid #fef3c7', borderRadius: '8px', marginBottom: '10px' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#d97706' }}>⚠️ We are on a short break till Tuesday! Orders are temporarily paused.</span>
+                  </div>
+                  <button
+                    disabled
+                    style={{
+                      width: '100%', padding: '13px',
+                      background: '#9ca3af', color: '#fff', border: 'none', borderRadius: '10px',
+                      fontSize: '14px', fontWeight: 700, cursor: 'not-allowed',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                    }}
+                  >
+                    Checkout Unavailable
+                  </button>
+                </div>
               </div>
             )}
           </motion.div>

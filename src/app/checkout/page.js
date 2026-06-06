@@ -752,23 +752,25 @@ export default function CheckoutPage() {
             )}
 
             {/* Place Order */}
-            <motion.button 
-              onClick={handlePlaceOrder} 
-              disabled={loading} 
-              whileHover={{ scale: loading ? 1 : 1.02, translateY: loading ? 0 : -2 }}
-              whileTap={{ scale: loading ? 1 : 0.96 }}
-              style={{
-                width: '100%', padding: '18px', 
-                background: loading ? '#9ca3af' : (form.paymentMethod === 'prepaid' ? '#16a34a' : '#059669'),
-                color: '#fff', fontSize: 16, fontWeight: 800, borderRadius: 16, border: 'none',
-                cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                boxShadow: loading ? 'none' : '0 8px 24px rgba(22, 163, 74, 0.25)', 
-                letterSpacing: 0.5, textTransform: 'uppercase',
-                outline: 'none'
-              }}
-            >
-              {loading ? <><Loader2 size={20} className="animate-spin" /> Processing...</> : <><Lock size={18} style={{ color: '#fff' }} /> {form.paymentMethod === 'prepaid' ? `Pay Securely · ₹${Math.round(orderTotal).toLocaleString()}` : `Place COD Order · ₹${Math.round(orderTotal).toLocaleString()}`}</>}
-            </motion.button>
+            <div style={{ marginTop: '16px', textAlign: 'center' }}>
+              <div style={{ padding: '12px', background: '#fffbeb', border: '1px solid #fef3c7', borderRadius: '12px', marginBottom: '16px' }}>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: '#d97706' }}>⚠️ We are on a short break till Tuesday! Orders are temporarily paused.</span>
+              </div>
+              <motion.button 
+                disabled 
+                style={{
+                  width: '100%', padding: '18px', 
+                  background: '#9ca3af',
+                  color: '#fff', fontSize: 16, fontWeight: 800, borderRadius: 16, border: 'none',
+                  cursor: 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  boxShadow: 'none', 
+                  letterSpacing: 0.5, textTransform: 'uppercase',
+                  outline: 'none'
+                }}
+              >
+                Checkout Unavailable
+              </motion.button>
+            </div>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 14, fontSize: 11, color: '#9ca3af' }}>
               <Lock size={11} /> Secured by Razorpay · 256-bit SSL encryption
