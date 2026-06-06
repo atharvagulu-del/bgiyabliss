@@ -192,11 +192,11 @@ export default function ProductDetailPage({ product, relatedProducts }) {
           </div>
           <p className={styles.taxLine}>Taxes included. <Link href="/pages/shipping-policy">Shipping</Link> calculated at checkout.</p>
 
-          <div className={`${styles.stockBadge} ${product.category === 'tools' || product.status === 'inactive' ? styles.outOfStock : styles.inStock}`}
-            style={product.category === 'tools' || product.status === 'inactive' ? { color: '#b45309', background: '#fffbeb' } : {}}>
-            <span className={`${styles.stockDot} ${product.category === 'tools' || product.status === 'inactive' ? styles.stockDotRed : styles.stockDotGreen}`}
-              style={product.category === 'tools' || product.status === 'inactive' ? { background: '#f59e0b' } : {}} />
-            {product.category === 'tools' || product.status === 'inactive' ? 'Coming Soon' : 'In stock'}
+          <div className={`${styles.stockBadge} ${product.category === 'tools' || product.status === 'inactive' || product.inStock !== true ? styles.outOfStock : styles.inStock}`}
+            style={product.category === 'tools' || product.status === 'inactive' || product.inStock !== true ? { color: '#b45309', background: '#fffbeb' } : {}}>
+            <span className={`${styles.stockDot} ${product.category === 'tools' || product.status === 'inactive' || product.inStock !== true ? styles.stockDotRed : styles.stockDotGreen}`}
+              style={product.category === 'tools' || product.status === 'inactive' || product.inStock !== true ? { background: '#f59e0b' } : {}} />
+            {product.category === 'tools' || product.status === 'inactive' ? 'Coming Soon' : (product.inStock !== true ? 'Out of stock' : 'In stock')}
           </div>
 
           {/* Amazon-style Linked Variant Switcher */}
@@ -362,9 +362,15 @@ export default function ProductDetailPage({ product, relatedProducts }) {
             </div>
             <div className={styles.btnRow}>
               <div style={{ flex: 1 }}>
-                <button className={styles.btnAddCart} disabled style={{ background: '#9ca3af', cursor: 'not-allowed', opacity: 1, boxShadow: 'none', width: '100%' }}>
-                  <ShoppingCart size={18} /> OUT OF STOCK
-                </button>
+                {product.inStock !== true ? (
+                  <button className={styles.btnAddCart} disabled style={{ background: '#9ca3af', cursor: 'not-allowed', opacity: 1, boxShadow: 'none', width: '100%' }}>
+                    <ShoppingCart size={18} /> OUT OF STOCK
+                  </button>
+                ) : (
+                  <button className={styles.btnAddCart} onClick={handleAddToCart} style={{ width: '100%' }}>
+                    <ShoppingCart size={18} /> ADD TO CART
+                  </button>
+                )}
               </div>
               <button className={`${styles.wishlistBtn} ${isWished ? styles.wishlistActive : ''}`} onClick={() => toggleWishlist(product)}>
                 <Heart size={20} fill={isWished ? '#ef4444' : 'none'} />

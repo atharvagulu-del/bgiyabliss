@@ -62,6 +62,7 @@ const emptyForm = {
   shippingLength: '',      // cm
   shippingBreadth: '',     // cm
   shippingHeight: '',      // cm
+  inStock: true,           // Default to in stock
 };
 
 export default function ProductForm({ existingProduct = null }) {
@@ -147,6 +148,7 @@ export default function ProductForm({ existingProduct = null }) {
           if (w.includes('L') && !w.includes('ml')) return 'L';
           return 'g';
         })(),
+        inStock: existingProduct.inStock !== false,
         productPackQuantity: (() => {
           const w = existingProduct.variantLabel || existingProduct.details?.Weight || '';
           const pMatch = w.match(/pack of\s*(\d+)/i);
@@ -475,6 +477,7 @@ export default function ProductForm({ existingProduct = null }) {
         reviews: parseInt(form.reviews) || 0,
         details: detailsObj,
         status: status || form.status,
+        inStock: form.inStock,
         featured: form.featured,
         variantGroupId: groupId,
         variantLabel: mainLabel,
@@ -1346,6 +1349,26 @@ export default function ProductForm({ existingProduct = null }) {
                       type="button"
                     >
                       Draft
+                    </button>
+                  </div>
+                </div>
+
+                <div className="adminFormGroup">
+                  <label className="adminLabel">Stock Status</label>
+                  <div className={styles.statusToggle}>
+                    <button
+                      className={`${styles.statusBtn} ${form.inStock ? styles.statusActive : ''}`}
+                      onClick={() => setForm(prev => ({ ...prev, inStock: true }))}
+                      type="button"
+                    >
+                      In Stock
+                    </button>
+                    <button
+                      className={`${styles.statusBtn} ${!form.inStock ? styles.statusDraft : ''}`}
+                      onClick={() => setForm(prev => ({ ...prev, inStock: false }))}
+                      type="button"
+                    >
+                      Out of Stock
                     </button>
                   </div>
                 </div>
