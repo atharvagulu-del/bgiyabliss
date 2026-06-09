@@ -752,23 +752,23 @@ export default function CheckoutPage() {
             )}
 
             {/* Place Order */}
-            <div style={{ marginTop: '16px', textAlign: 'center' }}>
-              <motion.button 
-                disabled 
-                style={{
-                  width: '100%', padding: '18px', 
-                  background: '#9ca3af',
-                  color: '#fff', fontSize: 16, fontWeight: 800, borderRadius: 16, border: 'none',
-                  cursor: 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  boxShadow: 'none', 
-                  letterSpacing: 0.5, textTransform: 'uppercase',
-                  outline: 'none'
-                }}
-              >
-                Items Out of Stock
-              </motion.button>
-              <p style={{ fontSize: '13px', color: '#dc2626', marginTop: '12px', fontWeight: 600 }}>Some items in your order are currently out of stock. Please check back later.</p>
-            </div>
+            <motion.button 
+              onClick={handlePlaceOrder} 
+              disabled={loading} 
+              whileHover={{ scale: loading ? 1 : 1.02, translateY: loading ? 0 : -2 }}
+              whileTap={{ scale: loading ? 1 : 0.96 }}
+              style={{
+                width: '100%', padding: '18px', 
+                background: loading ? '#9ca3af' : (form.paymentMethod === 'prepaid' ? '#16a34a' : '#059669'),
+                color: '#fff', fontSize: 16, fontWeight: 800, borderRadius: 16, border: 'none',
+                cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                boxShadow: loading ? 'none' : '0 8px 24px rgba(22, 163, 74, 0.25)', 
+                letterSpacing: 0.5, textTransform: 'uppercase',
+                outline: 'none'
+              }}
+            >
+              {loading ? <><Loader2 size={20} className="animate-spin" /> Processing...</> : <><Lock size={18} style={{ color: '#fff' }} /> {form.paymentMethod === 'prepaid' ? `Pay Securely · ₹${Math.round(orderTotal).toLocaleString()}` : `Place COD Order · ₹${Math.round(orderTotal).toLocaleString()}`}</>}
+            </motion.button>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 14, fontSize: 11, color: '#9ca3af' }}>
               <Lock size={11} /> Secured by Razorpay · 256-bit SSL encryption
