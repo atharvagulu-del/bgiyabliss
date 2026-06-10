@@ -226,7 +226,20 @@ export default function CheckoutPage() {
       catch (e) { console.error('Auto ship failed:', e); }
     };
 
+    // Calculate pickup date (order + 2 business days, skip Sundays)
+    const getPickupDate = () => {
+      const now = new Date();
+      let daysToAdd = 2;
+      const pickup = new Date(now);
+      while (daysToAdd > 0) {
+        pickup.setDate(pickup.getDate() + 1);
+        if (pickup.getDay() !== 0) daysToAdd--;
+      }
+      return pickup.toISOString().split('T')[0]; // YYYY-MM-DD
+    };
+
     const orderId = `BB-${Date.now()}`;
+    const pickupDate = getPickupDate();
     const orderData = {
       orderId,
       userId: user?.uid || null,
@@ -237,6 +250,7 @@ export default function CheckoutPage() {
       affiliateCode: appliedPromo?.isAffiliate ? appliedPromo.code : null,
       coinsEarned: coinsToEarn, coinsRedeemed: coinsApplied ? coinsToRedeem : 0, coinDiscount,
       shippingCost, total: orderTotal, paymentMethod: form.paymentMethod, status: 'pending',
+      pickupDate,
     };
 
     const processPostOrder = async (orderInfo) => {

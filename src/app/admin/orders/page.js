@@ -151,6 +151,17 @@ export default function OrdersPage() {
                       {order.items?.length || 0} item{(order.items?.length || 0) !== 1 ? 's' : ''}
                     </span>
 
+                    {/* Pickup Date Badge */}
+                    {order.pickupDate && (
+                      <span style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 4,
+                        padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600,
+                        color: '#0369a1', background: '#e0f2fe', whiteSpace: 'nowrap',
+                      }}>
+                        📦 Pickup: {new Date(order.pickupDate + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                      </span>
+                    )}
+
                     {/* Status Badge */}
                     <span style={{
                       display: 'inline-flex', alignItems: 'center', gap: 4,

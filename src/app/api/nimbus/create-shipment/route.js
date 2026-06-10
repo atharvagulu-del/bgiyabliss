@@ -1,6 +1,31 @@
 import { NextResponse } from 'next/server';
 import { getNimbusToken } from '@/lib/nimbus';
 
+// ── Calculate pickup date: order date + 2 days (skip Sundays) ──
+function getPickupDate() {
+  const now = new Date();
+  // Use IST (UTC+5:30)
+  const istOffset = 5.5 * 60 * 60 * 1000;
+  const istNow = new Date(now.getTime() + istOffset);
+
+  let daysToAdd = 2;
+  const pickup = new Date(istNow);
+
+  while (daysToAdd > 0) {
+    pickup.setDate(pickup.getDate() + 1);
+    // Skip Sundays (0 = Sunday)
+    if (pickup.getDay() !== 0) {
+      daysToAdd--;
+    }
+  }
+
+  // Format as YYYY-MM-DD
+  const year = pickup.getFullYear();
+  const month = String(pickup.getMonth() + 1).padStart(2, '0');
+  const day = String(pickup.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 // ── Shipping weight & dimensions lookup ──
 // Keys are lowercase substrings matched against item names.
 // weight = actual shipping weight in grams (with packaging)
@@ -85,6 +110,10 @@ export async function POST(req) {
     const dims = calculateShipmentDimensions(orderData.items || []);
     console.log(`Shipment dimensions for ${orderData.orderId}: ${dims.weight}g, ${dims.length}x${dims.breadth}x${dims.height}cm`);
 
+    // Calculate pickup date (D+2, skip Sundays)
+    const pickupDate = getPickupDate();
+    console.log(`Scheduled pickup date for ${orderData.orderId}: ${pickupDate}`);
+
     // Step 1: Fetch available couriers and pick the cheapest one
     let courierId = null;
     try {
@@ -131,6 +160,7 @@ export async function POST(req) {
       package_breadth: dims.breadth,
       package_height: dims.height,
       request_auto_pickup: 'yes',
+      pickup_date: pickupDate,
       ...(courierId && { courier_id: courierId }),
       consignee: {
         name: orderData.customer.name || 'Customer',
@@ -181,7 +211,8 @@ export async function POST(req) {
         awb: awb,
         courier: courier,
         shipmentId: shipmentId,
-        message: 'Shipment created successfully on Nimbus'
+        pickupDate: pickupDate,
+        message: `Shipment created. Pickup scheduled for ${pickupDate}`
       });
     } else {
       console.error('Nimbus shipment error:', data);
@@ -192,3 +223,4 @@ export async function POST(req) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
+
