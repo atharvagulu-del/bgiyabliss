@@ -1,23 +1,15 @@
 import { NextResponse } from 'next/server';
 import { getNimbusToken } from '@/lib/nimbus';
 
-// ── Calculate pickup date: order date + 2 days (skip Sundays) ──
+// ── Calculate pickup date: order date + 2 days ──
 function getPickupDate() {
   const now = new Date();
   // Use IST (UTC+5:30)
   const istOffset = 5.5 * 60 * 60 * 1000;
   const istNow = new Date(now.getTime() + istOffset);
 
-  let daysToAdd = 2;
   const pickup = new Date(istNow);
-
-  while (daysToAdd > 0) {
-    pickup.setDate(pickup.getDate() + 1);
-    // Skip Sundays (0 = Sunday)
-    if (pickup.getDay() !== 0) {
-      daysToAdd--;
-    }
-  }
+  pickup.setDate(pickup.getDate() + 2);
 
   // Format as YYYY-MM-DD
   const year = pickup.getFullYear();

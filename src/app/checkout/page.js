@@ -226,15 +226,11 @@ export default function CheckoutPage() {
       catch (e) { console.error('Auto ship failed:', e); }
     };
 
-    // Calculate pickup date (order + 2 business days, skip Sundays)
+    // Calculate pickup date (order + 2 days)
     const getPickupDate = () => {
       const now = new Date();
-      let daysToAdd = 2;
       const pickup = new Date(now);
-      while (daysToAdd > 0) {
-        pickup.setDate(pickup.getDate() + 1);
-        if (pickup.getDay() !== 0) daysToAdd--;
-      }
+      pickup.setDate(pickup.getDate() + 2);
       return pickup.toISOString().split('T')[0]; // YYYY-MM-DD
     };
 
