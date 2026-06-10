@@ -42,6 +42,15 @@ export const navLinks = [
           { name: 'Cow Dung Manure', link: '/products/coming-soon' },
         ],
       },
+      {
+        title: 'Specialty Fertilizers',
+        items: [
+          { name: 'Epsom Salt', link: '/products/epsom-salt' },
+          { name: 'Organic Potash', link: '/products/organic-potash' },
+          { name: 'Bone Meal', link: '/products/bone-meal' },
+          { name: 'Seaweed', link: '/products/seaweed' },
+        ],
+      },
     ],
   },
   {
@@ -52,10 +61,6 @@ export const navLinks = [
         title: 'Growth Promoters',
         items: [
           { name: 'Humic Acid', link: '/products/coming-soon' },
-          { name: 'Epsom Salt', link: '/products/coming-soon' },
-          { name: 'Organic Bio Potash', link: '/products/coming-soon' },
-          { name: 'Seaweed Extract Granules', link: '/products/coming-soon' },
-          { name: 'Bone Meal Powder', link: '/products/coming-soon' },
         ],
       },
       {
