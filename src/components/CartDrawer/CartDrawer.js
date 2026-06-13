@@ -188,14 +188,16 @@ export default function CartDrawer() {
                 cartItems.map((item) => (
                   <div key={item.id} style={{ display: 'flex', gap: '12px', padding: '14px 16px', borderBottom: '1px solid #f5f5f5' }}>
                     {/* Image */}
-                    <div style={{ position: 'relative', width: '80px', height: '80px', borderRadius: '10px', overflow: 'hidden', flexShrink: 0, background: '#f9f9f9' }}>
+                    <a href={`/products/${item.slug}`} onClick={() => setIsCartOpen(false)} style={{ position: 'relative', width: '80px', height: '80px', borderRadius: '10px', overflow: 'hidden', flexShrink: 0, background: '#f9f9f9', display: 'block' }}>
                       <Image src={item.image || item.images?.[0] || '/product-plants.png'} alt={item.name} fill style={{ objectFit: 'cover' }} />
-                    </div>
+                    </a>
 
                     {/* Details */}
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                       <div>
-                        <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#111', margin: '0 0 2px', lineHeight: '1.3' }}>{item.name}</h4>
+                        <a href={`/products/${item.slug}`} onClick={() => setIsCartOpen(false)} style={{ textDecoration: 'none' }}>
+                          <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#111', margin: '0 0 2px', lineHeight: '1.3' }}>{item.name}</h4>
+                        </a>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                           <span style={{ fontSize: '15px', fontWeight: 700, color: '#111' }}>₹{(item.salePrice || 0).toLocaleString()}</span>
                           {item.price && item.price > item.salePrice && (
