@@ -19,7 +19,16 @@ export default function Home() {
   useEffect(() => {
     const loadFirestoreProducts = async () => {
       try {
-        const products = await getActiveProducts();
+        let products = await getActiveProducts();
+        
+        // Deduplicate by slug to hide accidental duplicates
+        const uniqueSlugs = new Set();
+        products = products.filter(p => {
+          if (uniqueSlugs.has(p.slug)) return false;
+          uniqueSlugs.add(p.slug);
+          return true;
+        });
+
         if (products.length > 0) {
           const best = products.filter(p =>
             (p.featured?.includes('bestseller') ||
