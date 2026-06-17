@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Save, Trash2, Plus, X, Image as ImageIcon, ArrowLeft, ChevronDown, ChevronUp, Link2, GripVertical } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { addProduct, updateProduct, deleteProduct, getVariantGroup } from '@/lib/firestore';
+import { addProduct, updateProduct, deleteProduct, getVariantGroup, getAllProducts, getProductBySlug } from '@/lib/firestore';
 import styles from './ProductForm.module.css';
 
 const CATEGORIES = [
@@ -76,6 +76,18 @@ export default function ProductForm({ existingProduct = null }) {
   const [tagInput, setTagInput] = useState('');
   const [dragIndex, setDragIndex] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
+
+  // States for linking existing products
+  const [allProducts, setAllProducts] = useState([]);
+  const [showLinkModal, setShowLinkModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  // Fetch all products when modal opens
+  useEffect(() => {
+    if (showLinkModal && allProducts.length === 0) {
+      getAllProducts().then(setAllProducts).catch(console.error);
+    }
+  }, [showLinkModal]);
 
   // Initialize form with existing product data
   useEffect(() => {
@@ -237,6 +249,33 @@ export default function ProductForm({ existingProduct = null }) {
   // ─── Linked Variant helpers ───
   const addLinkedVariant = () => {
     setForm(prev => ({ ...prev, linkedVariants: [...prev.linkedVariants, emptyVariant()] }));
+  };
+  
+  const handleLinkProduct = (product) => {
+    // Determine the label/weight for the product
+    const w = product.details?.Weight || product.variantLabel || '';
+    const wMatch = w.match(/(\d+(?:\.\d+)?)\s*(g|kg|ml|L)/i);
+    const pMatch = w.match(/pack of\s*(\d+)/i);
+    
+    const newVariant = {
+      name: product.name,
+      label: w || product.name,
+      weightValue: wMatch ? wMatch[1] : '',
+      weightUnit: wMatch ? wMatch[2] : 'g',
+      packQuantity: pMatch ? pMatch[1] : '',
+      salePrice: String(product.salePrice || ''),
+      originalPrice: String(product.originalPrice || ''),
+      images: Array.isArray(product.images) ? product.images : [],
+      isUploading: false,
+      expanded: false,
+      featured: Array.isArray(product.featured) ? product.featured : [],
+      status: product.status || 'active',
+      _existingSlug: product.slug, // Crucial for linking
+    };
+    
+    setForm(prev => ({ ...prev, linkedVariants: [...prev.linkedVariants, newVariant] }));
+    setShowLinkModal(false);
+    setSearchQuery('');
   };
   const removeLinkedVariant = (index) => {
     setForm(prev => ({ ...prev, linkedVariants: prev.linkedVariants.filter((_, i) => i !== index) }));
@@ -537,6 +576,24 @@ export default function ProductForm({ existingProduct = null }) {
                 await updateProduct(sibling.id, updateData);
               }
             }
+            
+            // ── Link External Variants ──
+            const externalVariants = siblingEntries.filter(v => v._existingSlug && !groupDocs.some(d => d.slug === v._existingSlug));
+            for (const ext of externalVariants) {
+              const extDoc = await getProductBySlug(ext._existingSlug);
+              if (extDoc) {
+                await updateProduct(extDoc.id, {
+                  variantGroupId: groupId,
+                  variantSummary: allVariantSummary,
+                  variantLabel: ext.label,
+                  featured: ext.featured.length > 0 ? ext.featured : extDoc.featured,
+                  salePrice: ext.salePrice || extDoc.salePrice,
+                  originalPrice: ext.originalPrice || extDoc.originalPrice,
+                  images: ext.images.length > 0 ? ext.images : extDoc.images,
+                  details: ext.weight ? { ...(extDoc.details || {}), Weight: ext.weight } : (extDoc.details || {}),
+                });
+              }
+            }
           } catch (syncErr) {
             console.warn('Could not sync variant summaries:', syncErr.message);
           }
@@ -551,8 +608,12 @@ export default function ProductForm({ existingProduct = null }) {
         // 1. Save the main product
         await addProduct(baseProductData);
 
-        // 2. Save each variant as its own Firestore product doc
-        for (const v of siblingEntries) {
+        // 2. Separate new vs existing variants
+        const newVariants = siblingEntries.filter(v => !v._existingSlug);
+        const externalVariants = siblingEntries.filter(v => v._existingSlug);
+
+        // 3. Save each NEW variant as its own Firestore product doc
+        for (const v of newVariants) {
           const variantDiscount = v.originalPrice > v.salePrice && v.originalPrice > 0
             ? Math.round(((v.originalPrice - v.salePrice) / v.originalPrice) * 100)
             : baseProductData.discount;
@@ -576,11 +637,28 @@ export default function ProductForm({ existingProduct = null }) {
               : detailsObj,
           });
         }
+        
+        // 4. Update external variants
+        for (const ext of externalVariants) {
+          const extDoc = await getProductBySlug(ext._existingSlug);
+          if (extDoc) {
+            await updateProduct(extDoc.id, {
+              variantGroupId: groupId,
+              variantSummary: allVariantSummary,
+              variantLabel: ext.label,
+              featured: ext.featured.length > 0 ? ext.featured : extDoc.featured,
+              salePrice: ext.salePrice || extDoc.salePrice,
+              originalPrice: ext.originalPrice || extDoc.originalPrice,
+              images: ext.images.length > 0 ? ext.images : extDoc.images,
+              details: ext.weight ? { ...(extDoc.details || {}), Weight: ext.weight } : (extDoc.details || {}),
+            });
+          }
+        }
 
         const count = siblingEntries.length;
         setToast({
           type: 'success',
-          message: `✓ Product saved${count > 0 ? ` + ${count} variant product${count > 1 ? 's' : ''} created!` : '!'}`,
+          message: `✓ Product saved${count > 0 ? ` + ${count} variant product${count > 1 ? 's' : ''} created/linked!` : '!'}`,
         });
         setTimeout(() => router.push('/admin/products'), 2000);
       }
@@ -1320,10 +1398,55 @@ export default function ProductForm({ existingProduct = null }) {
                   );
                 })}
 
-                <button className={styles.addRowBtn} onClick={addLinkedVariant} type="button">
-                  <Plus size={15} /> Add Weight Variant
-                </button>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button className={styles.addRowBtn} onClick={addLinkedVariant} type="button">
+                    <Plus size={15} /> Add Weight Variant
+                  </button>
+                  <button className={styles.addRowBtn} onClick={() => setShowLinkModal(true)} type="button" style={{ background: '#f8fafc', color: '#0369a1', borderColor: '#bae6fd' }}>
+                    <Link2 size={15} /> Link Existing Product
+                  </button>
+                </div>
               </div>
+
+              {/* Link Existing Product Modal */}
+              {showLinkModal && (
+                <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)' }}>
+                  <div style={{ background: '#fff', padding: '24px', borderRadius: '12px', width: '100%', maxWidth: '500px', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                      <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 600 }}>Link Existing Product</h3>
+                      <button onClick={() => setShowLinkModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
+                    </div>
+                    <input 
+                      type="text" 
+                      placeholder="Search by product name..." 
+                      className="adminInput" 
+                      style={{ marginBottom: '16px' }}
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    <div style={{ flex: 1, overflowY: 'auto', border: '1px solid #e5e7eb', borderRadius: '8px' }}>
+                      {allProducts
+                        .filter(p => p.id !== existingProduct?.id && !form.linkedVariants.some(v => v._existingSlug === p.slug))
+                        .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                        .map(p => (
+                          <div 
+                            key={p.id} 
+                            onClick={() => handleLinkProduct(p)}
+                            style={{ padding: '12px', borderBottom: '1px solid #e5e7eb', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                            onMouseOver={(e) => e.currentTarget.style.background = '#f9fafb'}
+                            onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                          >
+                            <span style={{ fontSize: '14px', fontWeight: 500 }}>{p.name}</span>
+                            <span style={{ fontSize: '12px', color: '#6b7280', background: '#f3f4f6', padding: '2px 6px', borderRadius: '4px' }}>{p.category}</span>
+                          </div>
+                      ))}
+                      {allProducts.length === 0 && (
+                        <div style={{ padding: '20px', textAlign: 'center', color: '#6b7280' }}>Loading products...</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
 
