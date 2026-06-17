@@ -9,17 +9,16 @@ export const navLinks = [
         title: 'Potting Mixes',
         items: [
           { name: '5-in-1 Soilless Potting Mix', link: '/products/bgiya-bliss-5-in-1-potting-soil-mixture-ingredients-cocopeat-vermiculite-vermicompost-perlite-neem-powder-makes-10-kg-of-fluffy-soil-potting-soil-mix-for-plantssa' },
-          { name: 'Adenium Organic Potting Mix', link: '/products/coming-soon' },
-          { name: 'Cactus & Succulents Organic Mix', link: '/products/coming-soon' },
+          { name: 'Rose Organic Potting Mix', link: '/products/bagiya-bliss-rose-organic-potting-mix-1kg' },
+          { name: 'Premium Organic Potting Mix', link: '/products/bgiya-bliss-premium-organic-potting-mix-5kg-natural-soil-blend-with-cocopeat-perlite-mustard-cake-vermiculite-neem-cake-vermicompost-5kg-pack-of-1' },
         ],
       },
       {
         title: 'Soil Amendments',
         items: [
-          { name: 'Perlite', link: '/products/coming-soon' },
-          { name: 'Vermiculite', link: '/products/coming-soon' },
-          { name: 'Cocopeat Blocks', link: '/products/premium-cocopeat-block-5kg' },
-          { name: 'Loose Cocopeat Powder', link: '/products/coming-soon' },
+          { name: 'Perlite', link: '/products/bagiya-bliss-perlite-potting-mix-250g' },
+          { name: 'Cocopeat Blocks', link: '/products/bagiya-bliss-cocopeat-block-1kg' },
+          { name: 'Loose Cocopeat Powder', link: '/products/bagiya-bliss-cocopeat-1kg-ready-to-use-pack-natural-coconut-coir-for-home-gardening' },
         ],
       },
     ],
@@ -32,23 +31,23 @@ export const navLinks = [
         title: 'Organic Cakes',
         items: [
           { name: 'Neem Cake Powder', link: '/products/bgiya-bliss-organic-neem-cake-powder-100-pure-natural-fertilizer-soil-conditioner-with-pest-control-5kg' },
-          { name: 'Mustard Cake Powder', link: '/products/mustard-cake-powder-1kg' },
+          { name: 'Mustard Cake Powder', link: '/products/bagiya-bliss-mustard-cake-powder-1kg' },
         ],
       },
       {
         title: 'Manure & Compost',
         items: [
-          { name: 'Vermicompost', link: '/products/organic-vermicompost-5kg' },
-          { name: 'Cow Dung Manure', link: '/products/coming-soon' },
+          { name: 'Vermicompost', link: '/products/bagiya-bliss-organic-vermicompost-for-plants-nutrient-rich-natural-soil-supplement-1kg-1kg' },
+          { name: 'Cow Dung Manure', link: '/products/bagiya-bliss-organic-cow-manure-1kg-5kg' },
         ],
       },
       {
         title: 'Specialty Fertilizers',
         items: [
-          { name: 'Epsom Salt', link: '/products/epsom-salt' },
-          { name: 'Organic Potash', link: '/products/organic-potash' },
-          { name: 'Bone Meal', link: '/products/bone-meal' },
-          { name: 'Seaweed', link: '/products/seaweed' },
+          { name: 'Epsom Salt', link: '/products/bgiya-bliss-epsom-salt-for-plants-magnesium-sulfur-rich-plant-nutrient-450g' },
+          { name: 'Organic Potash', link: '/products/bgiya-bliss-organic-potash-fertilizer-flower-fruit-growth-booster-450g' },
+          { name: 'Bone Meal', link: '/products/bgiya-bliss-bone-meal-fertilizer-for-plants-essential-organic-phosphorus-supplement-450g' },
+          { name: 'Seaweed', link: '/products/bgiya-bliss-seaweed-extract-granules-for-plants-450-gm-organic-fertilizer-and-growth-promoter-for-all-indoor-outdoor-home-garden-plants' },
         ],
       },
     ],
