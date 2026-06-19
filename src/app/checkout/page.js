@@ -26,7 +26,7 @@ const AVAILABLE_COUPONS = [
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cartItems, cartSubtotal, cartTotal, discountAmount, appliedPromo, setAppliedPromo, clearCart, cartCount, cartTotalWeight, addToCart, removeFromCart, updateQuantity } = useCart();
+  const { cartItems, cartSubtotal, cartTotal, gstAmount, discountAmount, appliedPromo, setAppliedPromo, clearCart, cartCount, cartTotalWeight, addToCart, removeFromCart, updateQuantity } = useCart();
   const { user } = useAuth();
 
   // Steps: 1 = Contact, 2 = Address, 3 = Payment & Summary
@@ -127,7 +127,7 @@ export default function CheckoutPage() {
   const COD_FEE = 52;
   const shippingCost = form.paymentMethod === 'cod' ? COD_FEE : 0;
   const coinDiscount = coinsApplied ? Math.floor(coinsToRedeem / 10) : 0; // 100 coins = ₹10
-  const orderTotal = Math.max(cartTotal + shippingCost - coinDiscount, 0);
+  const orderTotal = Math.max(cartTotal + gstAmount + shippingCost - coinDiscount, 0);
   const coinsToEarn = Math.floor(cartSubtotal / 10);
 
   const handleApplyCoins = () => {
@@ -216,7 +216,7 @@ export default function CheckoutPage() {
       try {
         await fetch('/api/send-email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
           to: orderInfo.customer.email, subject: `Order Confirmation - Bgiya Bliss #${orderInfo.orderId}`,
-          html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;color:#333;"><h1 style="color:#16a34a;">Thank you for your order!</h1><p>Hi ${orderInfo.customer.name.split(' ')[0]},</p><p>We've received your order <strong>#${orderInfo.orderId}</strong> and are getting it ready.</p><p>You earned <strong>🪙 ${orderInfo.coinsEarned} Bgiya Coins</strong> on this order!</p><h2 style="border-bottom:1px solid #eee;padding-bottom:10px;">Order Summary</h2>${orderInfo.items.map(item => `<div style="display:flex;justify-content:space-between;margin-bottom:10px;"><span>${item.quantity}x ${item.name}</span><span>₹${item.price * item.quantity}</span></div>`).join('')}<div style="border-top:1px solid #eee;margin-top:20px;padding-top:10px;"><div style="display:flex;justify-content:space-between;font-size:18px;margin-top:10px;"><strong>Total:</strong><strong>₹${orderInfo.total}</strong></div></div></div>`
+          html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;color:#333;"><h1 style="color:#16a34a;">Thank you for your order!</h1><p>Hi ${orderInfo.customer.name.split(' ')[0]},</p><p>We've received your order <strong>#${orderInfo.orderId}</strong> and are getting it ready.</p><p>You earned <strong>🪙 ${orderInfo.coinsEarned} Bgiya Coins</strong> on this order!</p><h2 style="border-bottom:1px solid #eee;padding-bottom:10px;">Order Summary</h2>${orderInfo.items.map(item => `<div style="display:flex;justify-content:space-between;margin-bottom:10px;"><span>${item.quantity}x ${item.name}</span><span>₹${item.price * item.quantity}</span></div>`).join('')}<div style="border-top:1px solid #eee;margin-top:20px;padding-top:10px;"><div style="display:flex;justify-content:space-between;font-size:14px;color:#666;"><span>Subtotal:</span><span>₹${orderInfo.subtotal}</span></div>${orderInfo.gst ? `<div style="display:flex;justify-content:space-between;font-size:14px;color:#666;margin-top:5px;"><span>GST (5%):</span><span>₹${orderInfo.gst}</span></div>` : ''}<div style="display:flex;justify-content:space-between;font-size:18px;margin-top:10px;"><strong>Total:</strong><strong>₹${orderInfo.total}</strong></div></div></div>`
         })});
       } catch (e) { console.error('Failed to send email:', e); }
     };
@@ -244,6 +244,7 @@ export default function CheckoutPage() {
       items: cartItems.map(item => ({ id: item.id, name: item.name, slug: item.slug, quantity: item.quantity, price: item.salePrice || 0, image: item.image || item.images?.[0] || '', shippingWeight: item.shippingWeight || 0, shippingLength: item.shippingLength || 0, shippingBreadth: item.shippingBreadth || 0, shippingHeight: item.shippingHeight || 0 })),
       subtotal: cartSubtotal, discount: discountAmount, promoCode: appliedPromo?.code || null,
       affiliateCode: appliedPromo?.isAffiliate ? appliedPromo.code : null,
+      gst: gstAmount,
       coinsEarned: coinsToEarn, coinsRedeemed: coinsApplied ? coinsToRedeem : 0, coinDiscount,
       shippingCost, total: orderTotal, paymentMethod: form.paymentMethod, status: 'pending',
       pickupDate,
@@ -698,6 +699,12 @@ export default function CheckoutPage() {
                     }
                   </span>
                 </div>
+                {gstAmount > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>GST (5%)</span>
+                    <span>₹{gstAmount.toLocaleString()}</span>
+                  </div>
+                )}
                 {coinsApplied && coinDiscount > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', color: '#d97706' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>🪙 Bgiya Coins ({coinsToRedeem})</span>

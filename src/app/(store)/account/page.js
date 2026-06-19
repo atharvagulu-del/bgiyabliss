@@ -215,6 +215,12 @@ export default function AccountPage() {
                           <span style={{ fontWeight: 600, color: '#374151' }}>₹{(item.price * item.quantity).toLocaleString()}</span>
                         </div>
                       ))}
+                      {order.gst > 0 && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#6b7280' }}>
+                          <span><span style={{ color: '#9ca3af', marginRight: 6 }}></span>GST (5%)</span>
+                          <span style={{ fontWeight: 600, color: '#374151' }}>₹{(order.gst).toLocaleString()}</span>
+                        </div>
+                      )}
                       {order.items?.length > 3 && (
                         <span style={{ fontSize: 12, color: '#9ca3af' }}>+{order.items.length - 3} more items</span>
                       )}

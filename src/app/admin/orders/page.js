@@ -226,6 +226,11 @@ export default function OrdersPage() {
                             <div style={{ display: 'flex', justifyContent: 'space-between', color: '#6b7280' }}>
                               <span>Shipping ({order.paymentMethod?.toUpperCase()})</span><span>₹{(order.shippingCost || 0)}</span>
                             </div>
+                            {order.gst > 0 && (
+                              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#6b7280' }}>
+                                <span>GST (5%)</span><span>₹{order.gst.toLocaleString()}</span>
+                              </div>
+                            )}
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, color: '#111', marginTop: 6, paddingTop: 6, borderTop: '1px solid #e5e7eb', fontSize: 15 }}>
                               <span>Total</span><span>₹{Math.round(order.total || 0).toLocaleString()}</span>
                             </div>

@@ -76,6 +76,7 @@ export function CartProvider({ children }) {
   }
   
   const cartTotal = cartSubtotal - discountAmount;
+  const gstAmount = Math.round(cartTotal * 0.05);
 
   // Calculate total weight in grams
   const cartTotalWeight = cartItems.reduce((total, item) => {
@@ -115,6 +116,7 @@ export function CartProvider({ children }) {
         removeFromCart,
         cartSubtotal,
         cartTotal,
+        gstAmount,
         discountAmount,
         appliedPromo,
         setAppliedPromo,

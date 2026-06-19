@@ -173,12 +173,20 @@ export async function POST(req) {
         pincode: process.env.NIMBUS_ORIGIN_PIN || '324010',
         phone: '9571389234'
       },
-      order_items: orderData.items.map(item => ({
-        name: item.name,
-        qty: item.quantity,
-        price: item.price,
-        sku: item.id || 'N/A'
-      }))
+      order_items: [
+        ...orderData.items.map(item => ({
+          name: item.name,
+          qty: item.quantity,
+          price: item.price,
+          sku: item.id || 'N/A'
+        })),
+        ...(orderData.gst > 0 ? [{
+          name: 'GST (5%)',
+          qty: 1,
+          price: orderData.gst,
+          sku: 'GST-5'
+        }] : [])
+      ]
     };
 
     const res = await fetch('https://api.nimbuspost.com/v1/shipments', {
