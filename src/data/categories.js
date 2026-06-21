@@ -16,6 +16,7 @@ export const navLinks = [
       {
         title: 'Soil Amendments',
         items: [
+          { name: 'Vermiculite', link: '/products/bagiya-bliss-vermiculite-for-gardening-potting-mix-soil-aeration-moisture-retention-medium-500g' },
           { name: 'Perlite', link: '/products/bagiya-bliss-perlite-potting-mix-250g' },
           { name: 'Cocopeat Blocks', link: '/products/bagiya-bliss-cocopeat-block-1kg' },
           { name: 'Loose Cocopeat Powder', link: '/products/bagiya-bliss-cocopeat-1kg-ready-to-use-pack-natural-coconut-coir-for-home-gardening' },
