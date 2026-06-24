@@ -3,10 +3,13 @@ import { useRef, useState, useEffect } from 'react';
 import { Instagram, ChevronLeft, ChevronRight, Volume2, VolumeX } from 'lucide-react';
 
 const reels = [
-  { id: 1, src: '/reels/reel-1.mp4', handle: '@plant._.perfect' },
-  { id: 2, src: '/reels/reel-2.mp4', handle: '@aasanbagwani' },
-  { id: 3, src: '/reels/reel-3.mp4', handle: '@nita_singhs_dil_ki_baat' },
-  { id: 5, src: '/reels/reel-5.mp4', handle: '@botani.cal_girl' },
+  { id: 1, src: '/reels/reel-1.mp4', handle: '@sivan.mai', link: 'https://www.instagram.com/reels/DXO50iApaFn/' },
+  { id: 2, src: '/reels/reel-2.mp4', handle: '@anokha_aangan', link: 'https://www.instagram.com/reels/DXiwYfMjrqd/' },
+  { id: 3, src: '/reels/reel-3.mp4', handle: '@priyanka_vazhkai', link: 'https://www.instagram.com/reels/DYXRLLoJLIG/' },
+  { id: 4, src: '/reels/reel-4.mp4', handle: '@_miniblooms', link: 'https://www.instagram.com/reels/DXV4GBZiC4W/' },
+  { id: 5, src: '/reels/reel-5.mp4', handle: '@nature247natural', link: 'https://www.instagram.com/reels/DWY-aIXjZ8N/' },
+  { id: 6, src: '/reels/reel-6.mp4', handle: '@gharkibagia', link: 'https://www.instagram.com/reels/DZ4Xmryg_rR/' },
+  { id: 7, src: '/reels/reel-7.mp4', handle: '@bunnyorganics73', link: 'https://www.instagram.com/reels/DWJB34bk2Me/' },
 ];
 
 function VideoCard({ reel }) {
@@ -45,7 +48,7 @@ function VideoCard({ reel }) {
       </div>
 
       {/* User Info */}
-      <div className="absolute bottom-4 left-4 right-4 flex items-center gap-3">
+      <a href={reel.link} target="_blank" rel="noopener noreferrer" className="absolute bottom-4 left-4 right-4 flex items-center gap-3 no-underline" onClick={(e) => e.stopPropagation()}>
         <div className="w-10 h-10 rounded-full border-2 border-white/20 p-0.5 relative shrink-0">
           <div className="w-full h-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 rounded-full flex flex-col items-center justify-center">
             <Instagram size={18} className="text-white" />
@@ -57,7 +60,7 @@ function VideoCard({ reel }) {
           </p>
           <p className="text-white/80 text-xs drop-shadow-md">Instagram Reel</p>
         </div>
-      </div>
+      </a>
     </div>
   );
 }
