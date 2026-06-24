@@ -118,10 +118,14 @@ export default function ProductDetailPage({ product, relatedProducts }) {
     }
   };
 
-  const seedReviews = getSeedReviews(product.slug, product.name, product.category);
-  const reviews = fetchedReviews.length > 0 ? [...fetchedReviews, ...seedReviews] : (product.reviews_data || seedReviews);
   const stableData = getStableRatingData(product.id, product.name);
-  const totalReviews = product.reviews || reviews.length || stableData.reviewCount;
+  let seedReviews = getSeedReviews(product.slug, product.name, product.category);
+  // Cap the seed reviews at the randomized target count so "Show More" maths out perfectly
+  if (seedReviews.length > stableData.reviewCount) {
+    seedReviews = seedReviews.slice(0, stableData.reviewCount);
+  }
+  const reviews = fetchedReviews.length > 0 ? [...fetchedReviews, ...seedReviews] : (product.reviews_data || seedReviews);
+  const totalReviews = reviews.length;
   const calculatedRating = reviews.length > 0 ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) : stableData.rating;
   const avgRating = Math.max(product.rating || calculatedRating, 4.5);
   const ratingDist = [5, 4, 3, 2, 1].map(star => ({

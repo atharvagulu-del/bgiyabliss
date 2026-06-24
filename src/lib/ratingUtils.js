@@ -10,8 +10,8 @@ export function getStableRatingData(productId, productName) {
   const ratingVariations = [4.6, 4.7, 4.8, 4.9];
   const rating = ratingVariations[hash % ratingVariations.length];
 
-  // Reviews between 45 and 350
-  const reviewCount = 45 + (hash % 305);
+  // Reviews between 30 and 60
+  const reviewCount = 30 + (hash % 31);
 
   return { rating, reviewCount };
 }
