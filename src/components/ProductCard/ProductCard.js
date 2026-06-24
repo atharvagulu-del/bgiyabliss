@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { Star, ShoppingCart, Sun, Droplets, Heart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
+import { getStableRatingData } from '@/lib/ratingUtils';
 
 export default function ProductCard({ product }) {
   const { addToCart } = useCart();
@@ -53,7 +54,9 @@ export default function ProductCard({ product }) {
           {true && (
             <div className="flex items-center gap-1 bg-white/90 backdrop-blur-sm text-yellow-500 px-2 py-1 rounded shadow-sm text-xs font-bold">
               <Star size={12} fill="currentColor" />
-              <span className="text-gray-800">{Math.max(product.rating || 4.8, 4.5).toFixed(1)}</span>
+              <span className="text-gray-800">
+                {product.rating ? Math.max(product.rating, 4.5).toFixed(1) : getStableRatingData(product.id, product.name).rating.toFixed(1)}
+              </span>
             </div>
           )}
         </div>

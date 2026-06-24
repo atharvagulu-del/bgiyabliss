@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Star, Heart, ShoppingCart, ChevronDown, Grid3X3, List, SlidersHorizontal } from 'lucide-react';
 import { getActiveProducts } from '@/lib/firestore';
+import { getStableRatingData } from '@/lib/ratingUtils';
 import { useCart } from '@/context/CartContext';
 import styles from './page.module.css';
 
@@ -69,17 +70,22 @@ function ProductGridCard({ product }) {
         <Link href={`/products/${product.slug}`} className={styles.cardName}>
           {product.name}
         </Link>
-        {true && (
-          <div className={styles.cardRating}>
-            <div className={styles.cardStars}>
-              {[...Array(5)].map((_, i) => {
-                const finalRating = Math.max(product.rating || 4.8, 4.5);
-                return <Star key={i} size={12} fill={i < Math.round(finalRating) ? '#f59e0b' : 'none'} stroke={i < Math.round(finalRating) ? '#f59e0b' : '#d1d5db'} />;
-              })}
+        {true && (() => {
+          const stableData = getStableRatingData(product.id, product.name);
+          const finalRating = product.rating ? Math.max(product.rating, 4.5) : stableData.rating;
+          const finalReviews = product.reviews || stableData.reviewCount;
+          
+          return (
+            <div className={styles.cardRating}>
+              <div className={styles.cardStars}>
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} size={12} fill={i < Math.round(finalRating) ? '#f59e0b' : 'none'} stroke={i < Math.round(finalRating) ? '#f59e0b' : '#d1d5db'} />
+                ))}
+              </div>
+              <span className={styles.cardRatingText}>{finalRating.toFixed(1)} | {finalReviews}</span>
             </div>
-            <span className={styles.cardRatingText}>{Math.max(product.rating || 4.8, 4.5).toFixed(1)} | {product.reviews || Math.floor(product.name.length * 3.5)}</span>
-          </div>
-        )}
+          );
+        })()}
         <div className={styles.cardPricing}>
           <span className={styles.cardPrice}>₹ {(product.salePrice || product.price || 0).toLocaleString('en-IN')}</span>
           {product.originalPrice > (product.salePrice || 0) && (
