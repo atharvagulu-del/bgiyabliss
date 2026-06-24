@@ -6,7 +6,6 @@ const reels = [
   { id: 1, src: '/reels/reel-1.mp4', handle: '@plant._.perfect' },
   { id: 2, src: '/reels/reel-2.mp4', handle: '@aasanbagwani' },
   { id: 3, src: '/reels/reel-3.mp4', handle: '@nita_singhs_dil_ki_baat' },
-  { id: 4, src: '/reels/reel-4.mp4', handle: '@pritishiyayadav' },
   { id: 5, src: '/reels/reel-5.mp4', handle: '@botani.cal_girl' },
 ];
 
