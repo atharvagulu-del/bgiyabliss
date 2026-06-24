@@ -119,8 +119,9 @@ export default function ProductDetailPage({ product, relatedProducts }) {
 
   const seedReviews = getSeedReviews(product.slug, product.name, product.category);
   const reviews = fetchedReviews.length > 0 ? [...fetchedReviews, ...seedReviews] : (product.reviews_data || seedReviews);
-  const totalReviews = product.reviews || reviews.length;
-  const avgRating = product.rating || (reviews.length > 0 ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) : 4.8);
+  const totalReviews = product.reviews || reviews.length || Math.floor(product.name?.length * 3.5) || 45;
+  const calculatedRating = reviews.length > 0 ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) : 4.8;
+  const avgRating = Math.max(product.rating || calculatedRating, 4.5);
   const ratingDist = [5, 4, 3, 2, 1].map(star => ({
     star, count: reviews.filter(r => r.rating === star).length,
     pct: Math.round((reviews.filter(r => r.rating === star).length / reviews.length) * 100),

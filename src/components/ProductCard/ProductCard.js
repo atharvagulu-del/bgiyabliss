@@ -50,10 +50,10 @@ export default function ProductCard({ product }) {
         </div>
 
         <div className="absolute top-3 right-3 pointer-events-none">
-          {product.rating && (
+          {true && (
             <div className="flex items-center gap-1 bg-white/90 backdrop-blur-sm text-yellow-500 px-2 py-1 rounded shadow-sm text-xs font-bold">
               <Star size={12} fill="currentColor" />
-              <span className="text-gray-800">{product.rating}</span>
+              <span className="text-gray-800">{Math.max(product.rating || 4.8, 4.5).toFixed(1)}</span>
             </div>
           )}
         </div>
