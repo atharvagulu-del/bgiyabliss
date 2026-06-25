@@ -79,6 +79,9 @@ export default function Home() {
       {/* Category Circles — Blinkit/Organic Bazar style */}
       <CategoryCircles />
 
+      {/* Instagram Reels — Social proof before products */}
+      <CommunityFeed />
+
       <ProductCarousel
         title="Bestsellers"
         products={bestsellers}
@@ -103,7 +106,6 @@ export default function Home() {
       />
       <HowItWorks />
       <TestimonialMarquee />
-      <CommunityFeed />
       <WhyChooseUs />
       <TrustBar />
     </>

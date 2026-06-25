@@ -1,6 +1,6 @@
 'use client';
 import { useRef, useState, useEffect } from 'react';
-import { Instagram, ChevronLeft, ChevronRight, Volume2, VolumeX } from 'lucide-react';
+import { Instagram, ChevronLeft, ChevronRight, Volume2, VolumeX, ShoppingBag, Play } from 'lucide-react';
 
 const reels = [
   { id: 1, src: '/reels/reel-1.mp4', handle: '@sivan.mai', link: 'https://www.instagram.com/reels/DXO50iApaFn/' },
@@ -14,6 +14,7 @@ const reels = [
 
 function VideoCard({ reel }) {
   const [isMuted, setIsMuted] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef(null);
 
   const toggleMute = () => {
@@ -26,39 +27,69 @@ function VideoCard({ reel }) {
     }
   }, [isMuted]);
 
+  // IntersectionObserver for autoplay when visible
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          video.play().catch(() => {});
+          setIsPlaying(true);
+        } else {
+          video.pause();
+          setIsPlaying(false);
+        }
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="snap-start shrink-0 w-[240px] md:w-[280px] aspect-[9/16] rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 bg-gray-900 relative group cursor-pointer" onClick={toggleMute}>
+    <div className="snap-start shrink-0 w-[200px] md:w-[240px] aspect-[9/16] rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 bg-gray-900 relative group cursor-pointer" onClick={toggleMute}>
       {/* Video */}
       <video
         ref={videoRef}
         src={reel.src}
         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-        autoPlay
         loop
         muted={isMuted}
         playsInline
+        preload="metadata"
       />
       
-      {/* Dark Overlay for text legibility */}
-      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
+      {/* Dark Overlay */}
+      <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
+      <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none" />
 
-      {/* Play/Sound indicator */}
-      <div className="absolute top-4 right-4 w-8 h-8 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+      {/* Sound indicator */}
+      <div className="absolute top-3 right-3 w-7 h-7 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
       </div>
 
+      {/* Shop Now Button */}
+      <a
+        href="/collections/all"
+        className="absolute top-3 left-3 flex items-center gap-1.5 bg-emerald-500/90 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-[11px] font-bold no-underline shadow-md hover:bg-emerald-600 transition-all duration-200 opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <ShoppingBag size={12} /> Shop Now
+      </a>
+
       {/* User Info */}
-      <a href={reel.link} target="_blank" rel="noopener noreferrer" className="absolute bottom-4 left-4 right-4 flex items-center gap-3 no-underline" onClick={(e) => e.stopPropagation()}>
-        <div className="w-10 h-10 rounded-full border-2 border-white/20 p-0.5 relative shrink-0">
+      <a href={reel.link} target="_blank" rel="noopener noreferrer" className="absolute bottom-3 left-3 right-3 flex items-center gap-2.5 no-underline" onClick={(e) => e.stopPropagation()}>
+        <div className="w-9 h-9 rounded-full border-2 border-white/30 p-0.5 relative shrink-0">
           <div className="w-full h-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 rounded-full flex flex-col items-center justify-center">
-            <Instagram size={18} className="text-white" />
+            <Instagram size={14} className="text-white" />
           </div>
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-white font-semibold text-sm truncate drop-shadow-md">
+          <p className="text-white font-semibold text-xs truncate drop-shadow-md m-0">
             {reel.handle}
           </p>
-          <p className="text-white/80 text-xs drop-shadow-md">Instagram Reel</p>
+          <p className="text-white/70 text-[10px] drop-shadow-md m-0">Watch on Instagram ↗</p>
         </div>
       </a>
     </div>
@@ -70,37 +101,40 @@ export default function CommunityFeed() {
 
   const scroll = (dir) => {
     if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: dir * 300, behavior: 'smooth' });
+      scrollRef.current.scrollBy({ left: dir * 260, behavior: 'smooth' });
     }
   };
 
   return (
-    <section className="py-8 md:py-12 bg-white overflow-hidden">
+    <section className="py-6 md:py-10 bg-white overflow-hidden">
       <div className="container mx-auto px-4 md:px-8 max-w-[1400px]">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 mb-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 mb-6">
           <div>
-            <h2 className="text-2xl md:text-4xl font-bold font-heading text-gray-900 tracking-tight">
-              Join Our Community
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[11px] font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">Trending</span>
+            </div>
+            <h2 className="text-xl md:text-3xl font-bold font-heading text-gray-900 tracking-tight">
+              Real Gardeners, Real Results 🌱
             </h2>
-            <p className="text-gray-500 mt-2 text-base">
-              Inspiration from plant lovers across India.
+            <p className="text-gray-500 mt-1 text-sm">
+              See what plant parents across India are growing with Bgiya Bliss
             </p>
           </div>
           <a 
             href="https://instagram.com/bgiyabliss" 
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 bg-gradient-to-r from-pink-500 via-rose-500 to-orange-400 text-white px-6 py-3 rounded-full font-semibold text-sm hover:shadow-lg hover:shadow-pink-200 transition-all duration-300 shadow-md w-fit shrink-0 transform hover:-translate-y-0.5"
+            className="flex items-center gap-2 bg-gradient-to-r from-pink-500 via-rose-500 to-orange-400 text-white px-5 py-2.5 rounded-full font-semibold text-xs hover:shadow-lg hover:shadow-pink-200 transition-all duration-300 shadow-md w-fit shrink-0 transform hover:-translate-y-0.5"
           >
-            <Instagram size={18} /> @bgiyabliss
+            <Instagram size={16} /> Follow @bgiyabliss
           </a>
         </div>
         
-        {/* Scrollable Native Video Carousel */}
+        {/* Scrollable Video Carousel */}
         <div className="relative group -mx-4 px-4 md:mx-0 md:px-0">
           <div 
-            className="flex gap-4 overflow-x-auto hide-scrollbar snap-x snap-mandatory pb-4"
+            className="flex gap-3 overflow-x-auto hide-scrollbar snap-x snap-mandatory pb-4"
             ref={scrollRef}
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
@@ -113,18 +147,18 @@ export default function CommunityFeed() {
 
           {/* Nav arrows */}
           <button 
-            className="hidden md:flex absolute -left-5 top-[45%] -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-lg items-center justify-center text-gray-700 hover:text-emerald-600 hover:scale-110 transition-all opacity-0 group-hover:opacity-100 z-10 border border-gray-100"
+            className="hidden md:flex absolute -left-5 top-[45%] -translate-y-1/2 w-11 h-11 bg-white rounded-full shadow-lg items-center justify-center text-gray-700 hover:text-emerald-600 hover:scale-110 transition-all opacity-0 group-hover:opacity-100 z-10 border border-gray-100"
             onClick={() => scroll(-1)} 
             aria-label="Previous"
           >
-            <ChevronLeft size={24} />
+            <ChevronLeft size={22} />
           </button>
           <button 
-            className="hidden md:flex absolute -right-5 top-[45%] -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-lg items-center justify-center text-gray-700 hover:text-emerald-600 hover:scale-110 transition-all opacity-0 group-hover:opacity-100 z-10 border border-gray-100"
+            className="hidden md:flex absolute -right-5 top-[45%] -translate-y-1/2 w-11 h-11 bg-white rounded-full shadow-lg items-center justify-center text-gray-700 hover:text-emerald-600 hover:scale-110 transition-all opacity-0 group-hover:opacity-100 z-10 border border-gray-100"
             onClick={() => scroll(1)} 
             aria-label="Next"
           >
-            <ChevronRight size={24} />
+            <ChevronRight size={22} />
           </button>
         </div>
       </div>
