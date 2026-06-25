@@ -229,7 +229,7 @@ export default function CartDrawer() {
 
             {/* ── Footer: Offers + Pricing ── */}
             {cartItems.length > 0 && (
-              <div style={{ borderTop: '1px solid #eee', padding: '12px 16px 16px', background: '#fff' }}>
+              <div style={{ borderTop: '1px solid #eee', padding: '12px 16px', paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 24px))', background: '#fff' }}>
 
                 {/* Coupon / Offer section */}
                 {appliedPromo ? (

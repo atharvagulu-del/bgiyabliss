@@ -367,7 +367,7 @@ export default function CheckoutPage() {
         .step-anim { animation: ${animDir === 'forward' ? 'slideInRight' : 'slideInLeft'} 0.3s ease forwards; }
         @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
         .fade-in { animation: fadeIn 0.25s ease forwards; }
-        .co-input { width:100%; padding:14px 16px; border:1.5px solid #e5e7eb; border-radius:12px; font-size:15px; outline:none; background:#fff; color:#111; transition: border-color 0.2s, box-shadow 0.2s; }
+        .co-input { width:100%; padding:14px 16px; border:1.5px solid #e5e7eb; border-radius:12px; font-size:16px; outline:none; background:#fff; color:#111; transition: border-color 0.2s, box-shadow 0.2s; -webkit-appearance: none; }
         .co-input:focus { border-color:#16a34a; box-shadow: 0 0 0 3px rgba(22,163,74,0.08); }
         .co-input-error { border-color:#dc2626 !important; }
         .co-input::placeholder { color:#9ca3af; }
