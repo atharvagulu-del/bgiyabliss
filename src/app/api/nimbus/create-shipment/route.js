@@ -43,6 +43,13 @@ const PRODUCT_SHIPPING_INFO = [
 const DEFAULT_SHIPPING = { weight: 1000, l: 25, b: 15, h: 10 };
 
 function getProductShipping(item) {
+  const nameStr = (item.name || '').toLowerCase();
+  
+  // Hard override for 5-in-1 which is incorrectly 10kg in DB
+  if (nameStr.includes('5 in 1') || nameStr.includes('5 in one') || nameStr.includes('5-in-1')) {
+    return { weight: 3700, l: 30, b: 20, h: 20 };
+  }
+
   // Priority 1: Use shipping data set in admin panel (stored on product in Firestore)
   if (item.shippingWeight && item.shippingWeight > 0) {
     return {

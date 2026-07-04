@@ -124,7 +124,7 @@ export default function CheckoutPage() {
   }, [form.pincode, cartTotalWeight, cartTotal, mounted]);
 
   const baseShippingCost = dynamicShippingCost !== null ? Math.round(dynamicShippingCost) : 54;
-  const COD_FEE = 52;
+  const COD_FEE = 65;
   const shippingCost = form.paymentMethod === 'cod' ? COD_FEE : 0;
   const coinDiscount = coinsApplied ? Math.floor(coinsToRedeem / 10) : 0; // 100 coins = ₹10
   const orderTotal = Math.max(cartTotal + gstAmount + shippingCost - coinDiscount, 0);
