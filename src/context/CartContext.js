@@ -82,12 +82,12 @@ export function CartProvider({ children }) {
   const cartTotalWeight = cartItems.reduce((total, item) => {
     let itemWeightGrams = 0;
     const nameStr = (item.name || '').toLowerCase();
+    const weightStr = item.weight || item.details?.Weight || item.variantLabel || '';
     
     // Hard override for 5-in-1 which is incorrectly 10kg in variant/DB
     if (nameStr.includes('5 in 1') || nameStr.includes('5 in one') || nameStr.includes('5-in-1')) {
       itemWeightGrams = 3700;
     } else {
-      const weightStr = item.weight || item.details?.Weight || item.variantLabel || '';
       if (weightStr) {
         const match = weightStr.toString().match(/(\d+(?:\.\d+)?)\s*(kg|g|ml|l)/i);
         if (match) {
