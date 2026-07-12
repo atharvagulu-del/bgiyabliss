@@ -60,10 +60,13 @@ export default function OrdersPage() {
 
   // ── PDF Export for CA ──
   const downloadOrdersPDF = async () => {
-    const { default: jsPDF } = await import('jspdf');
-    await import('jspdf-autotable');
+    try {
+      const jsPDFModule = await import('jspdf');
+      const jsPDF = jsPDFModule.default || jsPDFModule.jsPDF;
+      const autoTableModule = await import('jspdf-autotable');
+      const autoTable = autoTableModule.default || autoTableModule.autoTable;
 
-    const doc = new jsPDF('landscape', 'mm', 'a4');
+      const doc = new jsPDF('landscape', 'mm', 'a4');
     const pageWidth = doc.internal.pageSize.getWidth();
     const now = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -125,7 +128,7 @@ export default function OrdersPage() {
       ];
     });
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: 72,
       head: [['#', 'Order ID', 'Date', 'Customer', 'Phone', 'Address', 'Items', 'Payment', 'Status', 'Subtotal', 'Discount', 'Promo', 'GST', 'Shipping', 'Total']],
       body: tableData,
@@ -150,22 +153,25 @@ export default function OrdersPage() {
         14: { cellWidth: 18, halign: 'right', fontStyle: 'bold' },
       },
       margin: { left: 8, right: 8 },
-      didDrawPage: (data) => {
-        // Footer on every page
+      didDrawPage: () => {
         doc.setFontSize(7);
         doc.setTextColor(150);
-        doc.text(`Bgiya Bliss Orders Report — Page ${doc.internal.getCurrentPageInfo().pageNumber}`, 14, doc.internal.pageSize.getHeight() - 8);
+        doc.text(`Bgiya Bliss Orders Report`, 14, doc.internal.pageSize.getHeight() - 8);
         doc.setTextColor(0);
       },
     });
 
     // ── Totals row at the bottom ──
-    const finalY = doc.lastAutoTable.finalY + 6;
+    const finalY = (doc.previousAutoTable?.finalY || 200) + 6;
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
     doc.text(`Grand Total: Rs.${Math.round(totalRevenue).toLocaleString('en-IN')}`, pageWidth - 14, finalY, { align: 'right' });
 
     doc.save(`Bgiya_Bliss_Orders_${new Date().toISOString().split('T')[0]}.pdf`);
+    } catch (err) {
+      console.error('PDF generation error:', err);
+      alert('Failed to generate PDF: ' + err.message);
+    }
   };
 
   return (
