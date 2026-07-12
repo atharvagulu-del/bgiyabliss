@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Package, Clock, Truck, CheckCircle2, ChevronDown, ChevronUp, MapPin, Phone, Mail, RefreshCw, User } from 'lucide-react';
+import { Package, Clock, Truck, CheckCircle2, ChevronDown, ChevronUp, MapPin, Phone, Mail, RefreshCw, User, Download } from 'lucide-react';
 import { getAllOrders, updateOrderStatus } from '@/lib/firestore';
 
 const STATUS_CONFIG = {
@@ -58,16 +58,135 @@ export default function OrdersPage() {
     return acc;
   }, {});
 
+  // ── PDF Export for CA ──
+  const downloadOrdersPDF = async () => {
+    const { default: jsPDF } = await import('jspdf');
+    await import('jspdf-autotable');
+
+    const doc = new jsPDF('landscape', 'mm', 'a4');
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const now = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    // ── Title ──
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Bgiya Bliss — Orders Report', 14, 18);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100);
+    doc.text(`Generated on ${now}  |  Total Orders: ${orders.length}`, 14, 25);
+    doc.setTextColor(0);
+
+    // ── Summary Stats ──
+    const totalRevenue = orders.reduce((s, o) => s + (o.total || 0), 0);
+    const totalSubtotal = orders.reduce((s, o) => s + (o.subtotal || 0), 0);
+    const totalGST = orders.reduce((s, o) => s + (o.gst || 0), 0);
+    const totalDiscount = orders.reduce((s, o) => s + (o.discount || 0), 0);
+    const totalShipping = orders.reduce((s, o) => s + (o.shippingCost || 0), 0);
+    const codOrders = orders.filter(o => o.paymentMethod === 'cod').length;
+    const prepaidOrders = orders.filter(o => o.paymentMethod !== 'cod').length;
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Summary', 14, 34);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    const summaryLines = [
+      `Total Revenue: Rs.${Math.round(totalRevenue).toLocaleString('en-IN')}`,
+      `Total Subtotal: Rs.${Math.round(totalSubtotal).toLocaleString('en-IN')}`,
+      `Total GST (5%): Rs.${Math.round(totalGST).toLocaleString('en-IN')}`,
+      `Total Discounts: Rs.${Math.round(totalDiscount).toLocaleString('en-IN')}`,
+      `Total Shipping: Rs.${Math.round(totalShipping).toLocaleString('en-IN')}`,
+      `COD Orders: ${codOrders}  |  Prepaid Orders: ${prepaidOrders}`,
+    ];
+    summaryLines.forEach((line, i) => doc.text(line, 14, 40 + i * 5));
+
+    // ── Orders Table ──
+    const tableData = orders.map((o, idx) => {
+      const date = o.createdAt?.toDate ? o.createdAt.toDate() : o.createdAt ? new Date(o.createdAt) : null;
+      const dateStr = date ? date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A';
+      const items = (o.items || []).map(i => `${i.name} x${i.quantity}`).join(', ');
+      return [
+        idx + 1,
+        o.orderId || o.id?.slice(0, 8).toUpperCase() || '-',
+        dateStr,
+        o.customer?.name || '-',
+        o.customer?.phone || '-',
+        `${o.shipping?.city || '-'}, ${o.shipping?.state || '-'} ${o.shipping?.pincode || ''}`.trim(),
+        items || '-',
+        (o.paymentMethod || 'prepaid').toUpperCase(),
+        (o.status || 'pending').charAt(0).toUpperCase() + (o.status || 'pending').slice(1),
+        `Rs.${Math.round(o.subtotal || 0).toLocaleString('en-IN')}`,
+        o.discount > 0 ? `-Rs.${Math.round(o.discount).toLocaleString('en-IN')}` : '-',
+        o.promoCode || '-',
+        `Rs.${Math.round(o.gst || 0).toLocaleString('en-IN')}`,
+        `Rs.${Math.round(o.shippingCost || 0).toLocaleString('en-IN')}`,
+        `Rs.${Math.round(o.total || 0).toLocaleString('en-IN')}`,
+      ];
+    });
+
+    doc.autoTable({
+      startY: 72,
+      head: [['#', 'Order ID', 'Date', 'Customer', 'Phone', 'Address', 'Items', 'Payment', 'Status', 'Subtotal', 'Discount', 'Promo', 'GST', 'Shipping', 'Total']],
+      body: tableData,
+      styles: { fontSize: 7, cellPadding: 2, overflow: 'linebreak' },
+      headStyles: { fillColor: [22, 101, 52], textColor: 255, fontSize: 7, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      columnStyles: {
+        0: { cellWidth: 8 },
+        1: { cellWidth: 18 },
+        2: { cellWidth: 18 },
+        3: { cellWidth: 22 },
+        4: { cellWidth: 20 },
+        5: { cellWidth: 30 },
+        6: { cellWidth: 40 },
+        7: { cellWidth: 14 },
+        8: { cellWidth: 16 },
+        9: { cellWidth: 18, halign: 'right' },
+        10: { cellWidth: 16, halign: 'right' },
+        11: { cellWidth: 16 },
+        12: { cellWidth: 14, halign: 'right' },
+        13: { cellWidth: 16, halign: 'right' },
+        14: { cellWidth: 18, halign: 'right', fontStyle: 'bold' },
+      },
+      margin: { left: 8, right: 8 },
+      didDrawPage: (data) => {
+        // Footer on every page
+        doc.setFontSize(7);
+        doc.setTextColor(150);
+        doc.text(`Bgiya Bliss Orders Report — Page ${doc.internal.getCurrentPageInfo().pageNumber}`, 14, doc.internal.pageSize.getHeight() - 8);
+        doc.setTextColor(0);
+      },
+    });
+
+    // ── Totals row at the bottom ──
+    const finalY = doc.lastAutoTable.finalY + 6;
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Grand Total: Rs.${Math.round(totalRevenue).toLocaleString('en-IN')}`, pageWidth - 14, finalY, { align: 'right' });
+
+    doc.save(`Bgiya_Bliss_Orders_${new Date().toISOString().split('T')[0]}.pdf`);
+  };
+
   return (
     <>
       <div className="adminTopbar">
         <h1 className="adminTopbarTitle">Orders</h1>
-        <button
-          onClick={loadOrders}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', background: '#f3f4f6', borderRadius: 8, fontSize: 13, fontWeight: 600, color: '#374151', cursor: 'pointer', border: '1px solid #e5e7eb' }}
-        >
-          <RefreshCw size={14} /> Refresh
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            onClick={downloadOrdersPDF}
+            disabled={orders.length === 0}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', background: '#16a34a', borderRadius: 8, fontSize: 13, fontWeight: 600, color: '#fff', cursor: orders.length === 0 ? 'not-allowed' : 'pointer', border: 'none', opacity: orders.length === 0 ? 0.5 : 1 }}
+          >
+            <Download size={14} /> Download PDF
+          </button>
+          <button
+            onClick={loadOrders}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', background: '#f3f4f6', borderRadius: 8, fontSize: 13, fontWeight: 600, color: '#374151', cursor: 'pointer', border: '1px solid #e5e7eb' }}
+          >
+            <RefreshCw size={14} /> Refresh
+          </button>
+        </div>
       </div>
 
       <div className="adminContent">
