@@ -10,6 +10,11 @@ const reels = [
   { id: 5, src: '/reels/reel-5.mp4', handle: '@nature247natural', link: 'https://www.instagram.com/reels/DWY-aIXjZ8N/' },
   { id: 6, src: '/reels/reel-6.mp4', handle: '@gharkibagia', link: 'https://www.instagram.com/reels/DZ4Xmryg_rR/' },
   { id: 7, src: '/reels/reel-7.mp4', handle: '@bunnyorganics73', link: 'https://www.instagram.com/reels/DWJB34bk2Me/' },
+  { id: 8, src: '/reels/reel-8.mp4', handle: '@bgiyabliss', link: 'https://www.instagram.com/bgiyabliss/' },
+  { id: 9, src: '/reels/reel-9.mp4', handle: '@bgiyabliss', link: 'https://www.instagram.com/bgiyabliss/' },
+  { id: 10, src: '/reels/reel-10.mp4', handle: '@bgiyabliss', link: 'https://www.instagram.com/bgiyabliss/' },
+  { id: 11, src: '/reels/reel-11.mp4', handle: '@bgiyabliss', link: 'https://www.instagram.com/bgiyabliss/' },
+  { id: 12, src: '/reels/reel-12.mp4', handle: '@bgiyabliss', link: 'https://www.instagram.com/bgiyabliss/' },
 ];
 
 function VideoCard({ reel }) {
