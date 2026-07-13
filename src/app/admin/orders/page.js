@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Package, Clock, Truck, CheckCircle2, ChevronDown, ChevronUp, MapPin, Phone, Mail, RefreshCw, User, Download } from 'lucide-react';
-import { getAllOrders, updateOrderStatus } from '@/lib/firestore';
+import { Package, Clock, Truck, CheckCircle2, ChevronDown, ChevronUp, MapPin, Phone, Mail, RefreshCw, User, Download, Trash2 } from 'lucide-react';
+import { getAllOrders, updateOrderStatus, db } from '@/lib/firestore';
+import { deleteDoc, doc } from 'firebase/firestore';
 
 const STATUS_CONFIG = {
   pending: { label: 'Pending', color: '#b45309', bg: '#fef3c7', icon: Clock },
@@ -174,11 +175,44 @@ export default function OrdersPage() {
     }
   };
 
+  const cleanDemoOrders = async () => {
+    if (!window.confirm('Are you sure you want to delete all demo/test orders from the database? (This cannot be undone)')) return;
+    setLoading(true);
+    
+    try {
+      const testNames = ['atharv', 'anagha', 'rita', 'test'];
+      const demoOrders = orders.filter(o => {
+        const n = (o.customer?.name || '').toLowerCase();
+        const e = (o.customer?.email || '').toLowerCase();
+        return testNames.some(t => n.includes(t) || e.includes(t));
+      });
+
+      let count = 0;
+      for (const order of demoOrders) {
+        await deleteDoc(doc(db, 'orders', order.id));
+        count++;
+      }
+      
+      alert(`Successfully deleted ${count} demo orders.`);
+      loadOrders();
+    } catch (err) {
+      console.error('Failed to clean demo orders:', err);
+      alert('Failed to clean orders. Make sure you are logged in as admin.');
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <div className="adminTopbar">
         <h1 className="adminTopbarTitle">Orders</h1>
         <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            onClick={cleanDemoOrders}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', background: '#dc2626', borderRadius: 8, fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', border: 'none' }}
+          >
+            <Trash2 size={14} /> Clean Demo Orders
+          </button>
           <button
             onClick={downloadOrdersPDF}
             disabled={orders.length === 0}
