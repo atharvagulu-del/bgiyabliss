@@ -188,6 +188,13 @@ export async function createOrder(orderData) {
 }
 
 export async function getAllOrders() {
+  const testNames = ['atharv', 'anagha', 'rita', 'test'];
+  const filterDemo = (order) => {
+    const n = (order.customer?.name || '').toLowerCase();
+    const e = (order.customer?.email || '').toLowerCase();
+    return !testNames.some(t => n.includes(t) || e.includes(t));
+  };
+
   try {
     const q = query(
       collection(db, ORDERS_COLLECTION),
@@ -197,7 +204,7 @@ export async function getAllOrders() {
     return snapshot.docs.map((d) => ({
       id: d.id,
       ...d.data(),
-    }));
+    })).filter(filterDemo);
   } catch (err) {
     console.log('getAllOrders failed, trying without orderBy:', err.message);
     const snapshot = await withTimeout(getDocs(collection(db, ORDERS_COLLECTION)));
@@ -206,7 +213,7 @@ export async function getAllOrders() {
       const da = a.createdAt?.toDate?.() || new Date(0);
       const db2 = b.createdAt?.toDate?.() || new Date(0);
       return db2 - da;
-    });
+    }).filter(filterDemo);
   }
 }
 
