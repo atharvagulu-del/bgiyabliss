@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { Package, Clock, Truck, CheckCircle2, ChevronDown, ChevronUp, MapPin, Phone, Mail, RefreshCw, User, Download, Trash2 } from 'lucide-react';
-import { getAllOrders, updateOrderStatus, db } from '@/lib/firestore';
+import { getAllOrders, updateOrderStatus } from '@/lib/firestore';
+import { db } from '@/lib/firebase';
 import { deleteDoc, doc } from 'firebase/firestore';
 
 const STATUS_CONFIG = {
