@@ -222,7 +222,7 @@ export default function CheckoutPage() {
     };
 
     const autoShip = async (orderInfo) => {
-      try { await fetch('/api/nimbus/create-shipment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...orderInfo, totalWeight: cartTotalWeight }) }); }
+      try { await fetch('/api/shiprocket/create-shipment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...orderInfo, totalWeight: cartTotalWeight }) }); }
       catch (e) { console.error('Auto ship failed:', e); }
     };
 
