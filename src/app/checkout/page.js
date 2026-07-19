@@ -589,6 +589,26 @@ export default function CheckoutPage() {
                   </div>
                   <span style={{ fontSize: 14, fontWeight: 700, color: '#16a34a' }}>Free</span>
                 </label>
+
+                <label onClick={() => u('paymentMethod', 'cod')} style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 18px',
+                  borderRadius: 14, cursor: 'pointer', transition: 'all 0.2s',
+                  border: form.paymentMethod === 'cod' ? '2px solid #16a34a' : '1.5px solid #e5e7eb',
+                  background: form.paymentMethod === 'cod' ? '#f0fdf4' : '#fff',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ width: 20, height: 20, borderRadius: '50%', border: `2px solid ${form.paymentMethod === 'cod' ? '#16a34a' : '#d1d5db'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {form.paymentMethod === 'cod' && <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#16a34a' }} />}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: '#111', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <Banknote size={16} /> Cash on Delivery
+                      </div>
+                      <div style={{ fontSize: 12, color: '#6b7280' }}>₹65 COD charges apply</div>
+                    </div>
+                  </div>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: '#111' }}>₹65</span>
+                </label>
               </div>
             </div>
 
@@ -756,7 +776,7 @@ export default function CheckoutPage() {
               whileTap={{ scale: loading ? 1 : 0.96 }}
               style={{
                 width: '100%', padding: '18px', 
-                background: loading ? '#9ca3af' : '#16a34a',
+                background: loading ? '#9ca3af' : (form.paymentMethod === 'prepaid' ? '#16a34a' : '#059669'),
                 color: '#fff', fontSize: 16, fontWeight: 800, borderRadius: 16, border: 'none',
                 cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 boxShadow: loading ? 'none' : '0 8px 24px rgba(22, 163, 74, 0.25)', 
@@ -764,7 +784,7 @@ export default function CheckoutPage() {
                 outline: 'none'
               }}
             >
-              {loading ? <><Loader2 size={20} className="animate-spin" /> Processing...</> : <><Lock size={18} style={{ color: '#fff' }} /> Pay Securely · ₹{Math.round(orderTotal).toLocaleString()}</>}
+              {loading ? <><Loader2 size={20} className="animate-spin" /> Processing...</> : <><Lock size={18} style={{ color: '#fff' }} /> {form.paymentMethod === 'prepaid' ? `Pay Securely · ₹${Math.round(orderTotal).toLocaleString()}` : `Place COD Order · ₹${Math.round(orderTotal).toLocaleString()}`}</>}
             </motion.button>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 14, fontSize: 11, color: '#9ca3af' }}>
