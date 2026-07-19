@@ -133,8 +133,8 @@ export async function POST(req) {
       pickup_location: 'warehouse',
       channel_id: '',
       comment: '',
-      billing_customer_name: orderData.customer?.name || 'Customer',
-      billing_last_name: '',
+      billing_customer_name: (orderData.customer?.name || 'Customer').split(' ')[0],
+      billing_last_name: (orderData.customer?.name || '').split(' ').slice(1).join(' '),
       billing_address: orderData.shipping?.address1 || '',
       billing_address_2: orderData.shipping?.address2 || '',
       billing_city: orderData.shipping?.city || '',
@@ -144,16 +144,16 @@ export async function POST(req) {
       billing_email: orderData.customer?.email || '',
       billing_phone: orderData.customer?.phone || '',
       shipping_is_billing: true,
-      shipping_customer_name: '',
-      shipping_last_name: '',
-      shipping_address: '',
-      shipping_address_2: '',
-      shipping_city: '',
-      shipping_pincode: '',
-      shipping_country: '',
-      shipping_state: '',
-      shipping_email: '',
-      shipping_phone: '',
+      shipping_customer_name: (orderData.customer?.name || 'Customer').split(' ')[0],
+      shipping_last_name: (orderData.customer?.name || '').split(' ').slice(1).join(' '),
+      shipping_address: orderData.shipping?.address1 || '',
+      shipping_address_2: orderData.shipping?.address2 || '',
+      shipping_city: orderData.shipping?.city || '',
+      shipping_pincode: orderData.shipping?.pincode || '',
+      shipping_country: 'India',
+      shipping_state: orderData.shipping?.state || '',
+      shipping_email: orderData.customer?.email || '',
+      shipping_phone: orderData.customer?.phone || '',
       order_items: orderItems,
       payment_method: paymentType,
       shipping_charges: orderData.shippingCost || 0,
@@ -205,9 +205,15 @@ export async function POST(req) {
 
       const couriers = svcData?.data?.available_courier_companies || [];
       if (couriers.length > 0) {
-        const cheapest = couriers.sort((a, b) => a.rate - b.rate)[0];
+        // Always pick the absolute cheapest courier
+        const cheapest = couriers.reduce((best, curr) => {
+          const bestRate = parseFloat(best.rate) || Infinity;
+          const currRate = parseFloat(curr.rate) || Infinity;
+          return currRate < bestRate ? curr : best;
+        }, couriers[0]);
         courierId = cheapest.courier_company_id;
-        console.log(`[Shiprocket] Best courier: ${cheapest.courier_name} (ID: ${courierId}) at Rs.${cheapest.rate}`);
+        console.log(`[Shiprocket] Best courier: ${cheapest.courier_name} (ID: ${courierId}) at Rs.${cheapest.rate}, ETD: ${cheapest.etd}`);
+        console.log(`[Shiprocket] ${couriers.length} couriers available, rates: ${couriers.map(c => c.courier_name + ' Rs.' + c.rate).join(', ')}`);
       }
     } catch (svcErr) {
       console.error('[Shiprocket] Courier serviceability check failed:', svcErr.message);
