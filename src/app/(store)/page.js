@@ -10,6 +10,7 @@ import WhyChooseUs from '@/components/WhyChooseUs/WhyChooseUs';
 import TrustBar from '@/components/TrustBar/TrustBar';
 import { bestsellers as staticBestsellers, plantBundles as staticBundles, newArrivals as staticArrivals, ceramics as staticCeramics } from '@/data/products';
 import { getActiveProducts } from '@/lib/firestore';
+import { cacheProducts } from '@/lib/productCache';
 
 export default function Home() {
   // Show static products INSTANTLY on first render — no blank sections ever
@@ -17,6 +18,9 @@ export default function Home() {
   const [plantBundles, setPlantBundles] = useState(staticBundles);
   const [newArrivals, setNewArrivals] = useState(staticArrivals);
   const [ceramics, setCeramics] = useState(staticCeramics);
+
+  // Cache static products immediately so product pages can read them
+  cacheProducts([...staticBestsellers, ...staticBundles, ...staticArrivals, ...staticCeramics]);
 
   useEffect(() => {
     let isMounted = true;
@@ -35,6 +39,8 @@ export default function Home() {
         });
 
         if (products.length > 0) {
+          // Cache all products for instant product page loads
+          cacheProducts(products);
           const best = products.filter(p =>
             (p.featured?.includes('bestseller') ||
               p.category === 'plant-care' ||

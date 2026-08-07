@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import ProductDetailPage from '@/components/ProductPage/ProductPage';
 import { getProductBySlug, getActiveProducts } from '@/lib/firestore';
+import { getCachedProduct, getAllCachedProducts } from '@/lib/productCache';
 import { bestsellers, newArrivals, plantBundles, ceramics } from '@/data/products';
 
 const allStaticProducts = [...bestsellers, ...newArrivals, ...plantBundles, ...ceramics];
@@ -12,33 +13,41 @@ const uniqueStaticProducts = Array.from(new Set(allStaticProducts.map(a => a.id)
 export default function Page() {
   const params = useParams();
   const router = useRouter();
-
   const slug = params.slug;
-  const initialStaticProduct = uniqueStaticProducts.find(p => p.slug === slug);
 
-  const [product, setProduct] = useState(initialStaticProduct || null);
-  const [relatedProducts, setRelatedProducts] = useState(() => {
-    if (initialStaticProduct) {
-      return uniqueStaticProducts
-        .filter(p => p.id !== initialStaticProduct.id)
-        .sort(() => 0.5 - Math.random())
-        .slice(0, 4);
-    }
-    return uniqueStaticProducts.slice(0, 4);
-  });
+  // Try cache first (populated by homepage), then static data
+  const cachedProduct = getCachedProduct(slug);
+  const staticProduct = uniqueStaticProducts.find(p => p.slug === slug);
+  const initialProduct = cachedProduct || staticProduct || null;
 
-  const [loading, setLoading] = useState(!initialStaticProduct);
+  // Build initial related products from cache or static
+  const initialRelated = (() => {
+    if (!initialProduct) return uniqueStaticProducts.slice(0, 4);
+    const cached = getAllCachedProducts();
+    const pool = cached.length > 1 ? cached : uniqueStaticProducts;
+    return pool
+      .filter(p => p.id !== initialProduct.id)
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 4);
+  })();
+
+  const [product, setProduct] = useState(initialProduct);
+  const [relatedProducts, setRelatedProducts] = useState(initialRelated);
+  const [loading, setLoading] = useState(!initialProduct);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    if (initialStaticProduct && (initialStaticProduct.category === 'tools' || initialStaticProduct.status === 'inactive')) {
+    // Redirect coming soon products
+    if (initialProduct && (initialProduct.category === 'tools' || initialProduct.status === 'inactive')) {
       router.replace('/products/coming-soon');
       return;
     }
 
+    // If we already have a product from cache/static, show it immediately
+    // and sync from Firestore in the background
     let isMounted = true;
 
-    const syncProductFromFirestore = async () => {
+    const syncFromFirestore = async () => {
       try {
         const firestoreProduct = await getProductBySlug(slug);
         if (!isMounted) return;
@@ -51,37 +60,31 @@ export default function Page() {
           setProduct(firestoreProduct);
           setLoading(false);
 
-          // Asynchronously load related products without blocking UI
+          // Load related products in background
           getActiveProducts().then(allProducts => {
             if (!isMounted) return;
             const related = allProducts
               .filter(p => p.id !== firestoreProduct.id)
               .sort(() => 0.5 - Math.random())
               .slice(0, 4);
-            if (related.length > 0) {
-              setRelatedProducts(related);
-            }
-          });
+            if (related.length > 0) setRelatedProducts(related);
+          }).catch(() => {});
           return;
         }
       } catch (err) {
-        console.error('Firestore sync error:', err);
+        // Firestore failed — no problem if we already have cached/static data
       }
 
       if (!isMounted) return;
-
-      if (!initialStaticProduct) {
+      if (!initialProduct) {
         setNotFound(true);
       }
       setLoading(false);
     };
 
-    syncProductFromFirestore();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [slug, router, initialStaticProduct]);
+    syncFromFirestore();
+    return () => { isMounted = false; };
+  }, [slug, router, initialProduct]);
 
   if (loading) {
     return (
