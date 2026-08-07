@@ -6,79 +6,82 @@ import { getProductBySlug, getActiveProducts } from '@/lib/firestore';
 import { bestsellers, newArrivals, plantBundles, ceramics } from '@/data/products';
 
 const allStaticProducts = [...bestsellers, ...newArrivals, ...plantBundles, ...ceramics];
+const uniqueStaticProducts = Array.from(new Set(allStaticProducts.map(a => a.id)))
+  .map(id => allStaticProducts.find(a => a.id === id));
 
 export default function Page() {
   const params = useParams();
-  const [product, setProduct] = useState(null);
-  const [relatedProducts, setRelatedProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
-
   const router = useRouter();
 
-  useEffect(() => {
-    const loadProduct = async () => {
-      const slug = params.slug;
+  const slug = params.slug;
+  const initialStaticProduct = uniqueStaticProducts.find(p => p.slug === slug);
 
+  const [product, setProduct] = useState(initialStaticProduct || null);
+  const [relatedProducts, setRelatedProducts] = useState(() => {
+    if (initialStaticProduct) {
+      return uniqueStaticProducts
+        .filter(p => p.id !== initialStaticProduct.id)
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 4);
+    }
+    return uniqueStaticProducts.slice(0, 4);
+  });
+
+  const [loading, setLoading] = useState(!initialStaticProduct);
+  const [notFound, setNotFound] = useState(false);
+
+  useEffect(() => {
+    if (initialStaticProduct && (initialStaticProduct.category === 'tools' || initialStaticProduct.status === 'inactive')) {
+      router.replace('/products/coming-soon');
+      return;
+    }
+
+    let isMounted = true;
+
+    const syncProductFromFirestore = async () => {
       try {
-        // Try Firestore first, with an 8-second timeout
-        const firestoreProduct = await Promise.race([
-          getProductBySlug(slug),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000))
-        ]);
+        const firestoreProduct = await getProductBySlug(slug);
+        if (!isMounted) return;
 
         if (firestoreProduct) {
-          // Redirect tools/inactive products to coming-soon page
           if (firestoreProduct.category === 'tools' || firestoreProduct.status === 'inactive') {
             router.replace('/products/coming-soon');
             return;
           }
           setProduct(firestoreProduct);
-
-          // Get related products from Firestore (also with timeout)
-          const allProducts = await Promise.race([
-            getActiveProducts(),
-            new Promise(resolve => setTimeout(() => resolve([]), 8000))
-          ]);
-          
-          const related = allProducts
-            .filter(p => p.id !== firestoreProduct.id)
-            .sort(() => 0.5 - Math.random())
-            .slice(0, 4);
-          setRelatedProducts(related.length > 0 ? related : allStaticProducts.slice(0, 4));
           setLoading(false);
+
+          // Asynchronously load related products without blocking UI
+          getActiveProducts().then(allProducts => {
+            if (!isMounted) return;
+            const related = allProducts
+              .filter(p => p.id !== firestoreProduct.id)
+              .sort(() => 0.5 - Math.random())
+              .slice(0, 4);
+            if (related.length > 0) {
+              setRelatedProducts(related);
+            }
+          });
           return;
         }
       } catch (err) {
-        console.log('Firestore lookup failed or timed out, trying static data');
+        console.error('Firestore sync error:', err);
       }
 
-      // Fallback to static data
-      const uniqueProducts = Array.from(new Set(allStaticProducts.map(a => a.id)))
-        .map(id => allStaticProducts.find(a => a.id === id));
+      if (!isMounted) return;
 
-      const staticProduct = uniqueProducts.find(p => p.slug === slug);
-      if (staticProduct) {
-        // Redirect tools/inactive products to coming-soon page
-        if (staticProduct.category === 'tools' || staticProduct.status === 'inactive') {
-          router.replace('/products/coming-soon');
-          return;
-        }
-        setProduct(staticProduct);
-        setRelatedProducts(
-          uniqueProducts
-            .filter(p => p.id !== staticProduct.id)
-            .sort(() => 0.5 - Math.random())
-            .slice(0, 4)
-        );
-      } else {
+      if (!initialStaticProduct) {
         setNotFound(true);
       }
       setLoading(false);
     };
 
-    loadProduct();
-  }, [params.slug, router]);
+    syncProductFromFirestore();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [slug, router, initialStaticProduct]);
 
   if (loading) {
     return (

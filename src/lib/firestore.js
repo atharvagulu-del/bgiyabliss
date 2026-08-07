@@ -16,7 +16,7 @@ import {
 import { db } from './firebase';
 
 const PRODUCTS_COLLECTION = 'products';
-const FIRESTORE_TIMEOUT = 15000; // 15 second timeout
+const FIRESTORE_TIMEOUT = 3500; // 3.5 second max timeout for fast response
 
 // Helper: wrap any promise with a timeout so it never hangs forever
 function withTimeout(promise, ms = FIRESTORE_TIMEOUT) {
@@ -31,52 +31,61 @@ function withTimeout(promise, ms = FIRESTORE_TIMEOUT) {
 // ─── READ ────────────────────────────────────────────
 
 export async function getAllProducts() {
-  const q = query(
-    collection(db, PRODUCTS_COLLECTION),
-    orderBy('createdAt', 'desc')
-  );
-  const snapshot = await withTimeout(getDocs(q));
-  return snapshot.docs.map((d) => ({
-    id: d.id,
-    ...d.data(),
-  }));
+  try {
+    const q = query(collection(db, PRODUCTS_COLLECTION));
+    const snapshot = await withTimeout(getDocs(q));
+    const products = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return products.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+  } catch (err) {
+    console.error('getAllProducts failed:', err);
+    return [];
+  }
 }
 
 export async function getActiveProducts() {
   try {
     const q = query(
       collection(db, PRODUCTS_COLLECTION),
-      where('status', '==', 'active'),
-      orderBy('createdAt', 'desc')
+      where('status', '==', 'active')
     );
     const snapshot = await withTimeout(getDocs(q));
-    return snapshot.docs.map((d) => ({
+    const products = snapshot.docs.map((d) => ({
       id: d.id,
       ...d.data(),
     }));
+    return products.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
   } catch (err) {
-    console.log('Compound query failed, falling back to client-side filter:', err.message);
-    const allProducts = await getAllProducts();
-    return allProducts.filter(p => p.status === 'active');
+    console.log('getActiveProducts query failed:', err.message);
+    return [];
   }
 }
 
 export async function getProductBySlug(slug) {
-  const q = query(
-    collection(db, PRODUCTS_COLLECTION),
-    where('slug', '==', slug)
-  );
-  const snapshot = await withTimeout(getDocs(q));
-  if (snapshot.empty) return null;
-  const productDoc = snapshot.docs[0];
-  return { id: productDoc.id, ...productDoc.data() };
+  try {
+    const q = query(
+      collection(db, PRODUCTS_COLLECTION),
+      where('slug', '==', slug)
+    );
+    const snapshot = await withTimeout(getDocs(q));
+    if (snapshot.empty) return null;
+    const productDoc = snapshot.docs[0];
+    return { id: productDoc.id, ...productDoc.data() };
+  } catch (err) {
+    console.error('getProductBySlug failed:', err);
+    return null;
+  }
 }
 
 export async function getProductById(id) {
-  const docRef = doc(db, PRODUCTS_COLLECTION, id);
-  const docSnap = await withTimeout(getDoc(docRef));
-  if (!docSnap.exists()) return null;
-  return { id: docSnap.id, ...docSnap.data() };
+  try {
+    const docRef = doc(db, PRODUCTS_COLLECTION, id);
+    const docSnap = await withTimeout(getDoc(docRef));
+    if (!docSnap.exists()) return null;
+    return { id: docSnap.id, ...docSnap.data() };
+  } catch (err) {
+    console.error('getProductById failed:', err);
+    return null;
+  }
 }
 
 export async function getProductsByCategory(category) {
@@ -84,18 +93,17 @@ export async function getProductsByCategory(category) {
     const q = query(
       collection(db, PRODUCTS_COLLECTION),
       where('category', '==', category),
-      where('status', '==', 'active'),
-      orderBy('createdAt', 'desc')
+      where('status', '==', 'active')
     );
     const snapshot = await withTimeout(getDocs(q));
-    return snapshot.docs.map((d) => ({
+    const products = snapshot.docs.map((d) => ({
       id: d.id,
       ...d.data(),
     }));
+    return products.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
   } catch (err) {
-    console.log('Category query failed, falling back:', err.message);
-    const allProducts = await getAllProducts();
-    return allProducts.filter(p => p.category === category && p.status === 'active');
+    console.log('Category query failed:', err.message);
+    return [];
   }
 }
 
