@@ -1,6 +1,10 @@
 import Link from 'next/link';
 import { Clock, ArrowLeft, Leaf } from 'lucide-react';
 
+// Prevent static prerendering — the (store) layout imports AuthProvider which
+// initialises Firebase at module scope and crashes without env vars at build time.
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Coming Soon | Bgiya Bliss',
   description: 'This product is coming soon to Bgiya Bliss.',

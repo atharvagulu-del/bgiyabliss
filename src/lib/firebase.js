@@ -12,9 +12,51 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// Initialize Firebase only once
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+// Lazy-initialize Firebase — only runs when first accessed at runtime,
+// not during Next.js static page generation at build time.
+// This prevents "auth/invalid-api-key" crashes when env vars aren't available.
+function getFirebaseApp() {
+  if (getApps().length === 0) {
+    // Skip initialization if API key is missing (build-time prerendering)
+    if (!firebaseConfig.apiKey) {
+      return null;
+    }
+    return initializeApp(firebaseConfig);
+  }
+  return getApps()[0];
+}
 
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export default app;
+// Cached instances
+let _auth = null;
+let _db = null;
+
+// Lazy getters — safe to import anywhere without triggering initialization
+export const auth = new Proxy({}, {
+  get(_, prop) {
+    if (!_auth) {
+      const app = getFirebaseApp();
+      if (!app) return undefined;
+      _auth = getAuth(app);
+    }
+    return _auth[prop];
+  },
+});
+
+export const db = new Proxy({}, {
+  get(_, prop) {
+    if (!_db) {
+      const app = getFirebaseApp();
+      if (!app) return undefined;
+      _db = getFirestore(app);
+    }
+    return _db[prop];
+  },
+});
+
+export default new Proxy({}, {
+  get(_, prop) {
+    const app = getFirebaseApp();
+    if (!app) return undefined;
+    return app[prop];
+  },
+});

@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import crypto from 'crypto';
 
 export async function POST(req) {
   try {
@@ -24,10 +23,25 @@ export async function POST(req) {
       );
     }
 
-    const generatedSignature = crypto
-      .createHmac('sha256', keySecret)
-      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-      .digest('hex');
+    // Use Web Crypto API instead of Node.js crypto module for Cloudflare Workers compatibility
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(keySecret);
+    const message = encoder.encode(`${razorpay_order_id}|${razorpay_payment_id}`);
+
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw',
+      keyData,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+
+    const signatureBuffer = await crypto.subtle.sign('HMAC', cryptoKey, message);
+
+    // Convert ArrayBuffer to hex string
+    const generatedSignature = Array.from(new Uint8Array(signatureBuffer))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
 
     // Compare signatures
     const isValid = generatedSignature === razorpay_signature;
