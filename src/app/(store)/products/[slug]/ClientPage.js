@@ -65,9 +65,37 @@ export default function ClientPage({ initialProduct, initialRelatedProducts }) {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-        <div style={{ width: 40, height: 40, border: '3px solid #e2e8f0', borderTopColor: '#004c30', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <div className="container section" style={{ padding: '40px 20px', minHeight: '80vh' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '40px' }}>
+          {/* Image Skeleton */}
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {[1,2,3,4].map(i => (
+                <div key={i} style={{ width: '80px', height: '80px', background: '#f1f5f9', borderRadius: '12px', animation: 'pulse 1.5s infinite' }} />
+              ))}
+            </div>
+            <div style={{ flex: 1, height: '500px', background: '#f1f5f9', borderRadius: '24px', animation: 'pulse 1.5s infinite' }} />
+          </div>
+          
+          {/* Content Skeleton */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', paddingTop: '20px' }}>
+            <div>
+              <div style={{ width: '80%', height: '36px', background: '#f1f5f9', borderRadius: '8px', marginBottom: '16px', animation: 'pulse 1.5s infinite' }} />
+              <div style={{ width: '40%', height: '24px', background: '#f1f5f9', borderRadius: '8px', animation: 'pulse 1.5s infinite' }} />
+            </div>
+            
+            <div style={{ width: '60%', height: '32px', background: '#f1f5f9', borderRadius: '8px', animation: 'pulse 1.5s infinite' }} />
+            
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <div style={{ width: '120px', height: '40px', background: '#f1f5f9', borderRadius: '20px', animation: 'pulse 1.5s infinite' }} />
+              <div style={{ width: '120px', height: '40px', background: '#f1f5f9', borderRadius: '20px', animation: 'pulse 1.5s infinite' }} />
+            </div>
+
+            <div style={{ width: '100%', height: '56px', background: '#f1f5f9', borderRadius: '12px', marginTop: '20px', animation: 'pulse 1.5s infinite' }} />
+            <div style={{ width: '100%', height: '56px', background: '#f1f5f9', borderRadius: '12px', animation: 'pulse 1.5s infinite' }} />
+          </div>
+        </div>
+        <style>{`@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }`}</style>
       </div>
     );
   }
