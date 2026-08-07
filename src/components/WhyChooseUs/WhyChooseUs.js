@@ -45,7 +45,7 @@ export default function WhyChooseUs() {
         <div className={styles.header}>
           <h2 className={styles.title}>The Bgiya Bliss Promise</h2>
           <p className={styles.subtitle}>
-            Nature's best for your garden.
+            Nature&apos;s best for your garden.
           </p>
         </div>
 
