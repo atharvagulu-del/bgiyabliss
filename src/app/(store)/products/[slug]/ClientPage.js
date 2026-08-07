@@ -5,28 +5,13 @@ import ProductDetailPage from '@/components/ProductPage/ProductPage';
 import { getProductBySlug, getActiveProducts } from '@/lib/firestore';
 import { getCachedProduct, getAllCachedProducts } from '@/lib/productCache';
 
-export default function ClientPage() {
+export default function ClientPage({ initialProduct, initialRelatedProducts }) {
   const params = useParams();
   const router = useRouter();
   const slug = params.slug;
 
-  // Try cache first (populated by homepage)
-  const cachedProduct = getCachedProduct(slug);
-  const initialProduct = cachedProduct || null;
-
-  // Build initial related products from cache
-  const initialRelated = (() => {
-    if (!initialProduct) return [];
-    const cached = getAllCachedProducts();
-    const pool = cached.length > 1 ? cached : [];
-    return pool
-      .filter(p => p.id !== initialProduct.id)
-      .sort(() => 0.5 - Math.random())
-      .slice(0, 4);
-  })();
-
   const [product, setProduct] = useState(initialProduct);
-  const [relatedProducts, setRelatedProducts] = useState(initialRelated);
+  const [relatedProducts, setRelatedProducts] = useState(initialRelatedProducts || []);
   const [loading, setLoading] = useState(!initialProduct);
   const [notFound, setNotFound] = useState(false);
 
