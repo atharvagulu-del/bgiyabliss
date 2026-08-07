@@ -12,7 +12,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        <link rel="preload" href="https://bgiya-bliss.pages.dev/videos/hero-compressed.mp4" as="video" type="video/mp4" />
+        <link rel="preload" href="/videos/hero-compressed.mp4" as="video" type="video/mp4" />
       </head>
       <body>
         <AuthProvider>

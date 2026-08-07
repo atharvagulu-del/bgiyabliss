@@ -36,7 +36,7 @@ export default function WhyChooseUs() {
           playsInline
           className={styles.bgVideo}
         >
-          <source src="https://bgiya-bliss.pages.dev/videos/background.mp4" type="video/mp4" />
+          <source src="/videos/background.mp4" type="video/mp4" />
         </video>
         <div className={styles.bgOverlay}></div>
       </div>
