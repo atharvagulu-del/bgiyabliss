@@ -24,9 +24,15 @@ if (typeof window !== 'undefined') {
       tabManager: persistentMultipleTabManager(),
     }),
   });
-} else {
-  // On the server/SSR, just use standard memory initialization
-  db = getFirestore(app);
+}
+
+// Call this explicitly during Next.js build steps (generateStaticParams) to fetch data.
+// Do NOT call this during normal SSR to prevent Serverless worker hangs.
+export function initServerDb() {
+  if (!db) {
+    db = getFirestore(app);
+  }
+  return db;
 }
 
 export { app, auth, db };

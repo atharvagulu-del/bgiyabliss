@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { Star, ShoppingCart, Sun, Droplets, Heart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
@@ -17,7 +18,7 @@ export default function ProductCard({ product }) {
     <div className="group flex flex-col h-full bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-emerald-200 transition-all duration-300 shadow-sm hover:shadow-xl w-[260px] md:w-[280px] shrink-0">
 
       {/* Image Area */}
-      <a href={`/products/${product.slug}`} className="relative h-64 md:h-72 w-full overflow-hidden block bg-gray-50 flex-shrink-0">
+      <Link href={`/products/${product.slug}`} className="relative h-64 md:h-72 w-full overflow-hidden block bg-gray-50 flex-shrink-0" prefetch={true}>
         <img
           src={product.image || product.images?.[0] || '/product-plants.png'}
           alt={product.name}
@@ -91,7 +92,7 @@ export default function ProductCard({ product }) {
             <ShoppingCart size={16} /> Quick Add
           </button>
         )}
-      </a>
+      </Link>
 
       {/* Info Area */}
       <div className="p-4 flex flex-col flex-grow">
@@ -106,9 +107,9 @@ export default function ProductCard({ product }) {
         </div>
 
         {/* Title */}
-        <a href={`/products/${product.slug}`} className="text-gray-900 font-medium text-[15px] leading-tight mb-3 hover:text-emerald-600 transition-colors line-clamp-2">
+        <Link href={`/products/${product.slug}`} className="text-gray-900 font-medium text-[15px] leading-tight mb-3 hover:text-emerald-600 transition-colors line-clamp-2" prefetch={true}>
           {product.name}
-        </a>
+        </Link>
 
         <div className="mt-auto">
           <div className="flex items-center justify-between">

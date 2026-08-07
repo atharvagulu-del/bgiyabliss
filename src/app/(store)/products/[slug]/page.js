@@ -1,10 +1,10 @@
 import ClientPage from './ClientPage';
-import { getActiveProducts } from '@/lib/firestore';
 
 export const dynamicParams = true; // allow unknown slugs to be rendered on demand
 
 export async function generateStaticParams() {
   try {
+    const { getActiveProducts } = await import('@/lib/firestore');
     const products = await getActiveProducts();
     const uniqueSlugs = Array.from(new Set(products.map(p => p.slug).filter(Boolean)));
     

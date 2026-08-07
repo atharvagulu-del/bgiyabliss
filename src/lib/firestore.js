@@ -13,7 +13,9 @@ import {
   setDoc,
   limit,
 } from 'firebase/firestore';
-import { db } from './firebase';
+import { db as browserDb, initServerDb } from './firebase';
+
+const getDb = () => browserDb || initServerDb();
 
 const PRODUCTS_COLLECTION = 'products';
 const FIRESTORE_TIMEOUT = 3500; // 3.5 second max timeout for fast response
@@ -32,7 +34,7 @@ function withTimeout(promise, ms = FIRESTORE_TIMEOUT) {
 
 export async function getAllProducts() {
   try {
-    const q = query(collection(db, PRODUCTS_COLLECTION));
+    const q = query(collection(getDb(), PRODUCTS_COLLECTION));
     const snapshot = await withTimeout(getDocs(q));
     const products = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
     return products.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
@@ -45,7 +47,7 @@ export async function getAllProducts() {
 export async function getActiveProducts() {
   try {
     const q = query(
-      collection(db, PRODUCTS_COLLECTION),
+      collection(getDb(), PRODUCTS_COLLECTION),
       where('status', '==', 'active')
     );
     const snapshot = await withTimeout(getDocs(q));
@@ -63,7 +65,7 @@ export async function getActiveProducts() {
 export async function getProductBySlug(slug) {
   try {
     const q = query(
-      collection(db, PRODUCTS_COLLECTION),
+      collection(getDb(), PRODUCTS_COLLECTION),
       where('slug', '==', slug)
     );
     const snapshot = await withTimeout(getDocs(q));
@@ -78,7 +80,7 @@ export async function getProductBySlug(slug) {
 
 export async function getProductById(id) {
   try {
-    const docRef = doc(db, PRODUCTS_COLLECTION, id);
+    const docRef = doc(getDb(), PRODUCTS_COLLECTION, id);
     const docSnap = await withTimeout(getDoc(docRef));
     if (!docSnap.exists()) return null;
     return { id: docSnap.id, ...docSnap.data() };
@@ -91,7 +93,7 @@ export async function getProductById(id) {
 export async function getProductsByCategory(category) {
   try {
     const q = query(
-      collection(db, PRODUCTS_COLLECTION),
+      collection(getDb(), PRODUCTS_COLLECTION),
       where('category', '==', category),
       where('status', '==', 'active')
     );
@@ -110,7 +112,7 @@ export async function getProductsByCategory(category) {
 export async function getProductsByFeatured(tag) {
   try {
     const q = query(
-      collection(db, PRODUCTS_COLLECTION),
+      collection(getDb(), PRODUCTS_COLLECTION),
       where('featured', 'array-contains', tag),
       where('status', '==', 'active')
     );
@@ -134,14 +136,14 @@ export async function addProduct(productData) {
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   };
-  const docRef = await withTimeout(addDoc(collection(db, PRODUCTS_COLLECTION), data));
+  const docRef = await withTimeout(addDoc(collection(getDb(), PRODUCTS_COLLECTION), data));
   return docRef.id;
 }
 
 // ─── UPDATE ──────────────────────────────────────────
 
 export async function updateProduct(id, productData) {
-  const docRef = doc(db, PRODUCTS_COLLECTION, id);
+  const docRef = doc(getDb(), PRODUCTS_COLLECTION, id);
   await withTimeout(updateDoc(docRef, {
     ...productData,
     updatedAt: serverTimestamp(),
@@ -151,7 +153,7 @@ export async function updateProduct(id, productData) {
 // ─── DELETE ──────────────────────────────────────────
 
 export async function deleteProduct(id) {
-  const docRef = doc(db, PRODUCTS_COLLECTION, id);
+  const docRef = doc(getDb(), PRODUCTS_COLLECTION, id);
   await withTimeout(deleteDoc(docRef));
 }
 
@@ -170,7 +172,7 @@ export async function getVariantGroup(variantGroupId) {
   if (!variantGroupId) return [];
   try {
     const q = query(
-      collection(db, PRODUCTS_COLLECTION),
+      collection(getDb(), PRODUCTS_COLLECTION),
       where('variantGroupId', '==', variantGroupId)
     );
     const snapshot = await withTimeout(getDocs(q));
@@ -191,7 +193,7 @@ export async function createOrder(orderData) {
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   };
-  const docRef = await withTimeout(addDoc(collection(db, ORDERS_COLLECTION), data));
+  const docRef = await withTimeout(addDoc(collection(getDb(), ORDERS_COLLECTION), data));
   return docRef.id;
 }
 
@@ -205,7 +207,7 @@ export async function getAllOrders() {
 
   try {
     const q = query(
-      collection(db, ORDERS_COLLECTION),
+      collection(getDb(), ORDERS_COLLECTION),
       orderBy('createdAt', 'desc')
     );
     const snapshot = await withTimeout(getDocs(q));
@@ -215,7 +217,7 @@ export async function getAllOrders() {
     })).filter(filterDemo);
   } catch (err) {
     console.log('getAllOrders failed, trying without orderBy:', err.message);
-    const snapshot = await withTimeout(getDocs(collection(db, ORDERS_COLLECTION)));
+    const snapshot = await withTimeout(getDocs(collection(getDb(), ORDERS_COLLECTION)));
     const orders = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
     return orders.sort((a, b) => {
       const da = a.createdAt?.toDate?.() || new Date(0);
@@ -232,7 +234,7 @@ export async function getUserOrders(email, userId) {
     // Try by email first
     if (email) {
       try {
-        const q = query(collection(db, ORDERS_COLLECTION), where('customer.email', '==', email));
+        const q = query(collection(getDb(), ORDERS_COLLECTION), where('customer.email', '==', email));
         const snapshot = await withTimeout(getDocs(q));
         orders = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
       } catch (err) {
@@ -242,7 +244,7 @@ export async function getUserOrders(email, userId) {
     // If no results and userId provided, try by userId
     if (orders.length === 0 && userId) {
       try {
-        const q = query(collection(db, ORDERS_COLLECTION), where('userId', '==', userId));
+        const q = query(collection(getDb(), ORDERS_COLLECTION), where('userId', '==', userId));
         const snapshot = await withTimeout(getDocs(q));
         orders = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
       } catch (err) {
@@ -261,14 +263,14 @@ export async function getUserOrders(email, userId) {
 }
 
 export async function getOrderById(id) {
-  const docRef = doc(db, ORDERS_COLLECTION, id);
+  const docRef = doc(getDb(), ORDERS_COLLECTION, id);
   const docSnap = await withTimeout(getDoc(docRef));
   if (!docSnap.exists()) return null;
   return { id: docSnap.id, ...docSnap.data() };
 }
 
 export async function updateOrderStatus(id, status) {
-  const docRef = doc(db, ORDERS_COLLECTION, id);
+  const docRef = doc(getDb(), ORDERS_COLLECTION, id);
   await withTimeout(updateDoc(docRef, {
     status,
     updatedAt: serverTimestamp(),
@@ -285,14 +287,14 @@ export async function addReview(productId, reviewData) {
     ...reviewData,
     createdAt: serverTimestamp(),
   };
-  const docRef = await withTimeout(addDoc(collection(db, REVIEWS_COLLECTION), data));
+  const docRef = await withTimeout(addDoc(collection(getDb(), REVIEWS_COLLECTION), data));
   return docRef.id;
 }
 
 export async function getReviews(productId) {
   try {
     const q = query(
-      collection(db, REVIEWS_COLLECTION),
+      collection(getDb(), REVIEWS_COLLECTION),
       where('productId', '==', productId),
       orderBy('createdAt', 'desc')
     );
@@ -312,7 +314,7 @@ export async function getReviews(productId) {
     console.log('getReviews failed (might need index):', err.message);
     // Fallback if index is missing
     try {
-      const q = query(collection(db, REVIEWS_COLLECTION), where('productId', '==', productId));
+      const q = query(collection(getDb(), REVIEWS_COLLECTION), where('productId', '==', productId));
       const snapshot = await withTimeout(getDocs(q));
       const reviews = snapshot.docs.map((d) => ({
         id: d.id,
@@ -339,7 +341,7 @@ const GENERAL_SETTINGS_DOC = 'general';
 
 export async function getStoreSettings() {
   try {
-    const docRef = doc(db, SETTINGS_COLLECTION, GENERAL_SETTINGS_DOC);
+    const docRef = doc(getDb(), SETTINGS_COLLECTION, GENERAL_SETTINGS_DOC);
     const docSnap = await withTimeout(getDoc(docRef));
     if (docSnap.exists()) {
       return docSnap.data();
@@ -353,7 +355,7 @@ export async function getStoreSettings() {
 
 export async function updateStoreSettings(settingsData) {
   try {
-    const docRef = doc(db, SETTINGS_COLLECTION, GENERAL_SETTINGS_DOC);
+    const docRef = doc(getDb(), SETTINGS_COLLECTION, GENERAL_SETTINGS_DOC);
     
     // Check if document exists first
     const docSnap = await withTimeout(getDoc(docRef));
@@ -389,7 +391,7 @@ const PROMOS_COLLECTION = 'promos';
 export async function getPromoCode(code) {
   try {
     const q = query(
-      collection(db, PROMOS_COLLECTION),
+      collection(getDb(), PROMOS_COLLECTION),
       where('code', '==', code.toUpperCase())
     );
     const snapshot = await withTimeout(getDocs(q));
@@ -406,14 +408,14 @@ export async function getPromoCode(code) {
 export async function getAllPromos() {
   try {
     const q = query(
-      collection(db, PROMOS_COLLECTION),
+      collection(getDb(), PROMOS_COLLECTION),
       orderBy('createdAt', 'desc')
     );
     const snapshot = await withTimeout(getDocs(q));
     return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
   } catch (err) {
     console.log('getAllPromos failed:', err.message);
-    const snapshot = await withTimeout(getDocs(collection(db, PROMOS_COLLECTION)));
+    const snapshot = await withTimeout(getDocs(collection(getDb(), PROMOS_COLLECTION)));
     return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
   }
 }
@@ -424,12 +426,12 @@ export async function addPromoCode(promoData) {
     code: promoData.code.toUpperCase(),
     createdAt: serverTimestamp(),
   };
-  const docRef = await withTimeout(addDoc(collection(db, PROMOS_COLLECTION), data));
+  const docRef = await withTimeout(addDoc(collection(getDb(), PROMOS_COLLECTION), data));
   return docRef.id;
 }
 
 export async function updatePromoCode(id, promoData) {
-  const docRef = doc(db, PROMOS_COLLECTION, id);
+  const docRef = doc(getDb(), PROMOS_COLLECTION, id);
   await withTimeout(updateDoc(docRef, {
     ...promoData,
     code: promoData.code?.toUpperCase(),
@@ -437,45 +439,45 @@ export async function updatePromoCode(id, promoData) {
 }
 
 export async function deletePromoCode(id) {
-  const docRef = doc(db, PROMOS_COLLECTION, id);
+  const docRef = doc(getDb(), PROMOS_COLLECTION, id);
   await withTimeout(deleteDoc(docRef));
 }
 
 // ═══════ AFFILIATES ═══════
 export async function createAffiliate(data) {
-  const ref = await addDoc(collection(db, 'affiliates'), { ...data, totalEarnings: 0, totalOrders: 0, status: 'pending', createdAt: serverTimestamp() });
+  const ref = await addDoc(collection(getDb(), 'affiliates'), { ...data, totalEarnings: 0, totalOrders: 0, status: 'pending', createdAt: serverTimestamp() });
   return ref.id;
 }
 
 export async function getAllAffiliates() {
   try {
-    const snap = await withTimeout(getDocs(query(collection(db, 'affiliates'), orderBy('createdAt', 'desc'))));
+    const snap = await withTimeout(getDocs(query(collection(getDb(), 'affiliates'), orderBy('createdAt', 'desc'))));
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (err) {
     console.log('getAllAffiliates fallback:', err.message);
-    const snap = await withTimeout(getDocs(collection(db, 'affiliates')));
+    const snap = await withTimeout(getDocs(collection(getDb(), 'affiliates')));
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   }
 }
 
 export async function getAffiliateByCode(code) {
   try {
-    const snap = await withTimeout(getDocs(query(collection(db, 'affiliates'), where('code', '==', code.toUpperCase()), where('status', '==', 'active'))));
+    const snap = await withTimeout(getDocs(query(collection(getDb(), 'affiliates'), where('code', '==', code.toUpperCase()), where('status', '==', 'active'))));
     return snap.empty ? null : { id: snap.docs[0].id, ...snap.docs[0].data() };
   } catch (err) {
     console.log('getAffiliateByCode fallback:', err.message);
-    const snap = await withTimeout(getDocs(query(collection(db, 'affiliates'), where('code', '==', code.toUpperCase()))));
+    const snap = await withTimeout(getDocs(query(collection(getDb(), 'affiliates'), where('code', '==', code.toUpperCase()))));
     const active = snap.docs.filter(d => d.data().status === 'active');
     return active.length === 0 ? null : { id: active[0].id, ...active[0].data() };
   }
 }
 
 export async function updateAffiliate(id, data) {
-  await updateDoc(doc(db, 'affiliates', id), data);
+  await updateDoc(doc(getDb(), 'affiliates', id), data);
 }
 
 export async function incrementAffiliateStats(id, orderAmount, commission) {
-  const docRef = doc(db, 'affiliates', id);
+  const docRef = doc(getDb(), 'affiliates', id);
   const snap = await getDoc(docRef);
   if (!snap.exists()) return;
   const current = snap.data();
@@ -486,39 +488,39 @@ export async function incrementAffiliateStats(id, orderAmount, commission) {
 }
 
 export async function logAffiliateEarning(data) {
-  await addDoc(collection(db, 'affiliate_earnings'), { ...data, status: 'pending', createdAt: serverTimestamp() });
+  await addDoc(collection(getDb(), 'affiliate_earnings'), { ...data, status: 'pending', createdAt: serverTimestamp() });
 }
 
 export async function getAffiliateEarnings(affiliateCode) {
   try {
-    const snap = await withTimeout(getDocs(query(collection(db, 'affiliate_earnings'), where('affiliateCode', '==', affiliateCode), orderBy('createdAt', 'desc'))));
+    const snap = await withTimeout(getDocs(query(collection(getDb(), 'affiliate_earnings'), where('affiliateCode', '==', affiliateCode), orderBy('createdAt', 'desc'))));
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (err) {
     console.log('getAffiliateEarnings fallback:', err.message);
-    const snap = await withTimeout(getDocs(query(collection(db, 'affiliate_earnings'), where('affiliateCode', '==', affiliateCode))));
+    const snap = await withTimeout(getDocs(query(collection(getDb(), 'affiliate_earnings'), where('affiliateCode', '==', affiliateCode))));
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   }
 }
 
 export async function getAllAffiliateEarnings() {
   try {
-    const snap = await withTimeout(getDocs(query(collection(db, 'affiliate_earnings'), orderBy('createdAt', 'desc'))));
+    const snap = await withTimeout(getDocs(query(collection(getDb(), 'affiliate_earnings'), orderBy('createdAt', 'desc'))));
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (err) {
     console.log('getAllAffiliateEarnings fallback:', err.message);
-    const snap = await withTimeout(getDocs(collection(db, 'affiliate_earnings')));
+    const snap = await withTimeout(getDocs(collection(getDb(), 'affiliate_earnings')));
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   }
 }
 
 export async function markEarningPaid(id) {
-  await updateDoc(doc(db, 'affiliate_earnings', id), { status: 'paid' });
+  await updateDoc(doc(getDb(), 'affiliate_earnings', id), { status: 'paid' });
 }
 
 // ═══════ BGIYA COINS ═══════
 export async function getUserCoins(email) {
   try {
-    const docRef = doc(db, 'user_coins', email);
+    const docRef = doc(getDb(), 'user_coins', email);
     const snap = await withTimeout(getDoc(docRef));
     return snap.exists() ? snap.data() : { balance: 0, totalEarned: 0, totalRedeemed: 0 };
   } catch (err) {
@@ -529,7 +531,7 @@ export async function getUserCoins(email) {
 
 export async function addCoins(email, amount, reason, orderId) {
   try {
-    const docRef = doc(db, 'user_coins', email);
+    const docRef = doc(getDb(), 'user_coins', email);
     const snap = await getDoc(docRef);
     const current = snap.exists() ? snap.data() : { balance: 0, totalEarned: 0, totalRedeemed: 0 };
     await setDoc(docRef, {
@@ -538,14 +540,14 @@ export async function addCoins(email, amount, reason, orderId) {
       totalRedeemed: current.totalRedeemed || 0,
       updatedAt: serverTimestamp()
     });
-    await addDoc(collection(db, 'coin_transactions'), { email, type: 'credit', amount, reason, orderId: orderId || null, createdAt: serverTimestamp() });
+    await addDoc(collection(getDb(), 'coin_transactions'), { email, type: 'credit', amount, reason, orderId: orderId || null, createdAt: serverTimestamp() });
   } catch (err) {
     console.error('addCoins failed:', err.message);
   }
 }
 
 export async function redeemCoins(email, amount, orderId) {
-  const docRef = doc(db, 'user_coins', email);
+  const docRef = doc(getDb(), 'user_coins', email);
   const snap = await getDoc(docRef);
   if (!snap.exists()) return false;
   const current = snap.data();
@@ -556,17 +558,17 @@ export async function redeemCoins(email, amount, orderId) {
     totalRedeemed: (current.totalRedeemed || 0) + amount,
     updatedAt: serverTimestamp()
   });
-  await addDoc(collection(db, 'coin_transactions'), { email, type: 'debit', amount, reason: 'Redeemed on order', orderId, createdAt: serverTimestamp() });
+  await addDoc(collection(getDb(), 'coin_transactions'), { email, type: 'debit', amount, reason: 'Redeemed on order', orderId, createdAt: serverTimestamp() });
   return true;
 }
 
 export async function getCoinTransactions(email) {
   try {
-    const snap = await withTimeout(getDocs(query(collection(db, 'coin_transactions'), where('email', '==', email), orderBy('createdAt', 'desc'))));
+    const snap = await withTimeout(getDocs(query(collection(getDb(), 'coin_transactions'), where('email', '==', email), orderBy('createdAt', 'desc'))));
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (err) {
     console.log('getCoinTransactions fallback:', err.message);
-    const snap = await withTimeout(getDocs(query(collection(db, 'coin_transactions'), where('email', '==', email))));
+    const snap = await withTimeout(getDocs(query(collection(getDb(), 'coin_transactions'), where('email', '==', email))));
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   }
 }
