@@ -1,5 +1,4 @@
 'use client';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Star, ShoppingCart, Sun, Droplets, Heart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
@@ -20,12 +19,11 @@ export default function ProductCard({ product }) {
 
       {/* Image Area */}
       <Link href={`/products/${product.slug}`} className="relative h-64 md:h-72 w-full overflow-hidden block bg-gray-50 flex-shrink-0" prefetch={true}>
-        <Image
+        <img
           src={product.image || product.images?.[0] || '/product-plants.png'}
           alt={product.name}
-          fill
-          sizes="(max-width: 768px) 50vw, 25vw"
-          style={{ objectFit: 'cover' }}
+          loading="eager"
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           className="transition-transform duration-700 group-hover:scale-105"
         />
 
