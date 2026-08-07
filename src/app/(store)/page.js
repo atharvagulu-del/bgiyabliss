@@ -12,15 +12,19 @@ import { bestsellers as staticBestsellers, plantBundles as staticBundles, newArr
 import { getActiveProducts } from '@/lib/firestore';
 
 export default function Home() {
-  const [bestsellers, setBestsellers] = useState([]);
-  const [plantBundles, setPlantBundles] = useState([]);
-  const [newArrivals, setNewArrivals] = useState([]);
-  const [ceramics, setCeramics] = useState([]);
+  // Show static products INSTANTLY on first render — no blank sections ever
+  const [bestsellers, setBestsellers] = useState(staticBestsellers);
+  const [plantBundles, setPlantBundles] = useState(staticBundles);
+  const [newArrivals, setNewArrivals] = useState(staticArrivals);
+  const [ceramics, setCeramics] = useState(staticCeramics);
 
   useEffect(() => {
+    let isMounted = true;
+
     const loadFirestoreProducts = async () => {
       try {
         let products = await getActiveProducts();
+        if (!isMounted) return;
         
         // Deduplicate by slug to hide accidental duplicates
         const uniqueSlugs = new Set();
@@ -59,17 +63,19 @@ export default function Home() {
           const uncategorised = products.filter(p => !categorised.has(p.id) && !p.featured?.includes('bundle'));
 
           setBestsellers(best.length > 0 ? best : uncategorised.length > 0 ? uncategorised : products.slice(0, 5));
-          setPlantBundles(bundles);
-          setNewArrivals(arrivals);
-          setCeramics(pots);
-        } else {
-          // If completely empty database, arrays stay empty
+          setPlantBundles(bundles.length > 0 ? bundles : staticBundles);
+          setNewArrivals(arrivals.length > 0 ? arrivals : staticArrivals);
+          setCeramics(pots.length > 0 ? pots : staticCeramics);
         }
+        // If Firestore returns empty, static data stays — no blank sections
       } catch (err) {
-        console.log('Error loading products from Firestore', err);
+        console.log('Error loading products from Firestore, using static data', err);
+        // Static data already showing — no action needed
       }
     };
     loadFirestoreProducts();
+
+    return () => { isMounted = false; };
   }, []);
 
   return (
