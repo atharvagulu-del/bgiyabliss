@@ -3,18 +3,18 @@ import { useRef, useState, useEffect } from 'react';
 import { Instagram, ChevronLeft, ChevronRight, Volume2, VolumeX, ShoppingBag } from 'lucide-react';
 
 const reels = [
-  { id: 1, src: '/reels/reel-1.mp4', handle: '@sivan.mai', link: 'https://www.instagram.com/reels/DXO50iApaFn/' },
-  { id: 2, src: '/reels/reel-2.mp4', handle: '@anokha_aangan', link: 'https://www.instagram.com/reels/DXiwYfMjrqd/' },
-  { id: 3, src: '/reels/reel-3.mp4', handle: '@priyanka_vazhkai', link: 'https://www.instagram.com/reels/DYXRLLoJLIG/' },
-  { id: 4, src: '/reels/reel-4.mp4', handle: '@_miniblooms', link: 'https://www.instagram.com/reels/DXV4GBZiC4W/' },
-  { id: 5, src: '/reels/reel-5.mp4', handle: '@nature247natural', link: 'https://www.instagram.com/reels/DWY-aIXjZ8N/' },
-  { id: 6, src: '/reels/reel-6.mp4', handle: '@gharkibagia', link: 'https://www.instagram.com/reels/DZ4Xmryg_rR/' },
-  { id: 7, src: '/reels/reel-7.mp4', handle: '@bunnyorganics73', link: 'https://www.instagram.com/reels/DWJB34bk2Me/' },
-  { id: 8, src: '/reels/reel-8.mp4', handle: '@bgiyabliss', link: 'https://www.instagram.com/bgiyabliss/' },
-  { id: 9, src: '/reels/reel-9.mp4', handle: '@bgiyabliss', link: 'https://www.instagram.com/bgiyabliss/' },
-  { id: 10, src: '/reels/reel-10.mp4', handle: '@bgiyabliss', link: 'https://www.instagram.com/bgiyabliss/' },
-  { id: 11, src: '/reels/reel-11.mp4', handle: '@bgiyabliss', link: 'https://www.instagram.com/bgiyabliss/' },
-  { id: 12, src: '/reels/reel-12.mp4', handle: '@bgiyabliss', link: 'https://www.instagram.com/bgiyabliss/' },
+  { id: 1, src: 'https://bgiya-bliss.pages.dev/reels/reel-1.mp4', handle: '@sivan.mai', link: 'https://www.instagram.com/reels/DXO50iApaFn/' },
+  { id: 2, src: 'https://bgiya-bliss.pages.dev/reels/reel-2.mp4', handle: '@anokha_aangan', link: 'https://www.instagram.com/reels/DXiwYfMjrqd/' },
+  { id: 3, src: 'https://bgiya-bliss.pages.dev/reels/reel-3.mp4', handle: '@priyanka_vazhkai', link: 'https://www.instagram.com/reels/DYXRLLoJLIG/' },
+  { id: 4, src: 'https://bgiya-bliss.pages.dev/reels/reel-4.mp4', handle: '@_miniblooms', link: 'https://www.instagram.com/reels/DXV4GBZiC4W/' },
+  { id: 5, src: 'https://bgiya-bliss.pages.dev/reels/reel-5.mp4', handle: '@nature247natural', link: 'https://www.instagram.com/reels/DWY-aIXjZ8N/' },
+  { id: 6, src: 'https://bgiya-bliss.pages.dev/reels/reel-6.mp4', handle: '@gharkibagia', link: 'https://www.instagram.com/reels/DZ4Xmryg_rR/' },
+  { id: 7, src: 'https://bgiya-bliss.pages.dev/reels/reel-7.mp4', handle: '@bunnyorganics73', link: 'https://www.instagram.com/reels/DWJB34bk2Me/' },
+  { id: 8, src: 'https://bgiya-bliss.pages.dev/reels/reel-8.mp4', handle: '@bgiyabliss', link: 'https://www.instagram.com/bgiyabliss/' },
+  { id: 9, src: 'https://bgiya-bliss.pages.dev/reels/reel-9.mp4', handle: '@bgiyabliss', link: 'https://www.instagram.com/bgiyabliss/' },
+  { id: 10, src: 'https://bgiya-bliss.pages.dev/reels/reel-10.mp4', handle: '@bgiyabliss', link: 'https://www.instagram.com/bgiyabliss/' },
+  { id: 11, src: 'https://bgiya-bliss.pages.dev/reels/reel-11.mp4', handle: '@bgiyabliss', link: 'https://www.instagram.com/bgiyabliss/' },
+  { id: 12, src: 'https://bgiya-bliss.pages.dev/reels/reel-12.mp4', handle: '@bgiyabliss', link: 'https://www.instagram.com/bgiyabliss/' },
 ];
 
 function VideoCard({ reel }) {
