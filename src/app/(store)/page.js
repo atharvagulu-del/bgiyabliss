@@ -11,16 +11,11 @@ import TrustBar from '@/components/TrustBar/TrustBar';
 import { bestsellers as staticBestsellers, plantBundles as staticBundles, newArrivals as staticArrivals, ceramics as staticCeramics } from '@/data/products';
 import { getActiveProducts } from '@/lib/firestore';
 import { cacheProducts } from '@/lib/productCache';
-
 export default function Home() {
-  // Show static products INSTANTLY on first render — no blank sections ever
-  const [bestsellers, setBestsellers] = useState(staticBestsellers);
-  const [plantBundles, setPlantBundles] = useState(staticBundles);
-  const [newArrivals, setNewArrivals] = useState(staticArrivals);
-  const [ceramics, setCeramics] = useState(staticCeramics);
-
-  // Cache static products immediately so product pages can read them
-  cacheProducts([...staticBestsellers, ...staticBundles, ...staticArrivals, ...staticCeramics]);
+  const [bestsellers, setBestsellers] = useState([]);
+  const [plantBundles, setPlantBundles] = useState([]);
+  const [newArrivals, setNewArrivals] = useState([]);
+  const [ceramics, setCeramics] = useState([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -69,11 +64,10 @@ export default function Home() {
           const uncategorised = products.filter(p => !categorised.has(p.id) && !p.featured?.includes('bundle'));
 
           setBestsellers(best.length > 0 ? best : uncategorised.length > 0 ? uncategorised : products.slice(0, 5));
-          setPlantBundles(bundles.length > 0 ? bundles : staticBundles);
-          setNewArrivals(arrivals.length > 0 ? arrivals : staticArrivals);
-          setCeramics(pots.length > 0 ? pots : staticCeramics);
+          setPlantBundles(bundles);
+          setNewArrivals(arrivals);
+          setCeramics(pots);
         }
-        // If Firestore returns empty, static data stays — no blank sections
       } catch (err) {
         console.log('Error loading products from Firestore, using static data', err);
         // Static data already showing — no action needed
