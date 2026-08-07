@@ -39,6 +39,7 @@ export default function WhyChooseUs() {
           <source src="https://bgiya-bliss.pages.dev/videos/background.mp4" type="video/mp4" />
         </video>
         <div className={styles.bgOverlay}></div>
+      </div>
 
       <div className={styles.container}>
         <div className={styles.header}>
