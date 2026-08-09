@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    unoptimized: true, // Crucial: disables Vercel Image Optimization so Cloudflare caches images directly
     remotePatterns: [
       {
         protocol: 'https',
