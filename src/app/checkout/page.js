@@ -281,12 +281,13 @@ export default function CheckoutPage() {
           amount: rzpayOrder.amount, currency: rzpayOrder.currency, name: 'Bgiya Bliss', description: 'Plant Store Purchase', image: '/logo.png', order_id: rzpayOrder.id,
           handler: async function (response) {
             try {
-              const verifyRes = await fetch('/api/razorpay/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature }) });
+              const verifyRes = await fetch('/api/razorpay/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, orderData: { ...orderData, paymentStatus: 'paid', razorpayPaymentId: response.razorpay_payment_id, razorpayOrderId: response.razorpay_order_id, totalWeight: cartTotalWeight } }) });
               const verifyData = await verifyRes.json();
               if (!verifyRes.ok || !verifyData.verified) { alert('Payment verification failed.'); setLoading(false); return; }
               orderData.paymentStatus = 'paid'; orderData.razorpayPaymentId = response.razorpay_payment_id; orderData.razorpayOrderId = response.razorpay_order_id; orderData.razorpaySignature = response.razorpay_signature;
               await createOrder(orderData); setOrderPlaced(true); clearCart();
-              await sendConfirmationEmail(orderData); await processPostOrder(orderData); await autoShip(orderData);
+              await sendConfirmationEmail(orderData); await processPostOrder(orderData);
+              // Shiprocket is now created server-side in the verify endpoint
               router.push(`/order-confirmation?id=${orderId}`);
             } catch (err) { console.error('Failed:', err); alert('Payment successful but order saving failed. Contact bgiyabliss73@gmail.com'); }
           },

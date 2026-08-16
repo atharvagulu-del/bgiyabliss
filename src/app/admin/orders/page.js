@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Package, Clock, Truck, CheckCircle2, ChevronDown, ChevronUp, MapPin, Phone, Mail, RefreshCw, User, Download, Trash2 } from 'lucide-react';
+import { Package, Clock, Truck, CheckCircle2, ChevronDown, ChevronUp, MapPin, Phone, Mail, RefreshCw, User, Download, Trash2, Rocket } from 'lucide-react';
 import { getAllOrders, updateOrderStatus } from '@/lib/firestore';
 import { db } from '@/lib/firebase';
 import { deleteDoc, doc } from 'firebase/firestore';
@@ -43,6 +43,28 @@ export default function OrdersPage() {
     } catch (err) {
       console.error('Failed to update status:', err);
       alert('Failed to update order status');
+    }
+    setUpdatingId(null);
+  };
+
+  const handleRetryShiprocket = async (order) => {
+    if (!window.confirm(`Create Shiprocket shipment for order ${order.orderId || order.id}?`)) return;
+    setUpdatingId(order.id);
+    try {
+      const res = await fetch('/api/shiprocket/create-shipment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(order),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(`✅ Shiprocket order created!\nAWB: ${data.awb || 'Pending'}\nCourier: ${data.courier || 'TBD'}\nShipment ID: ${data.shipmentId}`);
+      } else {
+        alert(`❌ Shiprocket failed: ${data.error || 'Unknown error'}`);
+      }
+    } catch (err) {
+      console.error('Retry Shiprocket failed:', err);
+      alert('Failed to create Shiprocket shipment: ' + err.message);
     }
     setUpdatingId(null);
   };
@@ -425,6 +447,24 @@ export default function OrdersPage() {
                             );
                           })}
                         </div>
+                      </div>
+
+                      {/* Shiprocket Retry */}
+                      <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <button
+                          onClick={() => handleRetryShiprocket(order)}
+                          disabled={updatingId === order.id}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 6,
+                            padding: '8px 16px', borderRadius: 8, fontSize: 12, fontWeight: 700,
+                            cursor: updatingId === order.id ? 'not-allowed' : 'pointer',
+                            background: '#7c3aed', color: '#fff', border: 'none',
+                            opacity: updatingId === order.id ? 0.5 : 1,
+                          }}
+                        >
+                          <Rocket size={14} /> Send to Shiprocket
+                        </button>
+                        <span style={{ fontSize: 11, color: '#9ca3af' }}>Use this to manually create/retry Shiprocket shipment</span>
                       </div>
                     </div>
                   )}

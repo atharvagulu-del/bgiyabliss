@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = body;
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderData } = body;
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       return NextResponse.json(
@@ -46,19 +46,47 @@ export async function POST(req) {
     // Compare signatures
     const isValid = generatedSignature === razorpay_signature;
 
-    if (isValid) {
-      return NextResponse.json({
-        verified: true,
-        message: 'Payment signature verified successfully',
-        paymentId: razorpay_payment_id,
-        orderId: razorpay_order_id,
-      });
-    } else {
+    if (!isValid) {
       return NextResponse.json(
         { verified: false, error: 'Invalid payment signature. Payment verification failed.' },
         { status: 400 }
       );
     }
+
+    // ── Signature is valid! Now create Shiprocket shipment server-side ──
+    let shiprocketResult = null;
+    if (orderData) {
+      try {
+        console.log(`[Verify] Payment verified for ${orderData.orderId}. Creating Shiprocket shipment...`);
+        
+        // Call our own Shiprocket API internally
+        const shipRes = await fetch(new URL('/api/shiprocket/create-shipment', req.url).toString(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderData),
+        });
+        
+        const shipData = await shipRes.json();
+        shiprocketResult = shipData;
+        
+        if (shipData.success) {
+          console.log(`[Verify] Shiprocket order created successfully for ${orderData.orderId}: AWB=${shipData.awb}`);
+        } else {
+          console.error(`[Verify] Shiprocket FAILED for ${orderData.orderId}:`, shipData.error || shipData);
+        }
+      } catch (shipErr) {
+        console.error(`[Verify] Shiprocket call crashed for ${orderData.orderId}:`, shipErr.message);
+        shiprocketResult = { success: false, error: shipErr.message };
+      }
+    }
+
+    return NextResponse.json({
+      verified: true,
+      message: 'Payment signature verified successfully',
+      paymentId: razorpay_payment_id,
+      orderId: razorpay_order_id,
+      shiprocket: shiprocketResult,
+    });
   } catch (error) {
     console.error('Payment verification error:', error);
     return NextResponse.json(
