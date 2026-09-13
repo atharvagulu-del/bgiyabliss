@@ -320,18 +320,14 @@ export default function ProductForm({ existingProduct = null }) {
   const handleVariantImageUpload = async (e, variantIndex) => {
     const file = e.target.files[0];
     if (!file) return;
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-    if (!cloudName || !uploadPreset) return;
 
     // Set uploading state on this variant
     setForm(prev => ({ ...prev, linkedVariants: prev.linkedVariants.map((v, i) => i === variantIndex ? { ...v, isUploading: true } : v) }));
 
     const fd = new FormData();
     fd.append('file', file);
-    fd.append('upload_preset', uploadPreset);
     try {
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: 'POST', body: fd });
+      const res = await fetch('/api/upload', { method: 'POST', body: fd });
       const data = await res.json();
       if (data.secure_url) {
         setForm(prev => ({
@@ -368,28 +364,18 @@ export default function ProductForm({ existingProduct = null }) {
     });
   };
 
-  // Cloudinary Direct Image Upload
+  // R2 Direct Image Upload
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     setIsUploading(true);
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-
-    if (!cloudName || !uploadPreset) {
-      setToast({ type: 'error', message: 'Cloudinary credentials missing in .env.local' });
-      setIsUploading(false);
-      setTimeout(() => setToast(null), 3000);
-      return;
-    }
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('upload_preset', uploadPreset);
 
     try {
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      const res = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       });
